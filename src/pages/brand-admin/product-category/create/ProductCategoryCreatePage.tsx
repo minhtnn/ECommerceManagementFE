@@ -8,11 +8,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Field,
-  FieldContent,
-  FieldLabel
-} from "@/components/ui/field";
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import {
   Form,
   FormControl,
@@ -43,7 +39,7 @@ import { handleApiError } from "@/lib/error";
 import { cn } from "@/lib/utils";
 import {
   CreateProductCategorySchema,
-  TCreateProductCategory
+  TCreateProductCategory,
 } from "@/schemas/product-category.schema";
 import { ECategoryStatus } from "@/types/enums/product-category-status.enum";
 import { EProductCategoryType } from "@/types/enums/product-category-type.enum";
@@ -53,7 +49,7 @@ import {
   ChevronsUpDownIcon,
   LoaderCircleIcon,
   Upload,
-  X
+  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -101,7 +97,7 @@ const ProductCategoryCreatePage = () => {
       name: "",
       parentProductCategoryId: undefined,
       description: "",
-      displayOrder: "1",
+      displayOrder: 1,
       status: ECategoryStatus.Active,
     },
   });
@@ -330,11 +326,20 @@ const ProductCategoryCreatePage = () => {
                   name="displayOrder"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="displayOrder">Thứ tự hiển thị</FormLabel>
+                      <FormLabel htmlFor="displayOrder">
+                        Thứ tự hiển thị
+                      </FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
                           {...field}
+                          type="number"
+                          onChange={(e) => {
+                            const value =
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value);
+                            field.onChange(value);
+                          }}
                           disabled={createProductCategoryMutation.isPending}
                         />
                       </FormControl>
