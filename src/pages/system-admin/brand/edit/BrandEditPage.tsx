@@ -166,12 +166,6 @@ const BrandEditPage = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <PageLoader/>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

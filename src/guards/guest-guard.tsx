@@ -9,22 +9,25 @@ type GuestGuardProps = {
     children: ReactNode;
 };
 
-export default function GuestGuard ( { children }: GuestGuardProps )
-{
-    const { isAuthenticated, role } = useSelector( ( state: RootState ) => state.user );
+/**
+ * GuestGuard - Chỉ dùng cho Login/Register page
+ * Nếu đã login → redirect về trang tương ứng với role
+ */
+export default function GuestGuard({ children }: GuestGuardProps) {
+    const { isAuthenticated, role } = useSelector((state: RootState) => state.user);
 
-    if ( isAuthenticated )
-    {
-        switch ( role )
-        {
+    if (isAuthenticated) {
+        switch (role) {
             case ERole.SystemAdmin:
-                return <Navigate to={ PATH_SYSTEM_ADMIN_DASHBOARD.root } />;
+                return <Navigate to={PATH_SYSTEM_ADMIN_DASHBOARD.root} replace />;
             case ERole.BrandAdmin:
-                return <Navigate to={ PATH_BRAND_DASHBOARD.root } />;
+                return <Navigate to={PATH_BRAND_DASHBOARD.root} replace />;
+            case ERole.EndCustomer:
+                return <Navigate to={PATH_GUEST.home.root} replace />;
             default:
-                return <Navigate to={PATH_GUEST.root} />;
+                return <Navigate to={PATH_GUEST.home.root} replace />;
         }
     }
 
-    return <>{ children }</>;
+    return <>{children}</>;
 }

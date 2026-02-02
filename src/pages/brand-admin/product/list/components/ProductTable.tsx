@@ -3,6 +3,7 @@ import { useQueryParams } from "@/hooks/use-query-params";
 import { handleApiError } from "@/lib/error";
 import { columns } from "./product-table/ProductColumn";
 import { DataTable } from "@/components/table/data-table";
+import { EProductStatus } from "@/types/enums/product-status.enum";
 
 const ProductTable = () => {
   const {
@@ -20,6 +21,7 @@ const ProductTable = () => {
     defaultFilter: [
       { id: "name", value: "" },
       { id: "code", value: null },
+      { id: "status", value: null },
     ],
   });
 
@@ -28,12 +30,17 @@ const ProductTable = () => {
   const nameFilter = String(filter.find((f) => f.id === "name")?.value ?? "");
   const codeFilter =
     (filter.find((f) => f.id === "code")?.value as string) || null;
+  const statusFilter = filter.find((f) => f.id === "status")?.value;
+  const statusValue =
+    statusFilter === "" || statusFilter === null ? null : Number(statusFilter);
 
   const { data, isLoading, isError, error } = getProducts({
     page: currentPage,
     size: pageSize,
     sortBy,
     isAsc,
+    code: codeFilter,
+    name: nameFilter,
   });
 
   if (isError && error) {
@@ -49,8 +56,20 @@ const ProductTable = () => {
       f.id === "name"
         ? "Tìm kiếm theo tên thương hiệu"
         : f.id === "code"
-        ? "Tìm kiếm theo mã thương hiệu"
-        : "",
+          ? "Tìm kiếm theo mã thương hiệu"
+          : "",
+    isSelect: f.id === "status",
+    options:
+      f.id === "status"
+        ? [
+            { label: "Tất cả", value: null },
+            { label: "Hoạt động", value: EProductStatus.Active.toString() },
+            {
+              label: "Không hoạt động",
+              value: EProductStatus.Inactive.toString(),
+            },
+          ]
+        : undefined,
   }));
 
   const sortValue = {

@@ -1,19 +1,10 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ChevronRight, Lock, MapPin, Package, User } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import EndUserLayout from "@/layouts/EndUserLayout";
+import { handleApiError } from "@/lib/error";
+import { ChevronRight, Lock, LogOut, MapPin, Package, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import EndUserLayout from "@/layouts/EndUserLayout";
-import { useAuth } from "@/hooks/use-auth";
-import { handleApiError } from "@/lib/error";
 
 interface CustomerInfo {
   name: string;
@@ -25,7 +16,7 @@ interface CustomerInfo {
 const Account = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("info");
-  const { getAccountDetail } = useAuth();
+  const { getAccountDetail, logout, logoutAllDevices } = useAuth();
 
   const {
     data: userData,
@@ -117,6 +108,26 @@ const Account = () => {
     { id: "password", label: "Đổi mật khẩu", icon: Lock },
     { id: "addresses", label: "Sổ địa chỉ", icon: MapPin },
   ];
+
+  // const handleLogout = () => {
+  //   logout();
+  //   toast.success("Đăng xuất thành công!");
+  // };
+
+  // const handleLogoutAllDevices = () => {
+  //   logoutAllDevices();
+  //   toast.success("Đã đăng xuất khỏi tất cả thiết bị!");
+  // };
+
+  const handleMenuClick = (id: string) => {
+    if (id === "password") {
+      // setIsPasswordDialogOpen(true);
+    } else if (id === "orders") {
+      // navigate("/orders");
+    } else {
+      setActiveTab(id);
+    }
+  };
 
   // const handleLogout = async () => {
   //   await supabase.auth.signOut();
@@ -223,7 +234,7 @@ const Account = () => {
                 !
               </p>
 
-              {/* <nav className="space-y-1">
+              <nav className="space-y-1">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -242,13 +253,22 @@ const Account = () => {
                   );
                 })}
                 <button
-                  onClick={handleLogout}
+                  onClick={logout}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Đăng xuất
                 </button>
-              </nav> */}
+
+                {/* Đăng xuất tất cả thiết bị */}
+                <button
+                  onClick={logoutAllDevices}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Đăng xuất tất cả thiết bị
+                </button>
+              </nav>
             </div>
           </div>
 

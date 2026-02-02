@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { LoginForm } from "./components/LoginForm";
+import { RegisterForm } from "./components/RegisterForm";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -180,144 +181,7 @@ const LoginPage = () => {
 
                 {/* Register Tab */}
                 <TabsContent value="register">
-                  {/* <form onSubmit={handleRegister} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="register-name"
-                        className="text-sm font-medium"
-                      >
-                        HỌ VÀ TÊN<span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="register-name"
-                        type="text"
-                        placeholder="Nhập Họ và Tên"
-                        value={registerName}
-                        onChange={(e) => setRegisterName(e.target.value)}
-                        required
-                        className={`h-11 ${
-                          errors.registerName ? "border-destructive" : ""
-                        }`}
-                        disabled={isLoading}
-                      />
-                      {errors.registerName && (
-                        <p className="text-xs text-destructive">
-                          {errors.registerName}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="register-phone"
-                        className="text-sm font-medium"
-                      >
-                        SỐ ĐIỆN THOẠI<span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="register-phone"
-                        type="tel"
-                        placeholder="Nhập Số điện thoại"
-                        value={registerPhone}
-                        onChange={(e) => setRegisterPhone(e.target.value)}
-                        required
-                        className={`h-11 ${
-                          errors.registerPhone ? "border-destructive" : ""
-                        }`}
-                        disabled={isLoading}
-                      />
-                      {errors.registerPhone && (
-                        <p className="text-xs text-destructive">
-                          {errors.registerPhone}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="register-email"
-                        className="text-sm font-medium"
-                      >
-                        EMAIL<span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="register-email"
-                        type="email"
-                        placeholder="Nhập Địa chỉ Email"
-                        value={registerEmail}
-                        onChange={(e) => setRegisterEmail(e.target.value)}
-                        required
-                        className={`h-11 ${
-                          errors.registerEmail ? "border-destructive" : ""
-                        }`}
-                        disabled={isLoading}
-                      />
-                      {errors.registerEmail && (
-                        <p className="text-xs text-destructive">
-                          {errors.registerEmail}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="register-password"
-                        className="text-sm font-medium"
-                      >
-                        MẬT KHẨU<span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="register-password"
-                        type="password"
-                        placeholder="Nhập Mật khẩu"
-                        value={registerPassword}
-                        onChange={(e) => setRegisterPassword(e.target.value)}
-                        required
-                        className={`h-11 ${
-                          errors.registerPassword ? "border-destructive" : ""
-                        }`}
-                        disabled={isLoading}
-                      />
-                      {errors.registerPassword && (
-                        <p className="text-xs text-destructive">
-                          {errors.registerPassword}
-                        </p>
-                      )}
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full h-11 text-base font-medium"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Đang xử lý...
-                        </>
-                      ) : (
-                        "ĐĂNG KÝ"
-                      )}
-                    </Button>
-
-                    <p className="text-xs text-muted-foreground text-center mt-4">
-                      Bằng việc đăng ký, bạn đã đồng ý với{" "}
-                      <Link
-                        to="/terms"
-                        className="text-primary hover:underline"
-                      >
-                        Điều khoản dịch vụ
-                      </Link>{" "}
-                      &{" "}
-                      <Link
-                        to="/privacy"
-                        className="text-primary hover:underline"
-                      >
-                        Chính sách bảo mật
-                      </Link>{" "}
-                      của chúng tôi.
-                    </p>
-                  </form> */}
+                  <RegisterForm/>
                 </TabsContent>
               </Tabs>
             </div>

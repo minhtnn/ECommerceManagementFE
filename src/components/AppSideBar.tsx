@@ -14,6 +14,7 @@ import {
   PackageSearchIcon,
   SlackIcon,
   SquareStackIcon,
+  WalletIcon,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { NavMain } from "./NavMain";
@@ -49,6 +50,16 @@ const systemAdminRoutes = {
       },
     ],
   },
+  paymentMethod: {
+    mainTitle: "Quản lý phương thức thanh toán",
+    items: [
+      {
+        title: "Danh sách phương thức",
+        url: PATH_SYSTEM_ADMIN_DASHBOARD.paymentMethod.root,
+        icon: PackageSearchIcon,
+      },
+    ],
+  },
 };
 
 const brandAdminRoute = {
@@ -77,6 +88,16 @@ const brandAdminRoute = {
       },
     ],
   },
+  customer: {
+    mainTitle: "Quản lý khách hàng",
+    items: [
+      {
+        title: "Danh sách khách hàng",
+        url: PATH_BRAND_DASHBOARD.customer.root,
+        icon: PackageSearchIcon,
+      },
+    ],
+  },
   order: {
     mainTitle: "Quản lý bán hàng",
     items: [
@@ -84,6 +105,11 @@ const brandAdminRoute = {
         title: "Đơn hàng",
         url: PATH_BRAND_DASHBOARD.order.root,
         icon: PackageSearchIcon,
+      },
+      {
+        title: "Phương thức thanh toán",
+        url: PATH_BRAND_DASHBOARD.paymentMethod.root,
+        icon: WalletIcon,
       },
     ],
   },
@@ -153,6 +179,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarContent>
                 <NavMain content={systemAdminRoutes.dashboard} />
                 <NavMain content={systemAdminRoutes.brand} />
+                <NavMain content={systemAdminRoutes.paymentMethod} />
               </SidebarContent>
             );
           case ERole.BrandAdmin:
@@ -160,6 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarContent>
                 <NavMain content={brandAdminRoute.dashboard} />
                 <NavMain content={brandAdminRoute.catalog} />
+                <NavMain content={brandAdminRoute.customer} />
                 <NavMain content={brandAdminRoute.order} />
               </SidebarContent>
             );

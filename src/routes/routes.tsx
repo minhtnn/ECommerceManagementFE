@@ -1,10 +1,11 @@
 // import LoadingScreen from "@/components/loading-screen";
 import { ErrorFallback } from "@/components/ErrorFallback";
 import LoadingScreen from "@/components/LoadingScreen";
+import CustomerGuard from "@/guards/customer-guard";
 import GuestGuard from "@/guards/guest-guard";
 import RoleBasedGuard from "@/guards/role-based-guard";
+import DashBoardLayout from "@/layouts/DashboardLayout";
 import Logout from "@/pages/auth/logout";
-import Collections from "@/pages/unneed/Collections";
 import { ERole } from "@/types/enums/role.enum";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { lazy, Suspense, type ElementType } from "react";
@@ -13,12 +14,10 @@ import { Navigate, useRoutes } from "react-router-dom";
 import {
   PATH_AUTH,
   PATH_BRAND_DASHBOARD,
+  PATH_END_CUSTOMER,
   PATH_GUEST,
   PATH_SYSTEM_ADMIN_DASHBOARD,
 } from "./path";
-import Admins from "@/pages/unneed/admin/Admins";
-import Dashboard from "@/pages/unneed/admin/Dashboard";
-import DashBoardLayout from "@/layouts/DashboardLayout";
 
 const Loadable = (Component: ElementType) => (props: any) => {
   return (
@@ -36,6 +35,7 @@ const Loadable = (Component: ElementType) => (props: any) => {
 
 export const AppRoutes = () =>
   useRoutes([
+    //#region Auth Routes
     {
       path: PATH_AUTH.root,
       children: [
@@ -53,7 +53,11 @@ export const AppRoutes = () =>
         },
         {
           path: "account",
-          element: <EndUserAccountPage />,
+          element: (
+            <CustomerGuard>
+              <EndUserAccountPage />
+            </CustomerGuard>
+          ),
         },
         {
           path: "logout",
@@ -61,7 +65,8 @@ export const AppRoutes = () =>
         },
       ],
     },
-    // Guest Routes
+    //#endregion
+    //#region Guest Routes
     {
       path: PATH_GUEST.root,
       children: [
@@ -99,7 +104,23 @@ export const AppRoutes = () =>
         },
       ],
     },
-    // System Admin Dashboard Routes
+    //#endregion
+    //#region End Customer Routes
+    {
+      path: PATH_END_CUSTOMER.root,
+      children: [
+        {
+          path: "cart",
+          element: (
+            <CustomerGuard>
+              <EndCustomerCartPage />
+            </CustomerGuard>
+          ),
+        },
+      ],
+    },
+    //#endregion
+    //#region System Admin Dashboard Routes
     {
       path: PATH_SYSTEM_ADMIN_DASHBOARD.root,
       element: (
@@ -116,15 +137,15 @@ export const AppRoutes = () =>
         },
         {
           path: "general",
-          element: <SystemAdminGeneralReportPage/>,
+          element: <SystemAdminGeneralReportPage />,
         },
         {
           path: "brands",
-          element: <BrandListPage/>,
+          element: <BrandListPage />,
         },
         {
           path: "brands/create",
-          element: <BrandCreatePage/>,
+          element: <BrandCreatePage />,
         },
         {
           path: "brands/:id/view",
@@ -132,15 +153,32 @@ export const AppRoutes = () =>
         },
         {
           path: "brands/:id/edit",
-          element: <BrandEditPage/>,
+          element: <BrandEditPage />,
+        },
+        {
+          path: "payment-methods",
+          element: <PaymentMethodsListPage />,
+        },
+        {
+          path: "payment-methods/create",
+          element: <PaymentMethodCreatePage />,
+        },
+        {
+          path: "payment-methods/:id/view",
+          element: <div>Payment Method View Page</div>,
+        },
+        {
+          path: "payment-methods/:id/edit",
+          element: <PaymentMethodEditPage />,
         },
         {
           path: "account",
-          element: <DashboardAccountPage/>
-        }
+          element: <DashboardAccountPage />,
+        },
       ],
     },
-    // Brand Admin Dashboard Routes
+    //#endregion
+    //#region Brand Admin Dashboard Routes
     {
       path: PATH_BRAND_DASHBOARD.root,
       element: (
@@ -155,19 +193,19 @@ export const AppRoutes = () =>
         },
         {
           path: "general",
-          element: <BrandAdminGeneralReportPage/>,
+          element: <BrandAdminGeneralReportPage />,
         },
         {
           path: "account",
-          element: <DashboardAccountPage/>,
+          element: <DashboardAccountPage />,
         },
         {
           path: "product-categories",
-          element: <BrandAdminListProductCategoryPage/>,
+          element: <BrandAdminListProductCategoryPage />,
         },
         {
           path: "product-categories/create",
-          element: <BrandAdminCreateProductCategoryPage/>,
+          element: <BrandAdminCreateProductCategoryPage />,
         },
         {
           path: "product-categories/:id/view",
@@ -175,15 +213,15 @@ export const AppRoutes = () =>
         },
         {
           path: "product-categories/:id/edit",
-          element: <BrandAdminEditProductCategoryPage/>,
+          element: <BrandAdminEditProductCategoryPage />,
         },
         {
           path: "products",
-          element: <BrandAdminListProductPage/>,
+          element: <BrandAdminListProductPage />,
         },
         {
           path: "products/create",
-          element: <BrandAdminCreateProductPage/>,
+          element: <BrandAdminCreateProductPage />,
         },
         {
           path: "products/:id/view",
@@ -191,7 +229,31 @@ export const AppRoutes = () =>
         },
         {
           path: "products/:id/edit",
-          element: <BrandAdminEditProductPage/>,
+          element: <BrandAdminEditProductPage />,
+        },
+        {
+          path: "payment-methods",
+          element: <BrandPaymentMethodListPage />,
+        },
+        {
+          path: "payment-methods/create",
+          element: <BrandPaymentMethodCreatePage />,
+        },
+        {
+          path: "payment-methods/:id/view",
+          element: <div>Payment Method View Page</div>,
+        },
+        {
+          path: "payment-methods/:id/edit",
+          element: <BrandPaymentMethodEditPage />,
+        },
+        {
+          path: "customers",
+          element: <BrandAdminListCustomerPage />,
+        },
+        {
+          path: "customers/:id/view",
+          element: <div>Customer View Page</div>,
         },
         {
           path: "orders",
@@ -203,20 +265,10 @@ export const AppRoutes = () =>
         },
       ],
     },
-    // Default Routes
+    //#endregion
     {
       path: "/",
-      element: (
-        <GuestGuard>
-          <CustomerHomePage />
-        </GuestGuard>
-      ),
-      children: [
-        {
-          element: <Navigate to={PATH_GUEST.home.root} replace />,
-          index: true,
-        },
-      ],
+      element: <Navigate to={PATH_GUEST.home.root} replace />,
     },
     {
       path: "*",
@@ -225,47 +277,103 @@ export const AppRoutes = () =>
   ]);
 
 //#region Authentication
-const LoginPage = Loadable(lazy(() => import("@/pages/auth/login")));
-const EndUserAccountPage = Loadable(lazy(() => import("@/pages/auth/customer-account")));
-const DashboardAccountPage = Loadable(lazy(() => import("@/pages/auth/dashboard-account")));
+const LoginPage = Loadable(
+  lazy(() => import("@/pages/auth/login-and-register")),
+);
+const EndUserAccountPage = Loadable(
+  lazy(() => import("@/pages/auth/customer-account")),
+);
+const DashboardAccountPage = Loadable(
+  lazy(() => import("@/pages/auth/dashboard-account")),
+);
 //#endregion
 
 //#region Customer
 const CustomerHomePage = Loadable(lazy(() => import("@/pages/guest/home")));
 const CustomerProductListPage = Loadable(
-  lazy(() => import("@/pages/guest/products/list"))
+  lazy(() => import("@/pages/guest/products/list")),
 );
 const CustomerProductDetailPage = Loadable(
-  lazy(() => import("@/pages/guest/products/detail"))
+  lazy(() => import("@/pages/guest/products/detail")),
 );
 const CustomerIntroductionPage = Loadable(
-  lazy(() => import("@/pages/guest/introduction"))
+  lazy(() => import("@/pages/guest/introduction")),
 );
-const CustomerNewsListPage = Loadable(lazy(() => import("@/pages/guest/news/list")));
+const CustomerNewsListPage = Loadable(
+  lazy(() => import("@/pages/guest/news/list")),
+);
 const CustomerNewsDetailPage = Loadable(
-  lazy(() => import("@/pages/guest/news/detail"))
+  lazy(() => import("@/pages/guest/news/detail")),
 );
-const CustomerContactPage = Loadable(lazy(() => import("@/pages/guest/contact")));
+const CustomerContactPage = Loadable(
+  lazy(() => import("@/pages/guest/contact")),
+);
+const EndCustomerCartPage = Loadable(
+  lazy(() => import("@/pages/end-customer/cart")),
+);
 
 //#endregion
 
 //#region System admin
-const SystemAdminGeneralReportPage = Loadable(lazy(() => import("@/pages/system-admin/general")));
-const BrandListPage = Loadable(lazy(() => import("@/pages/system-admin/brand/list")));
-const BrandCreatePage = Loadable(lazy(() => import("@/pages/system-admin/brand/create")));
-const BrandEditPage = Loadable(lazy(() => import("@/pages/system-admin/brand/edit")));
+const SystemAdminGeneralReportPage = Loadable(
+  lazy(() => import("@/pages/system-admin/general")),
+);
+const BrandListPage = Loadable(
+  lazy(() => import("@/pages/system-admin/brand/list")),
+);
+const BrandCreatePage = Loadable(
+  lazy(() => import("@/pages/system-admin/brand/create")),
+);
+const BrandEditPage = Loadable(
+  lazy(() => import("@/pages/system-admin/brand/edit")),
+);
+const PaymentMethodsListPage = Loadable(
+  lazy(() => import("@/pages/system-admin/payment-method/list")),
+);
+const PaymentMethodCreatePage = Loadable(
+  lazy(() => import("@/pages/system-admin/payment-method/create")),
+);
+const PaymentMethodEditPage = Loadable(
+  lazy(() => import("@/pages/system-admin/payment-method/edit")),
+);
+
 //#endregion
 
 //#region Brand admin
-const BrandAdminGeneralReportPage = Loadable(lazy(() => import("@/pages/brand-admin/general")));
-const BrandAdminCreateProductCategoryPage = Loadable(lazy(() => import("@/pages/brand-admin/product-category/create")));
-const BrandAdminListProductCategoryPage = Loadable(lazy(() => import("@/pages/brand-admin/product-category/list")));
-const BrandAdminEditProductCategoryPage = Loadable(lazy(() => import("@/pages/brand-admin/product-category/edit")));
-const BrandAdminListProductPage = Loadable(lazy(() => import("@/pages/brand-admin/product/list")));
-const BrandAdminCreateProductPage = Loadable(lazy(() => import("@/pages/brand-admin/product/create")));
-const BrandAdminEditProductPage = Loadable(lazy(() => import("@/pages/brand-admin/product/edit")));
+const BrandAdminGeneralReportPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/general")),
+);
+const BrandAdminCreateProductCategoryPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/product-category/create")),
+);
+const BrandAdminListProductCategoryPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/product-category/list")),
+);
+const BrandAdminEditProductCategoryPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/product-category/edit")),
+);
+const BrandAdminListProductPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/product/list")),
+);
+const BrandAdminCreateProductPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/product/create")),
+);
+const BrandAdminEditProductPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/product/edit")),
+);
+const BrandAdminListCustomerPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/end-customer/list")),
+);
+// const BrandAdminViewCustomerPage = Loadable(lazy(() => import("@/pages/brand-admin/end-customer/view")));
+const BrandPaymentMethodListPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/payment-method/list")),
+);
+const BrandPaymentMethodCreatePage = Loadable(
+  lazy(() => import("@/pages/brand-admin/payment-method/create")),
+);
+const BrandPaymentMethodEditPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/payment-method/edit")),
+);
 //#endregion
-
-
 
 const NotFoundPage = Loadable(lazy(() => import("@/pages/404Page")));

@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 export const columns: ColumnDef<TProductCategoryList>[] = [
   {
     accessorKey: "imageUrl",
+    colSpan: 1,
     header: () => <div className="font-semibold text-base"></div>,
     // <div className="font-semibold text-base">Ảnh</div>,
     cell: (info) => {
@@ -47,6 +48,7 @@ export const columns: ColumnDef<TProductCategoryList>[] = [
   },
   {
     accessorKey: "code",
+    colSpan: 1,
     header: () => <div className="font-semibold text-base">Mã</div>,
     cell: (info) => {
       const code = info.getValue() as string;
@@ -69,6 +71,7 @@ export const columns: ColumnDef<TProductCategoryList>[] = [
   },
   {
     accessorKey: "name",
+    colSpan: 2,
     header: () => <div className="font-semibold text-base">Tên danh mục</div>,
     cell: (info) => {
       const name = info.getValue() as string;
@@ -85,6 +88,7 @@ export const columns: ColumnDef<TProductCategoryList>[] = [
   },
   {
     id: "categoryType",
+    colSpan: 1,
     header: () => (
       <div className="text-center font-semibold text-base">Loại danh mục</div>
     ),
@@ -110,6 +114,8 @@ export const columns: ColumnDef<TProductCategoryList>[] = [
   },
   {
     accessorKey: "status",
+    colSpan: 1,
+
     header: () => (
       <div className="text-center font-semibold text-base">Trạng thái</div>
     ),
@@ -133,6 +139,8 @@ export const columns: ColumnDef<TProductCategoryList>[] = [
   },
   {
     id: "actions",
+    colSpan: 1,
+
     header: () => (
       <div className="text-center font-semibold text-base">Thao tác</div>
     ),

@@ -1,17 +1,28 @@
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { PATH_GUEST } from "@/routes/path";
+import { PATH_AUTH, PATH_GUEST } from "@/routes/path";
 import { TMenuProductListResponse } from "@/schemas/menu-product.schema";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ImageOff, ShoppingCart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useCart } from "@/hooks/use-cart";
 
 const ProductCard = (product: TMenuProductListResponse) => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auth check
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+
+  // Cart hooks
+  const { getEndCustomerCart, updateEndCustomerCart } = useCart();
+  const { data: cartData } = getEndCustomerCart({isAllowFetch: isAuthenticated});
+  const updateCartMutation = updateEndCustomerCart();
 
   const images = product.images || [];
   const hasMultipleImages = images.length > 1;
@@ -20,16 +31,16 @@ const ProductCard = (product: TMenuProductListResponse) => {
   useEffect(() => {
     if (isHovering && hasMultipleImages) {
       intervalRef.current = setInterval(() => {
-        setCurrentImageIndex((prevIndex) => 
+        setCurrentImageIndex((prevIndex) =>
           prevIndex === images.length - 1 ? 0 : prevIndex + 1
         );
-      }, 1000); // Slide every 1 second
+      }, 1000);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      setCurrentImageIndex(0); // Reset to first image when not hovering
+      setCurrentImageIndex(0);
     }
 
     return () => {
@@ -39,10 +50,81 @@ const ProductCard = (product: TMenuProductListResponse) => {
     };
   }, [isHovering, hasMultipleImages, images.length]);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
+
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+      navigate(PATH_AUTH.login, { 
+        state: { from: window.location.pathname } // Lưu lại trang hiện tại
+      });
+      return;
+    }
+
+    try {
+      // Get current cart items
+      const currentCart = cartData?.data?.data;
+      const currentItems = currentCart?.items || [];
+
+      // Check if product already in cart
+      const existingItemIndex = currentItems.findIndex(
+        (item) => item.productId === product.id
+      );
+
+      let updatedItems;
+
+      if (existingItemIndex >= 0) {
+        // Product exists → Increase quantity
+        updatedItems = currentItems.map((item, index) =>
+          index === existingItemIndex
+            ? {
+                productId: item.productId,
+                productNameSnapshot: item.productNameSnapshot,
+                quantity: item.quantity + 1,
+                unitPriceSnapshot: item.unitPriceSnapshot,
+              }
+            : {
+                productId: item.productId,
+                productNameSnapshot: item.productNameSnapshot,
+                quantity: item.quantity,
+                unitPriceSnapshot: item.unitPriceSnapshot,
+              }
+        );
+      } else {
+        // Product not in cart → Add new
+        updatedItems = [
+          ...currentItems.map((item) => ({
+            productId: item.productId,
+            productNameSnapshot: item.productNameSnapshot,
+            quantity: item.quantity,
+            unitPriceSnapshot: item.unitPriceSnapshot,
+          })),
+          {
+            productId: product.id,
+            productNameSnapshot: product.name,
+            quantity: 1,
+            unitPriceSnapshot: product.price,
+          },
+        ];
+      }
+
+      // Update cart via API
+      await updateCartMutation.mutateAsync({
+        items: updatedItems,
+        customerNote: currentCart?.customerNote || null,
+        appliedPromotions: currentCart?.appliedPromotions?.map((promo) => ({
+          promotionId: promo.promotionId,
+          promotionRuleNameSnapshot: promo.promotionRuleNameSnapshot,
+          discountAmountApplied: promo.discountAmountApplied,
+        })) || [],
+      });
+
+      toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
+    } catch (error: any) {
+      console.error("Add to cart error:", error);
+      toast.error(error?.response?.data?.message || "Không thể thêm vào giỏ hàng");
+    }
   };
 
   return (
@@ -62,15 +144,15 @@ const ProductCard = (product: TMenuProductListResponse) => {
                 src={image.url}
                 alt={image.altText || product.name}
                 className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ${
-                  index === currentImageIndex 
-                    ? 'opacity-100 translate-x-0' 
+                  index === currentImageIndex
+                    ? "opacity-100 translate-x-0"
                     : index < currentImageIndex
-                    ? 'opacity-0 -translate-x-full'
-                    : 'opacity-0 translate-x-full'
-                } ${isHovering ? 'scale-110' : 'scale-100'}`}
+                    ? "opacity-0 -translate-x-full"
+                    : "opacity-0 translate-x-full"
+                } ${isHovering ? "scale-110" : "scale-100"}`}
               />
             ))}
-            
+
             {/* Image indicators */}
             {hasMultipleImages && (
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
@@ -78,9 +160,9 @@ const ProductCard = (product: TMenuProductListResponse) => {
                   <div
                     key={index}
                     className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentImageIndex 
-                        ? 'bg-primary w-4' 
-                        : 'bg-gray-300'
+                      index === currentImageIndex
+                        ? "bg-primary w-4"
+                        : "bg-gray-300"
                     }`}
                   />
                 ))}
@@ -103,9 +185,7 @@ const ProductCard = (product: TMenuProductListResponse) => {
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-2">
-          <span className="price-sale text-lg">
-            {formatPrice(product.price)}
-          </span>
+          <span className="price-sale text-lg">{formatPrice(product.price)}</span>
         </div>
 
         {/* Add to Cart Button */}
@@ -113,9 +193,10 @@ const ProductCard = (product: TMenuProductListResponse) => {
           variant="outline"
           className="w-full btn-add-cart"
           onClick={handleAddToCart}
+          disabled={updateCartMutation.isPending}
         >
           <ShoppingCart size={16} className="mr-2" />
-          Chọn mua
+          {updateCartMutation.isPending ? "Đang thêm..." : "Chọn mua"}
         </Button>
       </div>
     </div>

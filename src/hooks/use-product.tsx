@@ -1,5 +1,6 @@
 import { productApi } from "@/apis/product.api";
 import envConfig from "@/schemas/config.schema";
+import { EProductStatus } from "@/types/enums/product-status.enum";
 import {
   useMutation,
   useQuery,
@@ -12,6 +13,9 @@ interface UseProductParams {
   size?: number;
   sortBy?: string;
   isAsc?: boolean;
+  code?: string;
+  name?: string;
+  status?: EProductStatus;
 }
 
 export const useProduct = () => {
@@ -22,6 +26,9 @@ export const useProduct = () => {
       size = params.size || 10,
       sortBy = params.sortBy || "createdDate",
       isAsc = params.isAsc || true,
+      code = params.code,
+      name = params.name,
+      status = params.status,
     } = params;
     return useSuspenseQuery({
       queryKey: [

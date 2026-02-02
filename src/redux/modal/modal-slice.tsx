@@ -7,6 +7,8 @@ interface ModalState {
   chosenCategoryId?: string;
   isAuthLoading: boolean;
   isEditAccountDialogOpen: boolean;
+  registerEmail: string | undefined;
+  showOTPModal: boolean;
 }
 
 const initialState: ModalState = {
@@ -16,6 +18,8 @@ const initialState: ModalState = {
   chosenCategoryId: undefined,
   isAuthLoading: true,
   isEditAccountDialogOpen: false,
+  registerEmail: undefined,
+  showOTPModal: false,
 };
 
 export const modalSlice = createSlice({
@@ -52,6 +56,18 @@ export const modalSlice = createSlice({
     ) {
       state.isEditAccountDialogOpen = action?.payload;
     },
+    handleSetRegisterEmail(
+      state,
+      action: PayloadAction<string | undefined>
+    ) {
+      state.registerEmail = action?.payload;
+    },
+    handleToggleOTPModal(
+      state,
+      action: PayloadAction<boolean>
+    ) {
+      state.showOTPModal = action?.payload;
+    }
   },
 });
 
@@ -61,7 +77,9 @@ export const {
   handleChangeHeaderMenuOpenWhenChangingMobile,
   handleSetChosenCategoryId,
   handleSetIsAuthLoading,
-  handleSetIsEditAccountDialogOpen
+  handleSetIsEditAccountDialogOpen,
+  handleSetRegisterEmail,
+  handleToggleOTPModal,
 } = modalSlice.actions;
 
 export default modalSlice.reducer;

@@ -1,11 +1,10 @@
-import { handleApiError } from "@/lib/error";
-import { useQueryParams } from "@/hooks/use-query-params";
+import { PageLoader } from "@/components/LoadingScreen";
 import { DataTable } from "@/components/table/data-table";
 import { useBrand } from "@/hooks/use-brand";
-import { TBrandListResponse } from "@/schemas/brand.schema";
-import { columns } from "./brand-table/BrandColumn";
+import { useQueryParams } from "@/hooks/use-query-params";
+import { handleApiError } from "@/lib/error";
 import { EBrandStatus } from "@/types/enums/brand-status.enum";
-import { PageLoader } from "@/components/LoadingScreen";
+import { columns } from "./brand-table/BrandColumn";
 
 const BrandTable = () => {
   const {

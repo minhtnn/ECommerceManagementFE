@@ -39,7 +39,7 @@ import {
   Search,
   Settings,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { DateTimePicker } from "../ui/date-time-picker";
 
@@ -61,6 +61,10 @@ declare module "@tanstack/react-table" {
     onDisplayOrderChange?: (productVariantId: string, displayOrder: number) => void;
     conditionType?: number;
     onPoQuantityChange?: (id: string, quantity: number) => void;
+  }
+  
+  interface ColumnDefBase<TData extends unknown, TValue = unknown> {
+    colSpan?: number; // Custom property for column width
   }
 }
 
@@ -105,12 +109,13 @@ interface DataTableProps<TData, TValue> {
 function TableSkeleton<TData, TValue>({
   columns,
   pageSize,
+  columnWidths,
 }: {
   columns: ColumnDef<TData, TValue>[];
   pageSize: number;
+  columnWidths: number[];
 }) {
   const skeletonRows = Array.from({ length: pageSize }, (_, index) => index);
-  const columnCount = columns.length;
 
   return (
     <Table>
@@ -119,7 +124,7 @@ function TableSkeleton<TData, TValue>({
           {columns.map((_, index) => (
             <TableHead 
               key={index}
-              style={{ width: `${100 / columnCount}%` }}
+              style={{ width: `${columnWidths[index]}%` }}
             >
               <Skeleton className="h-4 w-20" />
             </TableHead>
@@ -132,7 +137,7 @@ function TableSkeleton<TData, TValue>({
             {columns.map((_, colIndex) => (
               <TableCell 
                 key={colIndex}
-                style={{ width: `${100 / columnCount}%` }}
+                style={{ width: `${columnWidths[colIndex]}%` }}
               >
                 <Skeleton
                   className={cn(
@@ -185,7 +190,13 @@ export function DataTable<TData, TValue>({
   };
 
   const pageCount = Math.ceil(totalItems / pageSize);
-  const columnCount = columns.length;
+
+  // Calculate column widths based on colSpan
+  const columnWidths = useMemo(() => {
+    const colSpans = columns.map((col) => (col as any).colSpan || 1);
+    const totalSpan = colSpans.reduce((sum, span) => sum + span, 0);
+    return colSpans.map((span) => (span / totalSpan) * 100);
+  }, [columns]);
 
   const handlePaginationChange = (
     updater: PaginationState | ((old: PaginationState) => PaginationState)
@@ -482,17 +493,20 @@ export function DataTable<TData, TValue>({
           )}
         >
           {isLoading ? (
-            <TableSkeleton columns={columns} pageSize={pageSize} />
+            <TableSkeleton columns={columns} pageSize={pageSize} columnWidths={columnWidths} />
           ) : (
             <Table className="w-full table-fixed">
               <TableHeader className="sticky top-0 z-10 bg-table-header">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-table-header">
-                    {headerGroup.headers.map((header) => (
+                    {headerGroup.headers.map((header, index) => (
                       <TableHead 
                         key={header.id} 
                         className="h-11 font-semibold px-4"
-                        style={{ width: `${100 / columnCount}%`, maxWidth: `${100 / columnCount}%` }}
+                        style={{ 
+                          width: `${columnWidths[index]}%`, 
+                          maxWidth: `${columnWidths[index]}%` 
+                        }}
                       >
                         <div className="overflow-hidden text-ellipsis whitespace-nowrap w-full">
                           {header.isPlaceholder
@@ -516,11 +530,14 @@ export function DataTable<TData, TValue>({
                         onRowClick && "cursor-pointer"
                       )}
                     >
-                      {row.getVisibleCells().map((cell) => (
+                      {row.getVisibleCells().map((cell, index) => (
                         <TableCell 
                           key={cell.id} 
                           className="py-3 px-4"
-                          style={{ width: `${100 / columnCount}%`, maxWidth: `${100 / columnCount}%` }}
+                          style={{ 
+                            width: `${columnWidths[index]}%`, 
+                            maxWidth: `${columnWidths[index]}%` 
+                          }}
                         >
                           <div 
                             className="overflow-hidden text-ellipsis whitespace-nowrap w-full block" 

@@ -1,5 +1,5 @@
-import LoginPage from "@/pages/auth/login";
-import { LoginForm } from "@/pages/auth/login/components/LoginForm";
+import LoginPage from "@/pages/auth/login-and-register";
+import { LoginForm } from "@/pages/auth/login-and-register/components/LoginForm";
 import type { RootState } from "@/redux/store";
 import { PATH_AUTH } from "@/routes/path";
 import { useState, type ReactNode } from "react";

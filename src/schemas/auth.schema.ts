@@ -1,11 +1,12 @@
 import { z } from "zod"
 
+//#region Login
 export const FELoginSchema = z
   .object({
     usernameOrEmail: z.string().max(50).optional(),
     password: z.string()
-                .min(1, {message: "Mật khẩu không được bỏ trống"})
-                .max(50, {message: "Mật khẩu không được vượt quá 50 ký tự"}),
+      .min(1, { message: "Mật khẩu không được bỏ trống" })
+      .max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" }),
   })
   .superRefine((data, ctx) => {
     if (!data.usernameOrEmail || data.usernameOrEmail.trim() === "") {
@@ -23,11 +24,31 @@ export const BELoginSchema = z
     email: z.string().email().optional(),
     password: z.string(),
   })
+//#endregion
+
+//#region Register
+export const FERegisterSchema = z
+  .object({
+    brandCode: z.string(),
+    phoneNumber: z.string()
+      .refine(
+        (val) => val === "" || /^(0[0-9]{9})$/.test(val),
+        { message: "Số điện thoại không hợp lệ" }
+      )
+      .optional(),
+    email: z.string({ required_error: "Email là bắt buộc" }).email({ message: "Địa chỉ email không hợp lệ" }),
+    username: z.string().min(3, { message: "Tên đăng nhập phải có ít nhất 3 ký tự" }).max(50, { message: "Tên đăng nhập không được vượt quá 50 ký tự" }),
+    fullName: z.string().min(1, { message: "Họ và tên không được bỏ trống" }).max(100, { message: "Họ và tên không được vượt quá 100 ký tự" }),
+    passwordString: z.string()
+      .min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự" })
+      .max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" }),
+  });
+//#endregion
 
 export const AuthResponseSchema = z.object({
-    // accountId: z.string(),
-    username: z.string(),
-    accessToken: z.string(),
+  // accountId: z.string(),
+  username: z.string(),
+  accessToken: z.string(),
 });
 
 export const AccountDetailResponse = z.object({
@@ -40,6 +61,7 @@ export const AccountDetailResponse = z.object({
 
 export type TFELoginRequest = z.TypeOf<typeof FELoginSchema>;
 export type TBELoginRequest = z.TypeOf<typeof BELoginSchema>;
+export type TFERegisterSchema = z.TypeOf<typeof FERegisterSchema>;
 export type TAuthResponse = z.TypeOf<typeof AuthResponseSchema>;
 export type TAccountDetailResponse = z.TypeOf<typeof AccountDetailResponse>;
 

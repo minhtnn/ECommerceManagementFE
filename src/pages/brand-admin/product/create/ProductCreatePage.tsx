@@ -100,9 +100,9 @@ const ProductCreatePage = () => {
       name: "",
       fullName: "",
       description: "",
-      price: "0",
+      price: 0,
       status: EProductStatus.Active,
-      stockQuantity: "0",
+      stockQuantity: 0,
       images: [],
       sideAttributes: [],
     },
@@ -570,9 +570,16 @@ const ProductCreatePage = () => {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
                           placeholder="Nhập giá bán sản phẩm"
                           {...field}
+                          type="number"
+                          onChange={(e) => {
+                            const value =
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value);
+                            field.onChange(value);
+                          }}
                           disabled={createProductMutation.isPending}
                         />
                       </FormControl>
@@ -592,9 +599,16 @@ const ProductCreatePage = () => {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
                           placeholder="Nhập tồn kho hiện tại của sản phẩm"
                           {...field}
+                          type="number"
+                          onChange={(e) => {
+                            const value =
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value);
+                            field.onChange(value);
+                          }}
                           disabled={createProductMutation.isPending}
                         />
                       </FormControl>

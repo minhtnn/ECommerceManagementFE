@@ -1,9 +1,8 @@
   import { DataTable } from "@/components/table/data-table";
-  import { useProductCategory } from "@/hooks/use-product-category";
-  import { useQueryParams } from "@/hooks/use-query-params";
-  import { handleApiError } from "@/lib/error";
-  import { TProductCategoryList } from "@/schemas/product-category.schema";
-  import { columns } from "./product-category-table/ProductCategoryColumn";
+import { useProductCategory } from "@/hooks/use-product-category";
+import { useQueryParams } from "@/hooks/use-query-params";
+import { handleApiError } from "@/lib/error";
+import { columns } from "./product-category-table/ProductCategoryColumn";
 
   const ProductCategoryTable = () => {
     const {

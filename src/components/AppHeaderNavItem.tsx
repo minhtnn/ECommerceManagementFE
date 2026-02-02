@@ -1,5 +1,9 @@
+import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { cn } from "@/lib/utils";
-import { PATH_AUTH, PATH_GUEST } from "@/routes/path";
+import { handleChangeHeaderMenuOpenWhenChangingMobile } from "@/redux/modal/modal-slice";
+import { RootState } from "@/redux/store";
+import { PATH_AUTH, PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
+import { ERole } from "@/types/enums/role.enum";
 import {
   ChevronRight,
   Mail,
@@ -10,13 +14,10 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "./ui/input";
-import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
-import { RootState } from "@/redux/store";
-import { useDispatch, useSelector } from "react-redux";
-import { handleChangeHeaderMenuOpenWhenChangingMobile } from "@/redux/modal/modal-slice";
 
 const EndUserHeaderRoutes = {
   home: {
@@ -45,14 +46,16 @@ export function AppEndUserHeader({
   ...props
 }: React.HTMLAttributes<typeof HTMLElement>) {
   // const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const { isHeaderMenuOpenWhenChangingMobile } = useSelector(
-    (state: RootState) => state.modal
+    (state: RootState) => state.modal,
   );
   const dispatch = useDispatch();
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.user
+  const { isAuthenticated, user, role } = useSelector(
+    (state: RootState) => state.user,
   );
   const accountLink = isAuthenticated ? PATH_AUTH.account : PATH_AUTH.root;
+  const isEndCustomer = isAuthenticated && role === ERole.EndCustomer;
   const navigate = useNavigate();
   const { breadcrumbs, showBreadcrumb } = useBreadcrumb();
   const activeRoute = useMemo(() => {
@@ -62,7 +65,7 @@ export function AppEndUserHeader({
         if (path === route.url) return true;
         if (path.startsWith(route.url)) return true;
         return false;
-      }
+      },
     );
 
     return matchedKey ? matchedKey[0] : "home";
@@ -101,8 +104,8 @@ export function AppEndUserHeader({
             onClick={() =>
               dispatch(
                 handleChangeHeaderMenuOpenWhenChangingMobile(
-                  !isHeaderMenuOpenWhenChangingMobile
-                )
+                  !isHeaderMenuOpenWhenChangingMobile,
+                ),
               )
             }
           >
@@ -150,20 +153,26 @@ export function AppEndUserHeader({
               className="flex flex-col items-center p-2 hover:bg-muted rounded-lg transition-colors"
             >
               <User size={22} />
-              <span className="text-xs hidden sm:block">{isAuthenticated? user.username : "Tài khoản"}</span>
+              <span className="text-xs hidden sm:block">
+                {isAuthenticated ? user.username : "Tài khoản"}
+              </span>
             </Link>
-            <Link
-              to="/cart"
-              className="flex flex-col items-center p-2 hover:bg-muted rounded-lg transition-colors relative"
-            >
-              <ShoppingCart size={22} />
-              <span className="text-xs hidden sm:block">Giỏ hàng</span>
-              {/* {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-sale text-sale-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                  {totalItems}
-                </span>
-              )} */}
-            </Link>
+
+            {/* Chỉ hiển thị giỏ hàng khi user là EndCustomer */}
+            {isEndCustomer && (
+              <Link
+                to={PATH_END_CUSTOMER.cart}
+                className="flex flex-col items-center p-2 hover:bg-muted rounded-lg transition-colors relative"
+              >
+                <ShoppingCart size={22} />
+                <span className="text-xs hidden sm:block">Giỏ hàng</span>
+                {/* {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-sale text-sale-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                {totalItems}
+              </span>
+            )} */}
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -176,7 +185,7 @@ export function AppEndUserHeader({
               className={cn(
                 "nav-link",
                 activeRoute === key ? "nav-link-active" : "",
-                props.className
+                props.className,
               )}
             >
               {route.title}
@@ -212,7 +221,7 @@ export function AppEndUserHeader({
                   activeRoute === key
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted",
-                  props.className
+                  props.className,
                 )}
               >
                 {route.title}

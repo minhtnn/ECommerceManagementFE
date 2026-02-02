@@ -115,7 +115,7 @@ const userSlice = createSlice({
             state.isAuthenticated = false;
             state.role = null;
             state.accessToken = null;
-            state.isInitialized = true; // ✅ Giữ true để không init lại
+            state.isInitialized = true;
             localStorage.removeItem("userInfo");
         },
     },

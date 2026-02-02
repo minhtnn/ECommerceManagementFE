@@ -17,9 +17,12 @@ export const normalizeParams = (filters: any) => {
 
 export const API_SUFFIX = {
     AUTH_API: '/authentication',
-
     BRAND_API: '/brands',
     MENU_API: '/menus',
     PRODUCT_CATEGORY_API: '/product-categories',
     PRODUCT_API: '/products',
+    CUSTOMER_API: '/customers',
+    END_CUSTOMER_CART_API: '/carts/end-customer',
+    PAYMENT_METHOD_API: '/payment-methods',
+    ORDER_API: '/orders',
 }

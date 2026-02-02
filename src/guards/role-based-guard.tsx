@@ -1,10 +1,10 @@
-import LoginPage from "@/pages/auth/login";
+import LoginPage from "@/pages/auth/login-and-register";
 import type { RootState } from "@/redux/store";
 import {
-    PATH_AUTH,
-    PATH_BRAND_DASHBOARD,
-    PATH_GUEST,
-    PATH_SYSTEM_ADMIN_DASHBOARD,
+  PATH_AUTH,
+  PATH_BRAND_DASHBOARD,
+  PATH_GUEST,
+  PATH_SYSTEM_ADMIN_DASHBOARD,
 } from "@/routes/path";
 import { ERole } from "@/types/enums/role.enum";
 import { useState, type ReactNode } from "react";
@@ -18,11 +18,11 @@ type RoleBasedGuardProps = {
 
 const RoleBasedGuard = ({ children, role }: RoleBasedGuardProps) => {
   const { isAuthenticated, role: userRole } = useSelector(
-    (state: RootState) => state.user
+    (state: RootState) => state.user,
   );
   const { pathname } = useLocation();
   const [requestedLocation, setRequestedLocation] = useState<string | null>(
-    null
+    null,
   );
   if (!isAuthenticated) {
     if (pathname !== requestedLocation) {
@@ -39,8 +39,10 @@ const RoleBasedGuard = ({ children, role }: RoleBasedGuardProps) => {
         return <Navigate to={PATH_SYSTEM_ADMIN_DASHBOARD.root} replace />;
       case ERole.BrandAdmin:
         return <Navigate to={PATH_BRAND_DASHBOARD.root} replace />;
+      case ERole.EndCustomer:
+        return <Navigate to={PATH_GUEST.home.root} replace />;
       default:
-        return <Navigate to={PATH_GUEST.root} replace />;
+        return <Navigate to={PATH_GUEST.home.root} replace />;
     }
   }
 

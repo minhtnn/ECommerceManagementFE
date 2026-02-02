@@ -1,8 +1,7 @@
 import { authApi } from "@/apis/auth.api";
 import { logout, setUser } from "@/redux/user/user-slice";
-import { PATH_AUTH, PATH_GUEST } from "@/routes/path";
+import { PATH_AUTH } from "@/routes/path";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { log } from "console";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -23,6 +22,26 @@ export const useAuth = () => {
     },
   });
 
+  const registerMutation = useMutation({
+    mutationFn: authApi.endCustomerRegister,
+    onError: (error: any) => {
+      toast.error("Đăng ký thất bại:", error);
+    },
+  });
+
+  const verifyEmailMutation = useMutation({
+    mutationFn: authApi.verifyEmail,
+    onError: (error: any) => {
+      toast.error("Xác thực email thất bại:", error);
+    },
+  });
+  const resendOtpVerifyEmailMutation = useMutation({
+    mutationFn: authApi.resendOTPVerifyEmail,
+    onError: (error: any) => {
+      toast.error("Gửi lại mã OTP thất bại:", error);
+    },
+  });
+
   const getAccountDetail = (params: UseAccountDetailParams = {}) => {
     return useSuspenseQuery({
       queryKey: ["account-detail"],
@@ -32,23 +51,16 @@ export const useAuth = () => {
 
   const handleLogout = async () => {
     try {
-      // ✅ GỌI API LOGOUT
-      await authApi.logout();
+      var result = await authApi.logout();
 
-      // ✅ CLEAR REDUX STATE
-      dispatch(logout());
-
-      // ✅ REDIRECT ĐẾN LOGIN
-      navigate(PATH_AUTH.login);
-
-      toast.success("Đăng xuất thành công");
+      if (result.status === 200) {
+        dispatch(logout());
+        navigate(PATH_AUTH.login);
+        toast.success("Đăng xuất thành công");
+      }
     } catch (error: any) {
-      console.error("Logout error:", error);
-
-      // ✅ VẪN LOGOUT Ở FE NGAY CẢ KHI API LỖI
       dispatch(logout());
       navigate(PATH_AUTH.login);
-
       toast.error("Đã xảy ra lỗi khi đăng xuất");
     }
   };
@@ -81,7 +93,10 @@ export const useAuth = () => {
 
   return {
     loginMutation,
+    registerMutation,
     getAccountDetail,
+    verifyEmailMutation,
+    resendOtpVerifyEmailMutation,
     logout: handleLogout,
     logoutAllDevices: handleLogoutAllDevices,
   };

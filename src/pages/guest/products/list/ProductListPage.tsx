@@ -2,45 +2,11 @@ import { useProductMenu } from "@/hooks/use-product-menu";
 import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
 import ProductCard from "@/pages/guest/products/list/components/ProductCard";
+import { handleSetChosenCategoryId } from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
 import { Zap } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { CategoryTreeItem } from "./components/CategoryTreeItem";
-import { handleSetChosenCategoryId } from "@/redux/modal/modal-slice";
-
-interface SubCategory {
-  name: string;
-  slug: string;
-}
-
-interface Category {
-  name: string;
-  slug: string;
-  children?: SubCategory[];
-}
-
-const categories: Category[] = [
-  {
-    name: "TRANG CHỦ",
-    slug: "/",
-    children: [
-      { name: "Trang chủ", slug: "/" },
-      { name: "FLASH DEAL", slug: "/guest/products" },
-    ],
-  },
-  { name: "SALE 25.12", slug: "/guest/products" },
-  {
-    name: "GIỚI THIỆU",
-    slug: "/guest/introduce",
-    children: [
-      { name: "Giới thiệu", slug: "/guest/introduce" },
-      { name: "Giới thiệu Sản phẩm Uni Coffee", slug: "/guest/introduce" },
-    ],
-  },
-  { name: "TIN TỨC", slug: "/guest/news" },
-];
-
-// const featuredProducts = flashSaleProducts.slice(0, 2);
 
 const ProductPage = () => {
   const dispatch = useDispatch();

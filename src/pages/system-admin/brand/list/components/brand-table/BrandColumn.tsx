@@ -1,4 +1,3 @@
-import { SortableHeader } from "@/components/table/sortable-header";
 import { createFormattedHeader } from "@/components/table/table-formatter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
