@@ -191,7 +191,7 @@ const BrandPaymentMethodEditPage = () => {
 
           {/* Image */}
           <div className="flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 mb-6">
-            <div className="h-32 w-32 rounded-lg border bg-muted flex items-center justify-center overflow-hidden mb-4">
+            <div className="h-32 rounded-lg border bg-muted flex items-center justify-center overflow-hidden mb-4">
               {detail.imageUrl ? (
                 <img
                   src={detail.imageUrl}

@@ -232,14 +232,13 @@ const ProductCreatePage = () => {
     }
 
     try {
-      console.log("📦 Final FormData entries:");
-      for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
-        } else {
-          console.log(`  ${key}: ${value}`);
-        }
-      }
+      // for (const [key, value] of formData.entries()) {
+      //   if (value instanceof File) {
+      //     console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
+      //   } else {
+      //     console.log(`  ${key}: ${value}`);
+      //   }
+      // }
       const result = await createProductMutation.mutateAsync(formData);
       if (result?.data?.status >= 200 && result?.data?.status < 300) {
         toast.success("Tạo sản phẩm thành công");

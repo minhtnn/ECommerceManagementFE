@@ -12,4 +12,10 @@ export type PaginationResponse<T> = {
   items: T[];
 }
 
+export type InfiniteScrollResponse<T> = {
+  items: T[];
+  hasMore: boolean;
+  nextCursor: string | null;
+};
+
 export type ErrorResponse<T> = BaseResponse<T>

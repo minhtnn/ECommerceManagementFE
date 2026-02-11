@@ -878,25 +878,23 @@ const ProductEditPage = () => {
         }))
         .filter((attr) => attr.key !== "" && attr.value !== "");
 
-      console.log("Valid Attributes Count:", validAttrs.length);
-      console.log("Valid Attributes:", validAttrs);
+      // console.log("Valid Attributes Count:", validAttrs.length);
+      // console.log("Valid Attributes:", validAttrs);
 
       // Append to FormData
       validAttrs.forEach((attr, index) => {
         formData.append(`SideAttributes[${index}].Key`, attr.key);
         formData.append(`SideAttributes[${index}].Value`, attr.value);
-        console.log(`Added SideAttributes[${index}]:`, {
-          key: attr.key,
-          value: attr.value,
-        });
+        // console.log(`Added SideAttributes[${index}]:`, {
+        //   key: attr.key,
+        //   value: attr.value,
+        // });
       });
 
       // Debug: Log all FormData entries
-      console.log("=== FormData Contents ===");
-      for (const [key, value] of formData.entries()) {
-        console.log(key, ":", value);
-      }
-      console.log("========================");
+      // for (const [key, value] of formData.entries()) {
+      //   console.log(key, ":", value);
+      // }
 
       try {
         const result = await updateProductMutation.mutateAsync({

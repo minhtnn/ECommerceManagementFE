@@ -24,5 +24,6 @@ export const API_SUFFIX = {
     CUSTOMER_API: '/customers',
     END_CUSTOMER_CART_API: '/carts/end-customer',
     PAYMENT_METHOD_API: '/payment-methods',
+    PAYMENT_API: '/payments',
     ORDER_API: '/orders',
 }

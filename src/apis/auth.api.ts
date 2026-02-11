@@ -2,6 +2,7 @@ import { apiRequest } from "@/lib/http";
 import { TAccountDetailResponse, TAuthResponse } from "@/schemas/auth.schema";
 import { BaseResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
+import envConfig from "@/schemas/config.schema";
 
 
 export const authApi = {
@@ -13,7 +14,7 @@ export const authApi = {
     login: async (params?: any) => {
         return apiRequest.ecommerceCoffee.post<BaseResponse<TAuthResponse>>(
             `${API_SUFFIX.AUTH_API}/login`,
-            params
+            {brandCode: envConfig.BRAND_CODE, ...params}
         );
     },
     endCustomerRegister: async (data: FormData) => {
@@ -25,13 +26,13 @@ export const authApi = {
     verifyEmail: async (params?: any) => {
         return apiRequest.ecommerceCoffee.post<BaseResponse<TAuthResponse>>(
             `${API_SUFFIX.AUTH_API}/customer-verify-email`,
-            params
+            {brandCode: envConfig.BRAND_CODE, ...params}
         );
     },
     resendOTPVerifyEmail: async (params?: any) => {
         return apiRequest.ecommerceCoffee.post<BaseResponse<void>>(
             `${API_SUFFIX.AUTH_API}/resend-customer-verify-otp-email`,
-            params
+            {brandCode: envConfig.BRAND_CODE, ...params}
         );
     },
     refresh: async () => {

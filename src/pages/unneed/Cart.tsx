@@ -4,6 +4,7 @@ import { formatPrice } from "@/data/mockData";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import EndUserLayout from "@/layouts/EndUserLayout";
+import { PATH_GUEST } from "@/routes/path";
 
 const Cart = () => {
   const { items: cartItems, removeItem, updateQuantity, subtotal } = useCart();
@@ -23,7 +24,7 @@ const Cart = () => {
           <div className="text-center py-16">
             <ShoppingCart size={64} className="mx-auto text-muted-foreground mb-4" />
             <p className="text-xl text-muted-foreground mb-6">Giỏ hàng trống</p>
-            <Link to="/">
+            <Link to={PATH_GUEST.products.root}>
               <Button className="bg-primary hover:bg-primary/90">
                 Tiếp tục mua sắm
               </Button>

@@ -6,6 +6,8 @@ import EndUserLayout from "@/layouts/EndUserLayout";
 import { useCart } from "@/hooks/use-cart";
 import { handleApiError } from "@/lib/error";
 import { toast } from "sonner";
+import { PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
+import { PageLoader } from "@/components/LoadingScreen";
 
 const EndCustomerCartPage = () => {
   const { getEndCustomerCart, updateEndCustomerCart } = useCart();
@@ -18,6 +20,10 @@ const EndCustomerCartPage = () => {
   } = getEndCustomerCart();
 
   const updateCartMutation = updateEndCustomerCart();
+
+  if(isCartLoading){
+    return <PageLoader/>;
+  }
 
   if (isCartError && cartError) {
     handleApiError(cartError);
@@ -110,7 +116,7 @@ const EndCustomerCartPage = () => {
               className="mx-auto text-muted-foreground mb-4"
             />
             <p className="text-xl text-muted-foreground mb-6">Giỏ hàng trống</p>
-            <Link to="/">
+            <Link to={PATH_GUEST.products.root}>
               <Button className="bg-primary hover:bg-primary/90">
                 Tiếp tục mua sắm
               </Button>
@@ -224,7 +230,7 @@ const EndCustomerCartPage = () => {
                   </span>
                 </div>
               </div>
-              <Link to="/checkout">
+              <Link to={PATH_END_CUSTOMER.checkout}>
                 <Button className="w-full mt-6 bg-primary hover:bg-primary/90 font-bold py-6">
                   Tiến hành thanh toán
                   <ArrowRight size={18} className="ml-2" />

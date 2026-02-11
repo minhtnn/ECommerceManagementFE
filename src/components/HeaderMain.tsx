@@ -19,6 +19,7 @@ import type { RootState } from "@/redux/store";
 import {
   PATH_AUTH,
   PATH_BRAND_DASHBOARD,
+  PATH_END_CUSTOMER,
   PATH_GUEST,
   PATH_SYSTEM_ADMIN_DASHBOARD,
 } from "@/routes/path";
@@ -203,7 +204,7 @@ const HeaderMain = () => {
                     ? PATH_SYSTEM_ADMIN_DASHBOARD.general.account
                     : role === ERole.BrandAdmin
                       ? PATH_BRAND_DASHBOARD.general.account
-                      : PATH_GUEST.general.account
+                      : PATH_AUTH.account
                 }
               >
                 <DropdownMenuItem className="gap-2 p-2 cursor-pointer">

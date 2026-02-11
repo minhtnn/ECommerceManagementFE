@@ -1,7 +1,7 @@
 import { apiRequest } from "@/lib/http";
 import { BaseResponse, PaginationResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
-import { TBrandPaymentMethodDetailResponse, TBrandPaymentMethodListResponse, TPaymentMethodDetailResponse, TPaymentMethodListResponse } from "@/schemas/payment-method.schema";
+import { TBrandPaymentMethodDetailResponse, TBrandPaymentMethodListResponse, TBrandPublicPaymentMethodListResponse, TCancelPaymentRequest, TGetPaymentStatusResponse, TPaymentMethodDetailResponse, TPaymentMethodListResponse } from "@/schemas/payment-method.schema";
 
 //#region System payment method APIs
 const getPaymentMethods = async (params?: any) =>
@@ -15,7 +15,6 @@ const createPaymentMethod = async (data: FormData) =>
         `${API_SUFFIX.PAYMENT_METHOD_API}`,
         data
     );
-
 const updatePaymentMethod = async (id: string, data: FormData) =>
     await apiRequest.ecommerceCoffee.patch<BaseResponse<string>>(
         `${API_SUFFIX.PAYMENT_METHOD_API}/${id}`,
@@ -34,10 +33,22 @@ const createBrandPaymentMethod = async (data: FormData) =>
         `${API_SUFFIX.PAYMENT_METHOD_API}/brand`,
         data
     );
-
 const updateBrandPaymentMethod = async (id: string, data: FormData) =>
     await apiRequest.ecommerceCoffee.patch<BaseResponse<string>>(
         `${API_SUFFIX.PAYMENT_METHOD_API}/brand/${id}`,
+        data
+    );
+const getBrandPublicPaymentMethods = async (params?: any) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandPublicPaymentMethodListResponse[]>>(`${API_SUFFIX.PAYMENT_METHOD_API}/brand/public`, { params: params });
+
+const getPaymentStatus = async (orderId: string) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TGetPaymentStatusResponse>>(
+        `${API_SUFFIX.PAYMENT_API}/status/${orderId}`
+    );
+
+const cancelPayment = async (orderId: string, data?: TCancelPaymentRequest) =>
+    await apiRequest.ecommerceCoffee.post<BaseResponse<void>>(
+        `${API_SUFFIX.PAYMENT_API}/cancel/${orderId}`,
         data
     );
 
@@ -50,5 +61,9 @@ export const paymentApi = {
     getBrandPaymentMethods,
     getBrandPaymentMethodById,
     createBrandPaymentMethod,
-    updateBrandPaymentMethod
+    updateBrandPaymentMethod,
+    getBrandPublicPaymentMethods,
+
+    getPaymentStatus,
+    cancelPayment,
 };

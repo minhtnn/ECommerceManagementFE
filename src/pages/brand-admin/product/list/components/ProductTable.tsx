@@ -41,6 +41,7 @@ const ProductTable = () => {
     isAsc,
     code: codeFilter,
     name: nameFilter,
+    status: statusValue
   });
 
   if (isError && error) {

@@ -1,14 +1,14 @@
 import { de } from "date-fns/locale";
 
 const path = (root: string, sublink: string) => {
-    return `${root||''}${sublink}`;
+    return `${root || ''}${sublink}`;
 }
 
 const ROOTS_AUTH = '/auth';
 const ROOTS_SYSTEM_ADMIN_DASHBOARD = '/system-admin/dashboard';
 const ROOTS_BRAND_ADMIN_DASHBOARD = '/brand-admin/dashboard';
 const ROOTS_GUEST = '';
-const ROOTS_END_CUSTOMER = '/end-customer'; 
+const ROOTS_END_CUSTOMER = '/end-customer';
 
 export const PATH_AUTH = {
     root: ROOTS_AUTH,
@@ -33,7 +33,7 @@ export const PATH_SYSTEM_ADMIN_DASHBOARD = {
         create: path(ROOTS_SYSTEM_ADMIN_DASHBOARD, '/payment-methods/create'),
         edit: (id: string) => path(ROOTS_SYSTEM_ADMIN_DASHBOARD, `/payment-methods/${id}/edit`),
     },
-};
+}
 
 export const PATH_BRAND_DASHBOARD = {
     root: ROOTS_BRAND_ADMIN_DASHBOARD,
@@ -90,7 +90,13 @@ export const PATH_GUEST = {
 export const PATH_END_CUSTOMER = {
     root: ROOTS_END_CUSTOMER,
     cart: path(ROOTS_END_CUSTOMER, '/cart'),
-    // Có thể thêm sau:
-    // orders: path(ROOTS_END_CUSTOMER, '/orders'),
+    checkout: path(ROOTS_END_CUSTOMER, '/checkout'),
+    orders: {
+        root: path(ROOTS_END_CUSTOMER, '/orders'),
+        view: (id: string) => path(ROOTS_END_CUSTOMER, `/orders/${id}/view`)
+    },
+    payment: (id: string) => path(ROOTS_END_CUSTOMER, `/payment/${id}`),
+    addresses: path(ROOTS_END_CUSTOMER, '/addresses'),
+
     // profile: path(ROOTS_END_CUSTOMER, '/profile'),
 }

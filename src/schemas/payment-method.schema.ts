@@ -1,4 +1,6 @@
+import { EOrderStatus } from "@/types/enums/order-status.enum";
 import { EPaymentMethodStatus } from "@/types/enums/payment-method-status.enum";
+import { EPaymentStatus } from "@/types/enums/payment-status.enum";
 import z from "zod";
 
 //#region System Payment Method Schemas
@@ -84,7 +86,7 @@ export const BrandPaymentMethodDetailResponseSchema = z.object({
 });
 
 export const BrandPaymentMethodCreateSchema = z.object({
-    paymentMethodId: z.string({required_error: "Không được để trống"}),
+    paymentMethodId: z.string({ required_error: "Không được để trống" }),
     isDefault: z.boolean(),
     displayOrder: z.number().int(),
     isActive: z.boolean(),
@@ -97,6 +99,37 @@ export const BrandPaymentMethodUpdateSchema = z.object({
     isActive: z.boolean(),
     configuration: z.string().optional(),
 });
+
+export const BrandPublicPaymentMethodListResponseSchema = z.object({
+    id: z.string(),
+    paymentMethodId: z.string(),
+    name: z.string(),
+    imageUrl: z.string().nullable(),
+    isActive: z.boolean(),
+    isDefault: z.boolean(),
+});
+
+export const PaymentCallbackResponseSchema = z.object({
+    orderCode: z.string(),
+    orderStatus: z.nativeEnum(EOrderStatus),
+    paymentStatus: z.nativeEnum(EPaymentStatus),
+});
+
+export const GetPaymentStatusResponseSchema = z.object({
+    orderId: z.string().uuid(),
+    orderCode: z.string(),
+    orderStatus: z.nativeEnum(EOrderStatus),
+    paymentStatus: z.nativeEnum(EPaymentStatus),
+    amount: z.number(),
+    transactionId: z.string().nullable(),
+    paidAt: z.string().nullable(),
+    createdDate: z.string(),
+});
+
+export const CancelPaymentRequestSchema = z.object({
+    cancelReason: z.string().optional().nullable(),
+});
+
 //#endregion
 
 export type TPaymentMethodListResponse = z.infer<typeof PaymentMethodListResponseSchema>;
@@ -108,3 +141,10 @@ export type TBrandPaymentMethodListResponse = z.infer<typeof BrandPaymentMethodL
 export type TBrandPaymentMethodDetailResponse = z.infer<typeof BrandPaymentMethodDetailResponseSchema>;
 export type TBrandPaymentMethodCreate = z.infer<typeof BrandPaymentMethodCreateSchema>;
 export type TBrandPaymentMethodUpdate = z.infer<typeof BrandPaymentMethodUpdateSchema>;
+
+export type TBrandPublicPaymentMethodListResponse = z.infer<typeof BrandPublicPaymentMethodListResponseSchema>;
+
+export type TPaymentCallbackResponse = z.infer<typeof PaymentCallbackResponseSchema>;
+export type TGetPaymentStatusResponse = z.infer<typeof GetPaymentStatusResponseSchema>;
+export type TCancelPaymentRequest = z.infer<typeof CancelPaymentRequestSchema>;
+

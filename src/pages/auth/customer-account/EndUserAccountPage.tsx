@@ -1,21 +1,22 @@
+// pages/end-customer/account/Account.tsx
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
-import { ChevronRight, Lock, LogOut, MapPin, Package, User } from "lucide-react";
-import { useState } from "react";
+import { PATH_AUTH, PATH_END_CUSTOMER } from "@/routes/path";
+import {
+  ChevronRight,
+  Lock,
+  LogOut,
+  MapPin,
+  Package,
+  User,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-interface CustomerInfo {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-}
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Account = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("info");
   const { getAccountDetail, logout, logoutAllDevices } = useAuth();
 
   const {
@@ -28,179 +29,70 @@ const Account = () => {
   if (isUserError && userError) {
     handleApiError(userError);
   }
-  const account = userData.data.data;
-  // const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  // const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [user, setUser] = useState<SupabaseUser | null>(null);
-
-  // const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-  //   name: "",
-  //   email: "",
-  //   phone: "",
-  //   address: "",
-  // });
-
-  // const [editFormData, setEditFormData] = useState<CustomerInfo>({ ...customerInfo });
-
-  // const [passwordData, setPasswordData] = useState({
-  //   currentPassword: "",
-  //   newPassword: "",
-  //   confirmPassword: "",
-  // });
-
-  // Check authentication and fetch user data
-  // useEffect(() => {
-  //   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-  //     if (!session?.user) {
-  //       navigate("/auth");
-  //     } else {
-  //       setUser(session.user);
-  //     }
-  //   });
-
-  // supabase.auth.getSession().then(({ data: { session } }) => {
-  //   if (!session?.user) {
-  //     navigate("/auth");
-  //   } else {
-  //     setUser(session.user);
-  //     fetchProfile(session.user.id);
-  //   }
-  // });
-
-  // return () => subscription.unsubscribe();
-  // }, [navigate]);
-
-  // const fetchProfile = async (userId: string) => {
-  //   try {
-  //     const { data, error } = await supabase
-  //       .from('profiles')
-  //       .select('*')
-  //       .eq('user_id', userId)
-  //       .maybeSingle();
-
-  //     if (error) throw error;
-
-  //     if (data) {
-  //       setCustomerInfo({
-  //         name: data.full_name || '',
-  //         email: data.email || '',
-  //         phone: data.phone || '',
-  //         address: '',
-  //       });
-  //       setEditFormData({
-  //         name: data.full_name || '',
-  //         email: data.email || '',
-  //         phone: data.phone || '',
-  //         address: '',
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching profile:', error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const menuItems = [
-    { id: "info", label: "Thông tin tài khoản", icon: User },
-    { id: "orders", label: "Đơn hàng của bạn", icon: Package },
-    { id: "password", label: "Đổi mật khẩu", icon: Lock },
-    { id: "addresses", label: "Sổ địa chỉ", icon: MapPin },
+    {
+      id: "info",
+      label: "Thông tin tài khoản",
+      icon: User,
+      path: PATH_AUTH.account,
+    },
+    {
+      id: "orders",
+      label: "Đơn hàng của bạn",
+      icon: Package,
+      path: PATH_END_CUSTOMER.orders.root,
+    },
+    {
+      id: "password",
+      label: "Đổi mật khẩu",
+      icon: Lock,
+      path: "PATH_END_CUSTOMER.changePassword", 
+    },
+    {
+      id: "addresses",
+      label: "Sổ địa chỉ",
+      icon: MapPin,
+      path: PATH_END_CUSTOMER.addresses, 
+    },
   ];
 
-  // const handleLogout = () => {
-  //   logout();
-  //   toast.success("Đăng xuất thành công!");
-  // };
-
-  // const handleLogoutAllDevices = () => {
-  //   logoutAllDevices();
-  //   toast.success("Đã đăng xuất khỏi tất cả thiết bị!");
-  // };
-
-  const handleMenuClick = (id: string) => {
-    if (id === "password") {
-      // setIsPasswordDialogOpen(true);
-    } else if (id === "orders") {
-      // navigate("/orders");
-    } else {
-      setActiveTab(id);
-    }
+  const handleMenuClick = (path: string) => {
+    navigate(path);
   };
 
-  // const handleLogout = async () => {
-  //   await supabase.auth.signOut();
-  //   toast.success("Đăng xuất thành công!");
-  //   navigate("/auth");
-  // };
+  if (isUserLoading) {
+    return (
+      <EndUserLayout>
+        <div className="bg-muted/30 py-3 border-b">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Link
+                to="/"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Trang chủ
+              </Link>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <span className="text-primary font-medium">Trang khách hàng</span>
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="md:col-span-1">
+              <Skeleton className="h-96 w-full rounded-lg" />
+            </div>
+            <div className="md:col-span-2">
+              <Skeleton className="h-96 w-full rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </EndUserLayout>
+    );
+  }
 
-  // const handleSaveInfo = async () => {
-  //   if (!user) return;
-
-  //   try {
-  //     const { error } = await supabase
-  //       .from('profiles')
-  //       .update({
-  //         full_name: editFormData.name,
-  //         phone: editFormData.phone,
-  //       })
-  //       .eq('user_id', user.id);
-
-  //     if (error) throw error;
-
-  //     setCustomerInfo(editFormData);
-  //     setIsEditDialogOpen(false);
-  //     toast.success("Cập nhật thông tin thành công!");
-  //   } catch (error) {
-  //     toast.error("Có lỗi xảy ra, vui lòng thử lại");
-  //   }
-  // };
-
-  // const handleChangePassword = async () => {
-  //   if (passwordData.newPassword !== passwordData.confirmPassword) {
-  //     toast.error("Mật khẩu xác nhận không khớp!");
-  //     return;
-  //   }
-  //   if (passwordData.newPassword.length < 6) {
-  //     toast.error("Mật khẩu mới phải có ít nhất 6 ký tự!");
-  //     return;
-  //   }
-
-  //   // try {
-  //   //   const { error } = await supabase.auth.updateUser({
-  //   //     password: passwordData.newPassword
-  //   //   });
-
-  //   //   if (error) throw error;
-
-  //   //   setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-  //   //   setIsPasswordDialogOpen(false);
-  //   //   toast.success("Đổi mật khẩu thành công!");
-  //   // } catch (error: any) {
-  //   //   toast.error(error.message || "Có lỗi xảy ra, vui lòng thử lại");
-  //   // }
-  // };
-
-  // const handleMenuClick = (id: string) => {
-  //   if (id === "password") {
-  //     setIsPasswordDialogOpen(true);
-  //   } else if (id === "orders") {
-  //     navigate("/orders");
-  //   } else {
-  //     setActiveTab(id);
-  //   }
-  // };
-
-  // if (isLoading) {
-  //   return (
-  //     <EndUserLayout>
-  //       <div className="min-h-[60vh] flex items-center justify-center">
-  //         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  //       </div>
-  //     </EndUserLayout>
-  //   );
-  // }
+  const account = userData?.data?.data;
 
   return (
     <EndUserLayout>
@@ -215,7 +107,7 @@ const Account = () => {
               Trang chủ
             </Link>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            <span className="text-primary font-medium">Trang khách hàng</span>
+            <span className="text-primary font-medium">Tài khoản</span>
           </div>
         </div>
       </div>
@@ -224,25 +116,26 @@ const Account = () => {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Left Sidebar */}
           <div className="md:col-span-1">
-            <div className="bg-background rounded-lg border p-6">
+            <div className="bg-background rounded-lg border p-6 sticky top-4">
               <h2 className="text-lg font-bold mb-1">TRANG TÀI KHOẢN</h2>
               <p className="text-sm text-muted-foreground mb-6">
                 Xin chào,{" "}
                 <span className="font-medium text-foreground">
-                  {account.name || "Khách hàng"}
-                </span>{" "}
+                  {account?.name || "Khách hàng"}
+                </span>
                 !
               </p>
 
               <nav className="space-y-1">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
                   return (
                     <button
                       key={item.id}
-                      onClick={() => handleMenuClick(item.id)}
+                      onClick={() => handleMenuClick(item.path)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm transition-colors ${
-                        activeTab === item.id
+                        isActive
                           ? "bg-primary/10 text-primary font-medium"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
@@ -252,27 +145,29 @@ const Account = () => {
                     </button>
                   );
                 })}
-                <button
-                  onClick={logout}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Đăng xuất
-                </button>
 
-                {/* Đăng xuất tất cả thiết bị */}
-                <button
-                  onClick={logoutAllDevices}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Đăng xuất tất cả thiết bị
-                </button>
+                <div className="pt-2 mt-2 border-t">
+                  <button
+                    onClick={logout}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Đăng xuất
+                  </button>
+
+                  <button
+                    onClick={logoutAllDevices}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Đăng xuất tất cả thiết bị
+                  </button>
+                </div>
               </nav>
             </div>
           </div>
 
-          {/* Right Content */}
+          {/* Right Content - Account Info */}
           <div className="md:col-span-2">
             <div className="bg-background rounded-lg border p-6">
               <div className="flex items-center justify-between mb-6">
@@ -281,8 +176,7 @@ const Account = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    // setEditFormData({ ...customerInfo });
-                    // setIsEditDialogOpen(true);
+                    // TODO: Open edit dialog or navigate to edit page
                   }}
                 >
                   Chỉnh sửa
@@ -293,13 +187,13 @@ const Account = () => {
                 <div className="grid grid-cols-3 gap-4 py-3 border-b">
                   <span className="font-medium text-foreground">Họ tên:</span>
                   <span className="col-span-2 text-muted-foreground">
-                    {account.name || "Chưa cập nhật"}
+                    {account?.name || "Chưa cập nhật"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-4 py-3 border-b">
                   <span className="font-medium text-foreground">Email:</span>
                   <span className="col-span-2 text-muted-foreground">
-                    {account.email || "Chưa cập nhật"}
+                    {account?.email || "Chưa cập nhật"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-4 py-3 border-b">
@@ -307,13 +201,13 @@ const Account = () => {
                     Điện thoại:
                   </span>
                   <span className="col-span-2 text-muted-foreground">
-                    {account.phoneNumber || "Chưa cập nhật"}
+                    {account?.phoneNumber || "Chưa cập nhật"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-4 py-3">
                   <span className="font-medium text-foreground">Địa chỉ:</span>
                   <span className="col-span-2 text-muted-foreground">
-                    {account.address || "Chưa cập nhật"}
+                    {account?.address || "Chưa cập nhật"}
                   </span>
                 </div>
               </div>
@@ -321,117 +215,6 @@ const Account = () => {
           </div>
         </div>
       </div>
-
-      {/* Edit Info Dialog */}
-      {/* <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Chỉnh sửa thông tin</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Họ và tên</Label>
-              <Input
-                id="edit-name"
-                value={editFormData.name}
-                onChange={(e) =>
-                  setEditFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={editFormData.email}
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-xs text-muted-foreground">
-                Email không thể thay đổi
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-phone">Số điện thoại</Label>
-              <Input
-                id="edit-phone"
-                value={editFormData.phone}
-                onChange={(e) =>
-                  setEditFormData((prev) => ({
-                    ...prev,
-                    phone: e.target.value,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-              >
-                Hủy
-              </Button>
-              <Button onClick={handleSaveInfo}>Lưu thay đổi</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog> */}
-
-      {/* Change Password Dialog */}
-      {/* <Dialog
-        open={isPasswordDialogOpen}
-        onOpenChange={setIsPasswordDialogOpen}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Đổi mật khẩu</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Mật khẩu mới</Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData((prev) => ({
-                    ...prev,
-                    newPassword: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Xác nhận mật khẩu mới</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData((prev) => ({
-                    ...prev,
-                    confirmPassword: e.target.value,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setIsPasswordDialogOpen(false)}
-              >
-                Hủy
-              </Button>
-              <Button onClick={handleChangePassword}>Đổi mật khẩu</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog> */}
     </EndUserLayout>
   );
 };

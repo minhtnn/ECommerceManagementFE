@@ -13,11 +13,15 @@ import {
   ShoppingCart,
   User,
   X,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "./ui/input";
+import { useCart } from "@/hooks/use-cart";
+import { useTheme } from "@/providers/theme-provider";
 
 const EndUserHeaderRoutes = {
   home: {
@@ -45,8 +49,6 @@ const EndUserHeaderRoutes = {
 export function AppEndUserHeader({
   ...props
 }: React.HTMLAttributes<typeof HTMLElement>) {
-  // const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const { isHeaderMenuOpenWhenChangingMobile } = useSelector(
     (state: RootState) => state.modal,
   );
@@ -54,6 +56,7 @@ export function AppEndUserHeader({
   const { isAuthenticated, user, role } = useSelector(
     (state: RootState) => state.user,
   );
+  const { theme, setTheme } = useTheme();
   const accountLink = isAuthenticated ? PATH_AUTH.account : PATH_AUTH.root;
   const isEndCustomer = isAuthenticated && role === ERole.EndCustomer;
   const navigate = useNavigate();
@@ -70,6 +73,14 @@ export function AppEndUserHeader({
 
     return matchedKey ? matchedKey[0] : "home";
   }, [location.pathname]);
+  const { getEndCustomerCart } = useCart();
+  const { data: cartData } = getEndCustomerCart({
+    isAllowFetch: isEndCustomer,
+  });
+  const cart = cartData?.data?.data;
+  const totalItems =
+    cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
   return (
     <header className="bg-background sticky top-0 z-50 shadow-sm">
       <div className="bg-primary text-primary-foreground py-2 text-sm">
@@ -119,10 +130,12 @@ export function AppEndUserHeader({
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">
-                U
-              </span>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center">
+              <img
+                src="/UniCoffeeRoastery.png"
+                alt="UniCoffeeRoastery"
+                className="text-primary-foreground font-bold text-lg"
+              />
             </div>
             <div className="hidden sm:block">
               <div className="font-bold text-primary text-lg leading-tight">
@@ -133,7 +146,7 @@ export function AppEndUserHeader({
           </Link>
 
           {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-4">
+          {/* <div className="hidden md:flex flex-1 max-w-xl mx-4">
             <div className="relative w-full">
               <Input
                 type="text"
@@ -144,7 +157,7 @@ export function AppEndUserHeader({
                 <Search size={20} className="text-muted-foreground" />
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
@@ -166,13 +179,51 @@ export function AppEndUserHeader({
               >
                 <ShoppingCart size={22} />
                 <span className="text-xs hidden sm:block">Giỏ hàng</span>
-                {/* {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-sale text-sale-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                {totalItems}
-              </span>
-            )} */}
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                    {totalItems}
+                  </span>
+                )}
               </Link>
             )}
+
+            {/* Theme Toggle Switch */}
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="relative inline-flex h-9 w-16 shrink-0 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:opacity-90"
+              style={{
+                backgroundColor: theme === "dark" ? "#475569" : "#f59e0b",
+              }}
+              aria-label="Chuyển đổi chế độ giao diện"
+              title={theme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+            >
+              {/* Background Icons */}
+              <Sun 
+                size={14} 
+                className={`absolute left-2 transition-opacity duration-300 ${
+                  theme === "dark" ? "opacity-30 text-slate-300" : "opacity-0"
+                }`}
+              />
+              <Moon 
+                size={14} 
+                className={`absolute right-2 transition-opacity duration-300 ${
+                  theme === "dark" ? "opacity-0" : "opacity-30 text-amber-100"
+                }`}
+              />
+              
+              {/* Moving Circle */}
+              <span
+                className={`inline-flex h-7 w-7 items-center justify-center transform rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out ${
+                  theme === "dark" ? "translate-x-[30px]" : "translate-x-[2px]"
+                }`}
+              >
+                {theme === "dark" ? (
+                  <Moon size={16} className="text-slate-700" />
+                ) : (
+                  <Sun size={16} className="text-amber-500" />
+                )}
+              </span>
+            </button>
           </div>
         </div>
       </div>

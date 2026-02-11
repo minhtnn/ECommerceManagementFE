@@ -42,7 +42,6 @@
     --sale-badge-foreground: 0 0% 100%;
     --price-original: 0 0% 60%;
     --price-sale: 345 73% 31%;
-    --category-header: 345 60% 25%;
     --cream: 35 40% 97%;
     --coffee-dark: 25 30% 20%;
 
@@ -84,6 +83,16 @@
     --tree-button-hover: 0 0% 90%;
     --tree-border-image: 0 0% 88%;
     --tree-icon-empty: 0 0% 80%;
+
+    /* Brand */
+    --brand: 357 85% 52%;
+    --brand-foreground: 0 0% 100%;
+
+    --primary: var(--brand);
+    --primary-foreground: var(--brand-foreground);
+    --ring: var(--brand);
+    --category-header: var(--brand);
+
   }
 
   .dark {
@@ -120,7 +129,6 @@
     --sale-badge-foreground: 0 0% 100%;
     --price-original: 30 10% 60%;
     --price-sale: 345 65% 55%;
-    --category-header: 345 55% 35%;
     --cream: 25 20% 15%;
     --coffee-dark: 30 15% 85%;
 
@@ -162,6 +170,15 @@
     --tree-button-hover: 25 15% 25%;
     --tree-border-image: 25 15% 30%;
     --tree-icon-empty: 30 10% 50%;
+
+    /* Brand */
+    --brand: 357 75% 60%;
+    --brand-foreground: 0 0% 100%;
+
+    --primary: var(--brand);
+    --primary-foreground: var(--brand-foreground);
+    --ring: var(--brand);
+    --category-header: var(--brand);
   }
 }
 
@@ -190,7 +207,7 @@
   }
 
   .category-header {
-    background: var(--gradient-category);
+    background: var(--brand);
     @apply text-primary-foreground py-4 px-8 rounded-full text-center font-semibold text-lg;
   }
 
@@ -251,4 +268,47 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+@keyframes bounce-once {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-bounce-once {
+  animation: bounce-once 0.6s ease-in-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

@@ -9,6 +9,7 @@ import { RootState } from "@/redux/store";
 import { logout, setInitialized, setUser } from "@/redux/user/user-slice";
 import { useEffect, type ReactNode } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 type Props = {
     children: ReactNode;
@@ -21,7 +22,6 @@ const AuthProvider = ({ children }: Props) => {
 
     useEffect(() => {
         const initAuth = async () => {
-            console.log("🔐 Starting auth initialization...");
             dispatch(handleSetIsAuthLoading(true));
 
             try {
@@ -32,18 +32,14 @@ const AuthProvider = ({ children }: Props) => {
                     try {
                         const userInfo = JSON.parse(userInfoStr);
 
-                        // ✅ BƯỚC 2: KIỂM TRA ACCESS TOKEN CÒN HẠN
                         if (userInfo.accessToken && !isTokenExpired(userInfo.accessToken)) {
-                            console.log("✅ Found valid token in localStorage, using it");
 
-                            // ✅ TOKEN CÒN HẠN → DÙNG LUÔN, KHÔNG GỌI API
                             dispatch(setUser(userInfo));
                             return;
                         }
 
-                        console.log("⚠️ Token in localStorage expired, refreshing...");
                     } catch (parseError) {
-                        console.warn("⚠️ Failed to parse userInfo from localStorage:", parseError);
+                        toast.warning("Failed to parse userInfo from localStorage:", parseError);
                         localStorage.removeItem("userInfo");
                     }
                 }
@@ -52,12 +48,9 @@ const AuthProvider = ({ children }: Props) => {
                 const hasRefreshToken = document.cookie.includes('refreshToken');
 
                 if (!hasRefreshToken) {
-                    console.log("⚠️ No refresh token cookie found");
                     throw new Error('No refresh token');
                 }
 
-                // ✅ BƯỚC 4: GỌI /REFRESH ĐỂ LẤY TOKEN MỚI
-                console.log("🔄 Calling refresh API...");
                 const response = await authApi.refresh();
 
                 if (response.data.status !== 200) {
@@ -66,23 +59,19 @@ const AuthProvider = ({ children }: Props) => {
 
                 const userData = response.data.data;
 
-                console.log("✅ Session restored successfully");
 
-                // ✅ LƯU VÀO LOCALSTORAGE
                 localStorage.setItem("userInfo", JSON.stringify(userData));
 
                 dispatch(setUser(userData));
 
             } catch (error: any) {
-                console.warn("⚠️ Session restore failed:", error?.response?.data?.message || error.message);
+                toast.warning("⚠️ Session restore failed:", error?.response?.data?.message || error.message);
 
-                // ✅ XÓA DATA CŨ
                 localStorage.removeItem("userInfo");
                 dispatch(logout());
             } finally {
                 dispatch(setInitialized(true));
                 dispatch(handleSetIsAuthLoading(false));
-                console.log("✅ Auth initialization completed");
             }
         };
 

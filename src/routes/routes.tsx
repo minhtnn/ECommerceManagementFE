@@ -117,6 +117,46 @@ export const AppRoutes = () =>
             </CustomerGuard>
           ),
         },
+        {
+          path: "checkout",
+          element: (
+            <CustomerGuard>
+              <EndCustomerCheckoutPage />
+            </CustomerGuard>
+          ),
+        },
+        {
+          path: "orders",
+          element: (
+            <CustomerGuard>
+              <EndCustomerOrdersListPage />
+            </CustomerGuard>
+          ),
+        },
+        {
+          path: "orders/:id/view",
+          element: (
+            <CustomerGuard>
+              <EndCustomerOrdersDetailPage />
+            </CustomerGuard>
+          ),
+        },
+        {
+          path: "payment/:id",
+          element: (
+            <CustomerGuard>
+              <EndCustomerOrderPaymentPage />
+            </CustomerGuard>
+          ),
+        },
+        {
+          path: "addresses",
+          element: (
+            <CustomerGuard>
+              <EndCustomerAddressListPage />
+            </CustomerGuard>
+          ),
+        },
       ],
     },
     //#endregion
@@ -257,11 +297,11 @@ export const AppRoutes = () =>
         },
         {
           path: "orders",
-          element: <div>Order List Page</div>,
+          element: <BrandOrderListPage />,
         },
         {
           path: "orders/:id/view",
-          element: <div>Order View Page</div>,
+          element: <BrandOrderDetailPage />,
         },
       ],
     },
@@ -311,7 +351,23 @@ const CustomerContactPage = Loadable(
 const EndCustomerCartPage = Loadable(
   lazy(() => import("@/pages/end-customer/cart")),
 );
+const EndCustomerCheckoutPage = Loadable(
+  lazy(() => import("@/pages/end-customer/checkout")),
+);
+const EndCustomerOrdersListPage = Loadable(
+  lazy(() => import("@/pages/end-customer/order/list")),
+);
+const EndCustomerOrdersDetailPage = Loadable(
+  lazy(() => import("@/pages/end-customer/order/detail")),
+);
 
+const EndCustomerOrderPaymentPage = Loadable(
+  lazy(() => import("@/pages/end-customer/payment")),
+);
+
+const EndCustomerAddressListPage = Loadable(
+  lazy(() => import("@/pages/end-customer/address/list")),
+);
 //#endregion
 
 //#region System admin
@@ -374,6 +430,13 @@ const BrandPaymentMethodCreatePage = Loadable(
 const BrandPaymentMethodEditPage = Loadable(
   lazy(() => import("@/pages/brand-admin/payment-method/edit")),
 );
+const BrandOrderListPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/order/list")),
+);
+const BrandOrderDetailPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/order/detail")),
+);
+
 //#endregion
 
 const NotFoundPage = Loadable(lazy(() => import("@/pages/404Page")));
