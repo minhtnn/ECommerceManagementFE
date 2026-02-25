@@ -4,6 +4,7 @@ interface ModalState {
   isOpen: boolean;
   createdId?: string;
   isHeaderMenuOpenWhenChangingMobile: boolean;
+  isChangePasswordDashboardDialogOpen: boolean;
   chosenCategoryId?: string;
   isAuthLoading: boolean;
   isEditAccountDialogOpen: boolean;
@@ -20,6 +21,7 @@ const initialState: ModalState = {
   isEditAccountDialogOpen: false,
   registerEmail: undefined,
   showOTPModal: false,
+  isChangePasswordDashboardDialogOpen: false,
 };
 
 export const modalSlice = createSlice({
@@ -67,7 +69,13 @@ export const modalSlice = createSlice({
       action: PayloadAction<boolean>
     ) {
       state.showOTPModal = action?.payload;
-    }
+    },
+    handleChangePasswordDashboardDialogOpen(
+      state,
+      action: PayloadAction<boolean>
+    ) {
+      state.isChangePasswordDashboardDialogOpen = action?.payload;
+    },
   },
 });
 
@@ -80,6 +88,7 @@ export const {
   handleSetIsEditAccountDialogOpen,
   handleSetRegisterEmail,
   handleToggleOTPModal,
+  handleChangePasswordDashboardDialogOpen
 } = modalSlice.actions;
 
 export default modalSlice.reducer;

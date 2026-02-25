@@ -52,12 +52,27 @@ const EndCustomerAddressListPage = () => {
   };
   return (
     <EndCustomerAccountLayout breadcrumbs={[{ label: "Sổ địa chỉ" }]}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <LocateFixedIcon className="w-7 h-7" />
-          Sổ địa chỉ của bạn
-        </h1>
-        <p className="text-muted-foreground mt-1">Quản lý sổ địa chỉ của bạn</p>
+      <div className="flex justify-between items-center">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <LocateFixedIcon className="w-7 h-7" />
+            Sổ địa chỉ của bạn
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Quản lý sổ địa chỉ của bạn
+          </p>
+        </div>
+        <div className="mb-6">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2"
+            onClick={handleOpenCreateDialog}
+          >
+            <Plus size={16} />
+            Thêm mới
+          </Button>
+        </div>
       </div>
       {addresses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed rounded-lg">

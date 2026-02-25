@@ -6,17 +6,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { handleApiError } from "@/lib/error";
 import { cn } from "@/lib/utils";
-import { handleSetIsEditAccountDialogOpen } from "@/redux/modal/modal-slice";
+import {
+  handleChangePasswordDashboardDialogOpen,
+  handleSetIsEditAccountDialogOpen,
+} from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
 import { ImageOff, Upload } from "lucide-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { ChangePasswordPageDashboardDialog } from "./components/ChangePasswordPageDashboardDialog";
 
 interface CustomerInfo {
   name: string;
@@ -28,13 +31,13 @@ interface CustomerInfo {
 const Account = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { getAccountDetail } = useAuth();
+  const { getAccountDetail, changePassword } = useAuth();
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
   const { isEditAccountDialogOpen } = useSelector(
-    (state: RootState) => state.modal
+    (state: RootState) => state.modal,
   );
 
   const {
@@ -100,16 +103,27 @@ const Account = () => {
             <div className="bg-background rounded-lg border p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">THÔNG TIN TÀI KHOẢN</h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // setEditFormData({ ...customerInfo });
-                    dispatch(handleSetIsEditAccountDialogOpen(true));
-                  }}
-                >
-                  Chỉnh sửa
-                </Button>
+                <div className="space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // setEditFormData({ ...customerInfo });
+                      dispatch(handleSetIsEditAccountDialogOpen(true));
+                    }}
+                  >
+                    Chỉnh sửa
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      dispatch(handleChangePasswordDashboardDialogOpen(true));
+                    }}
+                  >
+                    Đổi mật khẩu
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -211,57 +225,7 @@ const Account = () => {
       </Dialog>
 
       {/* Change Password Dialog */}
-      {/* <Dialog
-        open={isPasswordDialogOpen}
-        onOpenChange={setIsPasswordDialogOpen}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Đổi mật khẩu</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Mật khẩu mới</Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData((prev) => ({
-                    ...prev,
-                    newPassword: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Xác nhận mật khẩu mới</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData((prev) => ({
-                    ...prev,
-                    confirmPassword: e.target.value,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setIsPasswordDialogOpen(false)}
-              >
-                Hủy
-              </Button>
-              <Button onClick={handleChangePassword}>Đổi mật khẩu</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog> */}
+      <ChangePasswordPageDashboardDialog />
     </div>
   );
 };

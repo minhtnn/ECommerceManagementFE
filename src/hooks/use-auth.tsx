@@ -91,6 +91,25 @@ export const useAuth = () => {
     }
   };
 
+  const changePassword = () =>
+    useMutation({
+      mutationFn: authApi.changePassword,
+      onSuccess: (response) => {
+        toast.success(
+          response.data.message ||
+            "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.",
+        );
+        // Auto logout after successful password change
+        setTimeout(() => {
+          dispatch(logout());
+          navigate(PATH_AUTH.login);
+        }, 2000);
+      },
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Đổi mật khẩu thất bại");
+      },
+    });
+
   return {
     loginMutation,
     registerMutation,
@@ -99,5 +118,6 @@ export const useAuth = () => {
     resendOtpVerifyEmailMutation,
     logout: handleLogout,
     logoutAllDevices: handleLogoutAllDevices,
+    changePassword,
   };
 };

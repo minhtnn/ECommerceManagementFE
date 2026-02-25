@@ -215,12 +215,14 @@ const EndCustomerCheckoutPage = () => {
     (pm) => pm.id === selectedPaymentMethodId,
   );
 
-  const shipping =
-    cart.totalAmountWithoutDiscount >= 399000
-      ? 0
-      : cart.totalAmountWithoutDiscount > 0
-        ? 30000
-        : 0;
+  // const shipping =
+  //   cart.totalAmountWithoutDiscount >= 399000
+  //     ? 0
+  //     : cart.totalAmountWithoutDiscount > 0
+  //       ? 30000
+  //       : 0;
+
+  const shipping = 0;
 
   // Calculate discount based on applied voucher
   const calculateDiscount = (): number => {

@@ -27,3 +27,8 @@ export const API_SUFFIX = {
     PAYMENT_API: '/payments',
     ORDER_API: '/orders',
 }
+
+export const MAP_API_SUFFIX = {
+  PROVINCE_API: '/p/',
+  WARD_API: '/w/'
+}

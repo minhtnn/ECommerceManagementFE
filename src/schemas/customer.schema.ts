@@ -31,18 +31,18 @@ export const CustomerAddressDetailResponseSchema = z.object({
     lastModifiedDate: z.date().nullable()
 });
 export const CreateCustomerAddressSchema = z.object({
-    receiver: z.string({ required_error: "Tên người nhận không được để trống" }),
-    address: z.string({ required_error: "Địa chỉ người nhận không được để trống" }),
-    shippingContact: z.string({ required_error: "Số điện thoại người nhận không được để trống" }),
+    receiver: z.string({ required_error: "Tên người nhận không được để trống", invalid_type_error: "Tên người nhận phải là chuỗi ký tự" }),
+    address: z.string({ required_error: "Địa chỉ người nhận không được để trống", invalid_type_error: "Địa chỉ người nhận phải là chuỗi ký tự" }),
+    shippingContact: z.string({ required_error: "Số điện thoại người nhận không được để trống", invalid_type_error: "Số điện thoại người nhận phải là chuỗi ký tự"  }),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
     isPrimary: z.boolean(),
 });
 export const UpdateCustomerAddressSchema = z.object({
     id: z.string().uuid(),
-    receiver: z.string({ required_error: "Tên người nhận không được để trống" }),
-    address: z.string({ required_error: "Địa chỉ người nhận không được để trống" }),
-    shippingContact: z.string({ required_error: "Số điện thoại người nhận không được để trống" }),
+    receiver: z.string({ required_error: "Tên người nhận không được để trống", invalid_type_error: "Tên người nhận phải là chuỗi ký tự" }),
+    address: z.string({ required_error: "Địa chỉ người nhận không được để trống", invalid_type_error: "Địa chỉ người nhận phải là chuỗi ký tự" }),
+    shippingContact: z.string({ required_error: "Số điện thoại người nhận không được để trống", invalid_type_error: "Số điện thoại người nhận phải là chuỗi ký tự" }),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
     isPrimary: z.boolean(),

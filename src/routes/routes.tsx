@@ -18,6 +18,7 @@ import {
   PATH_GUEST,
   PATH_SYSTEM_ADMIN_DASHBOARD,
 } from "./path";
+import VietnamAddressSelector from "@/pages/unneed/Map";
 
 const Loadable = (Component: ElementType) => (props: any) => {
   return (
@@ -154,6 +155,14 @@ export const AppRoutes = () =>
           element: (
             <CustomerGuard>
               <EndCustomerAddressListPage />
+            </CustomerGuard>
+          ),
+        },
+        {
+          path: "change-password",
+          element: (
+            <CustomerGuard>
+              <EndUserChangePasswordPage />
             </CustomerGuard>
           ),
         },
@@ -323,6 +332,9 @@ const LoginPage = Loadable(
 const EndUserAccountPage = Loadable(
   lazy(() => import("@/pages/auth/customer-account")),
 );
+const EndUserChangePasswordPage = Loadable(
+  lazy(() => import("@/pages/auth/customer-change-password")),
+);
 const DashboardAccountPage = Loadable(
   lazy(() => import("@/pages/auth/dashboard-account")),
 );
@@ -364,7 +376,6 @@ const EndCustomerOrdersDetailPage = Loadable(
 const EndCustomerOrderPaymentPage = Loadable(
   lazy(() => import("@/pages/end-customer/payment")),
 );
-
 const EndCustomerAddressListPage = Loadable(
   lazy(() => import("@/pages/end-customer/address/list")),
 );

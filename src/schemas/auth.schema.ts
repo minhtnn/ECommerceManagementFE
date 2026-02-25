@@ -59,9 +59,37 @@ export const AccountDetailResponse = z.object({
   address: z.string().optional()
 });
 
+export const ChangePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(1, { message: "Mật khẩu hiện tại không được bỏ trống" }),
+    newPassword: z
+      .string()
+      .min(8, { message: "Mật khẩu mới phải có ít nhất 8 ký tự" })
+      .regex(/[A-Z]/, { message: "Mật khẩu mới phải có ít nhất 1 chữ hoa" })
+      .regex(/[a-z]/, { message: "Mật khẩu mới phải có ít nhất 1 chữ thường" })
+      .regex(/[0-9]/, { message: "Mật khẩu mới phải có ít nhất 1 chữ số" })
+      .regex(/[@$!%*?&#]/, {
+        message: "Mật khẩu mới phải có ít nhất 1 ký tự đặc biệt (@$!%*?&#)",
+      }),
+    confirmNewPassword: z
+      .string()
+      .min(1, { message: "Xác nhận mật khẩu không được bỏ trống" }),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Mật khẩu xác nhận không khớp",
+    path: ["confirmNewPassword"],
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: "Mật khẩu mới phải khác mật khẩu hiện tại",
+    path: ["newPassword"],
+  });
+
 export type TFELoginRequest = z.TypeOf<typeof FELoginSchema>;
 export type TBELoginRequest = z.TypeOf<typeof BELoginSchema>;
 export type TFERegisterSchema = z.TypeOf<typeof FERegisterSchema>;
 export type TAuthResponse = z.TypeOf<typeof AuthResponseSchema>;
 export type TAccountDetailResponse = z.TypeOf<typeof AccountDetailResponse>;
+export type TChangePasswordRequest = z.TypeOf<typeof ChangePasswordSchema>;
 

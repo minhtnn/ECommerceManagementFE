@@ -29,7 +29,7 @@ export const EndCustomerAccountSidebar = () => {
         id: "password",
         label: "Đổi mật khẩu",
         icon: Lock,
-        path: "PATH_END_CUSTOMER.changePassword", 
+        path: PATH_END_CUSTOMER.changePassword, 
       },
       {
         id: "addresses",

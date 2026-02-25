@@ -847,13 +847,24 @@ const ProductEditPage = () => {
       formData.append("Status", data.status.toString());
       formData.append("StockQuantity", data.stockQuantity.toString());
 
-      // Existing Images
-      const existingImageIds = imagesState.list
-        .filter((img) => img.isExisting && img.id)
-        .map((img) => img.id);
-      existingImageIds.forEach((imgId) => {
-        formData.append("ExistingImageIds", imgId);
+      // Existing Images + their metadata
+      const existingImages = imagesState.list.filter(
+        (img) => img.isExisting && img.id,
+      );
+      existingImages.forEach((img) => {
+        formData.append("ExistingImageIds", img.id);
       });
+
+      // Serialize existing image metadata as JSON
+      const existingImageMetadata = existingImages.map((img) => ({
+        Id: img.id,
+        AltText: img.altText || "",
+        IsMainImage: img.isMainImage,
+      }));
+      formData.append(
+        "ExistingImageMetadataJson",
+        JSON.stringify(existingImageMetadata),
+      );
 
       // New Images
       const newImagesList = imagesState.list.filter(
@@ -868,8 +879,6 @@ const ProductEditPage = () => {
         );
       });
 
-      // Side Attributes - FIX HERE
-      // Trim whitespace and filter valid attributes
       const validAttrs = sideAttributes
         .map((attr) => ({
           ...attr,
@@ -877,25 +886,10 @@ const ProductEditPage = () => {
           value: attr.value.trim(),
         }))
         .filter((attr) => attr.key !== "" && attr.value !== "");
-
-      // console.log("Valid Attributes Count:", validAttrs.length);
-      // console.log("Valid Attributes:", validAttrs);
-
-      // Append to FormData
       validAttrs.forEach((attr, index) => {
         formData.append(`SideAttributes[${index}].Key`, attr.key);
         formData.append(`SideAttributes[${index}].Value`, attr.value);
-        // console.log(`Added SideAttributes[${index}]:`, {
-        //   key: attr.key,
-        //   value: attr.value,
-        // });
       });
-
-      // Debug: Log all FormData entries
-      // for (const [key, value] of formData.entries()) {
-      //   console.log(key, ":", value);
-      // }
-
       try {
         const result = await updateProductMutation.mutateAsync({
           id: id!,
@@ -919,9 +913,6 @@ const ProductEditPage = () => {
   );
 
   //#endregion
-  // ============================================================================
-  // RENDER
-  // ============================================================================
 
   // Show loading while fetching data OR while data is not ready
   if (isLoading || !isDataReady) {

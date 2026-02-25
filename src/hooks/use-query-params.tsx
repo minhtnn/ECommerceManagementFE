@@ -126,7 +126,6 @@ export const useQueryParams = ( {
         // Filtering
         filter,
         setFilter,
-
         resetParams,
 
     };
