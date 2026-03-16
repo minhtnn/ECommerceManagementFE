@@ -1,62 +1,127 @@
+// pages/guest/products/list/ProductPage.tsx
 import { useProductMenu } from "@/hooks/use-product-menu";
 import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
 import ProductCard from "@/pages/guest/products/list/components/ProductCard";
 import { handleSetChosenCategoryId } from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
-import { Zap } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { CategoryTreeItem } from "./components/CategoryTreeItem";
+import { useEffect, useRef, useMemo } from "react";
+import { Button } from "@/components/ui/button";
 
-const ProductPage = () => {
+const ProductListPage = () => {
   const dispatch = useDispatch();
-  const { chosenCategoryId } = useSelector(
-      (state: RootState) => state.modal
-    );
+  const { chosenCategoryId } = useSelector((state: RootState) => state.modal);
   const { getPublicProductMenu } = useProductMenu();
+
   const {
-    data: menuData,
-    isLoading: IsMenuLoading,
+    data,
+    isLoading,
     isError,
     error,
-  } = getPublicProductMenu((chosenCategoryId) ? { categoryId: chosenCategoryId } : {});
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = getPublicProductMenu(
+    chosenCategoryId ? { categoryId: chosenCategoryId } : {}
+  );
+
+  // Infinite scroll observer
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isError && error) {
     handleApiError(error);
   }
 
-  if(menuData?.data.data === null){
+  // Flatten all pages into single array
+  const allProducts = useMemo(() => {
+    return (
+      data?.pages?.flatMap(
+        (page) => page?.data?.data?.products?.items || []
+      ) || []
+    );
+  }, [data]);
+
+  // Get categories from first page only (they're the same in all pages)
+  const categoriesTree =
+    data?.pages?.[0]?.data?.data?.productCategoriesTree || [];
+
+  if (isLoading) {
     return (
       <EndUserLayout>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-foreground/70">
-            <h2 className="text-2xl font-semibold mb-4">Không có sản phẩm nào</h2>
-            <p>Hiện tại không có sản phẩm nào trong danh mục này. Vui lòng quay lại sau hoặc chọn danh mục khác.</p>
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         </div>
       </EndUserLayout>
     );
   }
 
-  const categoriesTree = menuData?.data.data.productCategoriesTree || [];
-  const products = menuData?.data.data.products;
-  // const totalProducts = menuData?.data.data.totalProducts || 0;
-
-  if(categoriesTree && categoriesTree.length === 0 && products && products.length === 0){
+  if (!data?.pages?.[0]?.data?.data) {
     return (
       <EndUserLayout>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-foreground/70">
-            <h2 className="text-2xl font-semibold mb-4">Không có sản phẩm nào</h2>
-            <p>Hiện tại không có sản phẩm nào trong danh mục này. Vui lòng quay lại sau hoặc chọn danh mục khác.</p>
+            <h2 className="text-2xl font-semibold mb-4">
+              Không có sản phẩm nào
+            </h2>
+            <p>
+              Hiện tại không có sản phẩm nào trong danh mục này. Vui lòng quay
+              lại sau hoặc chọn danh mục khác.
+            </p>
           </div>
         </div>
       </EndUserLayout>
     );
   }
-  const handleCategorySelect = (categoryId) => {
+
+  if (categoriesTree.length === 0 && allProducts.length === 0) {
+    return (
+      <EndUserLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center text-foreground/70">
+            <h2 className="text-2xl font-semibold mb-4">
+              Không có sản phẩm nào
+            </h2>
+            <p>
+              Hiện tại không có sản phẩm nào trong danh mục này. Vui lòng quay
+              lại sau hoặc chọn danh mục khác.
+            </p>
+          </div>
+        </div>
+      </EndUserLayout>
+    );
+  }
+
+  const handleCategorySelect = (categoryId: string) => {
     dispatch(handleSetChosenCategoryId(categoryId));
   };
+
   return (
     <EndUserLayout>
       <div className="container mx-auto px-4 py-8">
@@ -97,7 +162,7 @@ const ProductPage = () => {
 
             {/* Products Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {products.map((product, index) => (
+              {allProducts.map((product, index) => (
                 <div
                   key={product.id}
                   className="animate-fade-in"
@@ -107,10 +172,39 @@ const ProductPage = () => {
                 </div>
               ))}
             </div>
+
+            {/* Loading More Indicator */}
+            <div ref={observerTarget} className="py-8">
+              {isFetchingNextPage && (
+                <div className="flex justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              )}
+
+              {!hasNextPage && allProducts.length > 0 && (
+                <p className="text-center text-muted-foreground text-sm">
+                  Đã hiển thị tất cả {allProducts.length} sản phẩm
+                </p>
+              )}
+
+              {/* Manual Load More Button (Optional) */}
+              {hasNextPage && !isFetchingNextPage && (
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => fetchNextPage()}
+                    className="px-8"
+                  >
+                    Xem thêm sản phẩm
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </EndUserLayout>
   );
 };
-export default ProductPage;
+
+export default ProductListPage;

@@ -64,6 +64,16 @@ export const PATH_BRAND_DASHBOARD = {
         create: path(ROOTS_BRAND_ADMIN_DASHBOARD, '/payment-methods/create'),
         edit: (id: string) => path(ROOTS_BRAND_ADMIN_DASHBOARD, `/payment-methods/${id}/edit`),
     },
+    promotionRule: {
+        root: path(ROOTS_BRAND_ADMIN_DASHBOARD, '/promotion-rules'),
+        create: path(ROOTS_BRAND_ADMIN_DASHBOARD, '/promotion-rules/create'),
+        edit: (id: string) => path(ROOTS_BRAND_ADMIN_DASHBOARD, `/promotion-rules/${id}/edit`),
+    },
+    posts : {
+        root: path(ROOTS_BRAND_ADMIN_DASHBOARD, '/posts'),
+        create: path(ROOTS_BRAND_ADMIN_DASHBOARD, '/posts/create'),
+        edit: (id: string) => path(ROOTS_BRAND_ADMIN_DASHBOARD, `/posts/${id}/edit`),
+    }
 }
 
 export const PATH_GUEST = {
@@ -80,11 +90,11 @@ export const PATH_GUEST = {
     },
     news: {
         root: path(ROOTS_GUEST, '/news'),
-        detail: (slug: string) => path(ROOTS_GUEST, `/news/${slug}`),
+        detail: (id: string) => path(ROOTS_GUEST, `/news/${id}`),
     },
     contact: {
         root: path(ROOTS_GUEST, '/contact'),
-    }
+    },
 }
 
 export const PATH_END_CUSTOMER = {

@@ -1,9 +1,15 @@
+// hooks/use-product-menu.ts
 import { menuProductApi } from "@/apis/menu-product.api";
 import envConfig from "@/schemas/config.schema";
-import { keepPreviousData, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useSuspenseQuery,
+  keepPreviousData,
+} from "@tanstack/react-query";
 
 interface UseProductMenuParams {
   categoryId?: string;
+  pageSize?: number;
 }
 
 export const useProductMenu = () => {
@@ -17,18 +23,32 @@ export const useProductMenu = () => {
   };
 
   const getPublicProductMenu = (params: UseProductMenuParams = {}) => {
-    const { categoryId } = params;
-    return useSuspenseQuery({
-      queryKey: ["public-product-menu", categoryId],
-      queryFn: async () => {
-        const apiParams = categoryId ? { categoryId } : {};
+    const { categoryId, pageSize = 20 } = params;
+
+    return useInfiniteQuery({
+      queryKey: ["public-product-menu", categoryId, pageSize],
+      queryFn: async ({ pageParam }) => {
+        const apiParams: any = { pageSize };
+
+        if (categoryId) {
+          apiParams.categoryId = categoryId;
+        }
+
+        if (pageParam) {
+          apiParams.cursor = pageParam;
+        }
 
         return menuProductApi.getPublicMenuProducts(
           envConfig.BRAND_CODE,
-          apiParams
+          apiParams,
         );
       },
-      ...keepPreviousData,
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage) => {
+        const products = lastPage?.data?.data?.products;
+        return products?.hasMore ? products.nextCursor : undefined;
+      },
+      staleTime: 2 * 60 * 1000, // 2 minutes
     });
   };
 

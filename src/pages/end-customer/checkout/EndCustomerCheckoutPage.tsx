@@ -19,6 +19,8 @@ import {
   ChevronLeft,
   CreditCard,
   Edit,
+  Gift,
+  ImageOff,
   Loader2,
   MapPin,
   Phone,
@@ -37,73 +39,14 @@ import { PageLoader } from "@/components/LoadingScreen";
 import { usePayment } from "@/hooks/use-payment";
 import OrderSuccessDialog from "./components/OrderSuccessDialog";
 
-interface Voucher {
-  id: string;
-  code: string;
-  name: string;
-  discountType: "percentage" | "fixed";
-  discountValue: number;
-  minOrderValue: number;
-  maxDiscount?: number;
-  usageLimit: number;
-  usedCount: number;
-  startDate: string;
-  endDate: string;
-  isActive: boolean;
-}
-
-const availableVouchers: Voucher[] = [
-  {
-    id: "1",
-    code: "GIAM5K",
-    name: "Giảm 5K",
-    discountType: "fixed",
-    discountValue: 5000,
-    minOrderValue: 0,
-    usageLimit: 100,
-    usedCount: 25,
-    startDate: "2024-01-01",
-    endDate: "2026-12-31",
-    isActive: true,
-  },
-  {
-    id: "2",
-    code: "KM5PHAN",
-    name: "Khuyến mãi 5%",
-    discountType: "percentage",
-    discountValue: 5,
-    minOrderValue: 50000,
-    maxDiscount: 20000,
-    usageLimit: 200,
-    usedCount: 80,
-    startDate: "2024-01-01",
-    endDate: "2025-12-31",
-    isActive: true,
-  },
-  {
-    id: "3",
-    code: "GIAM10PHAN",
-    name: "Giảm 10%",
-    discountType: "percentage",
-    discountValue: 10,
-    minOrderValue: 100000,
-    maxDiscount: 50000,
-    usageLimit: 50,
-    usedCount: 10,
-    startDate: "2024-01-01",
-    endDate: "2025-12-31",
-    isActive: true,
-  },
-];
-
 const EndCustomerCheckoutPage = () => {
   const navigate = useNavigate();
-  const { getEndCustomerCart } = useCart();
+  const { getEndCustomerCart, updateEndCustomerCart } = useCart();
   const { getCustomerAddresses } = useCustomer();
   const { getBrandPublicPaymentMethods } = usePayment();
   const { createOrder } = useOrder();
 
-  // All useState hooks
+  // ── State ──────────────────────────────────────────────────────────────────
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
@@ -116,15 +59,11 @@ const EndCustomerCheckoutPage = () => {
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] =
     useState<string>("");
+  const [formData, setFormData] = useState({ notes: "" });
+  const [promoCode, setPromoCode] = useState("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
-  const [formData, setFormData] = useState({
-    notes: "",
-  });
-
-  const [discountCode, setDiscountCode] = useState("");
-  const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
-
-  // All useQuery hooks
+  // ── Queries ────────────────────────────────────────────────────────────────
   const {
     data: cartData,
     error: cartError,
@@ -146,56 +85,46 @@ const EndCustomerCheckoutPage = () => {
     error: brandPublicPaymentMethodsError,
   } = getBrandPublicPaymentMethods();
 
-  // Mutations
+  // ── Mutations ──────────────────────────────────────────────────────────────
   const createOrderMutation = createOrder();
+  const updateCartMutation = updateEndCustomerCart();
 
-  // Derive data
+  // ── Derived data ───────────────────────────────────────────────────────────
   const cart = cartData?.data?.data;
   const addresses = addressesData?.data?.data || [];
   const paymentMethods = brandPublicPaymentMethodsData?.data?.data || [];
 
-  // useEffect for address selection
+  // ── Effects ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddressId) {
-      const primaryAddress = addresses.find((addr) => addr.isPrimary);
-      setSelectedAddressId(primaryAddress?.id || addresses[0]?.id || null);
+      const primary = addresses.find((a) => a.isPrimary);
+      setSelectedAddressId(primary?.id || addresses[0]?.id || null);
     }
   }, [addresses, selectedAddressId]);
 
-  // useEffect for payment method selection
   useEffect(() => {
     if (paymentMethods.length > 0 && !selectedPaymentMethodId) {
-      const defaultMethod = paymentMethods.find((pm) => pm.isDefault === true);
-      setSelectedPaymentMethodId(
-        defaultMethod?.id || paymentMethods[0]?.id || "",
-      );
+      const def = paymentMethods.find((pm) => pm.isDefault === true);
+      setSelectedPaymentMethodId(def?.id || paymentMethods[0]?.id || "");
     }
   }, [paymentMethods, selectedPaymentMethodId]);
 
-  // Early returns AFTER all hooks
-  if (
-    isCartLoading ||
-    isAddressesLoading ||
-    isBrandPublicPaymentMethodsLoading
-  ) {
+  // ── Loading / Error guards ─────────────────────────────────────────────────
+  if (isCartLoading || isAddressesLoading || isBrandPublicPaymentMethodsLoading)
     return <PageLoader />;
-  }
 
-  // Handle errors
-  if (isAddressesError && addressesError) {
-    handleApiError(addressesError);
-  }
-
-  if (isCartError && cartError) {
-    handleApiError(cartError);
-  }
-
-  if (isBrandPublicPaymentMethodsError && brandPublicPaymentMethodsError) {
+  if (isAddressesError && addressesError) handleApiError(addressesError);
+  if (isCartError && cartError) handleApiError(cartError);
+  if (isBrandPublicPaymentMethodsError && brandPublicPaymentMethodsError)
     handleApiError(brandPublicPaymentMethodsError);
-  }
 
-  // Check if cart exists and has items
-  if (!cart || cart.items.length === 0) {
+  // ── Derived cart data ──────────────────────────────────────────────────────
+  const nonGiftItems = cart?.items.filter((i) => !i.isGiftItem) ?? [];
+  const giftItems = cart?.items.filter((i) => i.isGiftItem) ?? [];
+  const totalNonGiftQty = nonGiftItems.reduce((s, i) => s + i.quantity, 0);
+  const totalGiftQty = giftItems.reduce((s, i) => s + i.quantity, 0);
+
+  if (!cart || nonGiftItems.length === 0) {
     return (
       <EndUserLayout>
         <div className="container mx-auto px-4 py-16 text-center">
@@ -208,97 +137,66 @@ const EndCustomerCheckoutPage = () => {
     );
   }
 
-  const selectedAddress = addresses.find(
-    (addr) => addr.id === selectedAddressId,
-  );
-  const selectedPaymentMethod = paymentMethods.find(
-    (pm) => pm.id === selectedPaymentMethodId,
-  );
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
+  const shipping = cart.totalOrderShippingFee;
 
-  // const shipping =
-  //   cart.totalAmountWithoutDiscount >= 399000
-  //     ? 0
-  //     : cart.totalAmountWithoutDiscount > 0
-  //       ? 30000
-  //       : 0;
+  const buildCurrentItems = () =>
+    nonGiftItems.map((i) => ({
+      productId: i.productId,
+      productImageUrlSnapshot: i.productImageUrlSnapshot,
+      quantity: i.quantity,
+    }));
 
-  const shipping = 0;
+  const buildCurrentPromotions = () =>
+    cart.appliedPromotions.map((p) => ({
+      promotionRuleId: p.promotionId,
+      promotionRuleCode: p.promotionRuleCode,
+      promotionRuleNameSnapshot: p.promotionRuleNameSnapshot,
+      discountAmountApplied: p.discountAmountApplied,
+    }));
 
-  // Calculate discount based on applied voucher
-  const calculateDiscount = (): number => {
-    if (!appliedVoucher) return 0;
+  const buildBasePayload = () => ({
+    cartId: cart.id,
+    customerNote: cart.customerNote,
+    items: buildCurrentItems(),
+  });
 
-    if (appliedVoucher.discountType === "fixed") {
-      return appliedVoucher.discountValue;
-    } else {
-      const percentageDiscount =
-        (cart.totalAmountWithoutDiscount * appliedVoucher.discountValue) / 100;
-      if (appliedVoucher.maxDiscount) {
-        return Math.min(percentageDiscount, appliedVoucher.maxDiscount);
-      }
-      return percentageDiscount;
+  // ── Promo handlers ─────────────────────────────────────────────────────────
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setIsApplyingPromo(true);
+    try {
+      await updateCartMutation.mutateAsync({
+        ...buildBasePayload(),
+        promotionCodeToApply: promoCode.trim(),
+      });
+      toast.success("Áp dụng mã khuyến mãi thành công!");
+      setPromoCode("");
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setIsApplyingPromo(false);
     }
   };
 
-  const discount = calculateDiscount();
-  const total = cart.totalAmountWithoutDiscount + shipping - discount;
+  const handleRemovePromo = async (promotionId: string) => {
+    try {
+      await updateCartMutation.mutateAsync({
+        ...buildBasePayload(),
+        appliedPromotions: buildCurrentPromotions().filter(
+          (p) => p.promotionRuleId !== promotionId,
+        ),
+      });
+      toast.success("Đã xóa mã khuyến mãi");
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
 
-  const handleInputChange = (field: string, value: string) => {
+  // ── Other handlers ─────────────────────────────────────────────────────────
+  const handleInputChange = (field: string, value: string) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleApplyDiscount = () => {
-    const trimmedCode = discountCode.trim();
-
-    if (!trimmedCode) {
-      toast.error("Vui lòng nhập mã giảm giá");
-      return;
-    }
-
-    const voucher = availableVouchers.find(
-      (v) => v.code.toUpperCase() === trimmedCode.toUpperCase() && v.isActive,
-    );
-
-    if (!voucher) {
-      toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn");
-      return;
-    }
-
-    const now = new Date();
-    const startDate = new Date(voucher.startDate);
-    const endDate = new Date(voucher.endDate);
-
-    if (now < startDate) {
-      toast.error("Mã giảm giá chưa có hiệu lực");
-      return;
-    }
-
-    if (now > endDate) {
-      toast.error("Mã giảm giá đã hết hạn");
-      return;
-    }
-
-    if (voucher.usedCount >= voucher.usageLimit) {
-      toast.error("Mã giảm giá đã hết lượt sử dụng");
-      return;
-    }
-
-    if (cart.totalAmountWithoutDiscount < voucher.minOrderValue) {
-      toast.error(
-        `Đơn hàng tối thiểu ${formatPrice(voucher.minOrderValue)} để áp dụng mã này`,
-      );
-      return;
-    }
-
-    setAppliedVoucher(voucher);
-    toast.success(`Đã áp dụng mã giảm giá "${voucher.name}"!`);
-  };
-
-  const handleRemoveVoucher = () => {
-    setAppliedVoucher(null);
-    setDiscountCode("");
-    toast.info("Đã hủy mã giảm giá");
-  };
 
   const handleOpenCreateDialog = () => {
     setDialogMode("create");
@@ -313,7 +211,6 @@ const EndCustomerCheckoutPage = () => {
   };
 
   const handlePlaceOrder = async () => {
-    // Validations
     if (!selectedAddress) {
       toast.error("Vui lòng chọn địa chỉ giao hàng");
       return;
@@ -322,12 +219,7 @@ const EndCustomerCheckoutPage = () => {
       toast.error("Vui lòng chọn phương thức thanh toán");
       return;
     }
-    if (!cart || cart.items.length === 0) {
-      toast.error("Giỏ hàng trống");
-      return;
-    }
 
-    // ⭐ Build order request - Updated theo BE
     const orderRequest: TCreateOrderRequest = {
       brandPaymentMethodId: selectedPaymentMethodId,
       cartId: cart.id,
@@ -349,25 +241,20 @@ const EndCustomerCheckoutPage = () => {
         (pm) => pm.id === selectedPaymentMethodId,
       );
 
-      // If payment URL exists (PayOS), redirect to payment gateway
       if (orderData.paymentUrl) {
         if (
           paymentMethod?.name.toUpperCase().includes("PAYOS") ||
           orderData.paymentUrl
         ) {
           toast.success("Đang chuyển đến trang thanh toán...");
-          // Navigate to custom payment page instead of external URL
           navigate(PATH_END_CUSTOMER.payment(orderData.orderId));
         } else if (paymentMethod?.name.toUpperCase().includes("COD")) {
-          // COD - show success dialog
           setCreatedOrderData(orderData);
           setOrderSuccessDialogOpen(true);
           toast.success("Đặt hàng thành công!");
         } else {
-          // Other payment methods - redirect to payment URL if available
-          if (orderData.paymentUrl) {
-            window.location.href = orderData.paymentUrl;
-          } else {
+          if (orderData.paymentUrl) window.location.href = orderData.paymentUrl;
+          else {
             setCreatedOrderData(orderData);
             setOrderSuccessDialogOpen(true);
             toast.success("Đặt hàng thành công!");
@@ -375,22 +262,20 @@ const EndCustomerCheckoutPage = () => {
         }
       }
     } catch (error: any) {
-      // Error is handled in mutation onError
       console.error("Order creation failed:", error);
     }
   };
 
   const handleCloseSuccessDialog = () => {
     setOrderSuccessDialogOpen(false);
-    // Navigate to home or orders page after closing
     navigate(PATH_GUEST.home.root);
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <EndUserLayout>
       <div className="bg-muted/30 min-h-screen py-6">
         <div className="container mx-auto px-4">
-          {/* Logo centered */}
           <div className="text-center mb-8">
             <Link to={PATH_GUEST.home.root} className="inline-block">
               <h1 className="text-2xl font-bold text-primary">
@@ -400,13 +285,13 @@ const EndCustomerCheckoutPage = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Form */}
+            {/* ── Left Column ──────────────────────────────────────── */}
             <div className="lg:col-span-2 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Customer Information - Address Selection */}
+                {/* Address */}
                 <div className="bg-card rounded-lg p-6 shadow-sm animate-fade-in">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
                       <User size={20} className="text-primary" />
                       Thông tin nhận hàng
                     </h2>
@@ -457,7 +342,6 @@ const EndCustomerCheckoutPage = () => {
                                 </span>
                               </div>
                             )}
-
                             <div className="pr-16">
                               <div className="flex items-start gap-2 mb-2">
                                 <User
@@ -474,7 +358,6 @@ const EndCustomerCheckoutPage = () => {
                                   </p>
                                 </div>
                               </div>
-
                               <div className="flex items-start gap-2">
                                 <MapPin
                                   size={16}
@@ -485,7 +368,6 @@ const EndCustomerCheckoutPage = () => {
                                 </p>
                               </div>
                             </div>
-
                             <Button
                               size="icon"
                               variant="ghost"
@@ -497,7 +379,6 @@ const EndCustomerCheckoutPage = () => {
                             >
                               <Edit size={14} />
                             </Button>
-
                             {isSelected && (
                               <div className="absolute top-2 left-2">
                                 <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
@@ -511,13 +392,12 @@ const EndCustomerCheckoutPage = () => {
                     </div>
                   )}
 
-                  {/* Notes */}
                   <div className="mt-6">
                     <Label className="text-sm text-muted-foreground mb-2">
                       Ghi chú đơn hàng (tùy chọn)
                     </Label>
                     <Textarea
-                      placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn"
+                      placeholder="Ghi chú về đơn hàng..."
                       value={formData.notes}
                       onChange={(e) =>
                         handleInputChange("notes", e.target.value)
@@ -530,32 +410,29 @@ const EndCustomerCheckoutPage = () => {
 
                 {/* Shipping & Payment */}
                 <div className="space-y-6">
-                  {/* Shipping */}
                   <div
                     className="bg-card rounded-lg p-6 shadow-sm animate-fade-in"
                     style={{ animationDelay: "0.1s" }}
                   >
-                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                    <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
                       <Truck size={20} className="text-primary" />
                       Vận chuyển
                     </h2>
-                    <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 text-center text-sm text-foreground">
+                    <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 text-center text-sm">
                       {selectedAddress
                         ? "Giao hàng tiêu chuẩn"
                         : "Vui lòng chọn địa chỉ giao hàng"}
                     </div>
                   </div>
 
-                  {/* Payment Methods */}
                   <div
                     className="bg-card rounded-lg p-6 shadow-sm animate-fade-in"
                     style={{ animationDelay: "0.2s" }}
                   >
-                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                    <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
                       <CreditCard size={20} className="text-primary" />
                       Thanh toán
                     </h2>
-
                     {paymentMethods.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed rounded-lg">
                         <CreditCard
@@ -573,12 +450,11 @@ const EndCustomerCheckoutPage = () => {
                         className="space-y-3"
                       >
                         {paymentMethods.map((method) => {
-                          const isDefault = method.isDefault === true;
                           const isSelected =
                             selectedPaymentMethodId === method.id;
                           return (
                             <div
-                              key={method.id} // Changed from paymentMethodId
+                              key={method.id}
                               onClick={() =>
                                 setSelectedPaymentMethodId(method.id)
                               }
@@ -590,15 +466,15 @@ const EndCustomerCheckoutPage = () => {
                             >
                               <div className="flex items-center gap-3 flex-1">
                                 <RadioGroupItem
-                                  value={method.id} // Changed from paymentMethodId
-                                  id={method.id} // Changed from paymentMethodId
+                                  value={method.id}
+                                  id={method.id}
                                 />
                                 <Label
-                                  htmlFor={method.id} // Changed from paymentMethodId
+                                  htmlFor={method.id}
                                   className="cursor-pointer flex items-center gap-2"
                                 >
                                   {method.name}
-                                  {isDefault && (
+                                  {method.isDefault && (
                                     <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                                       Mặc định
                                     </span>
@@ -624,89 +500,169 @@ const EndCustomerCheckoutPage = () => {
               </div>
             </div>
 
-            {/* Right Column - Order Summary */}
+            {/* ── Right Column - Order Summary ──────────────────────── */}
             <div className="lg:col-span-1">
               <div
                 className="bg-card rounded-lg p-6 shadow-sm sticky top-24 animate-fade-in"
                 style={{ animationDelay: "0.3s" }}
               >
-                <h2 className="text-lg font-semibold text-foreground mb-4">
-                  Đơn hàng (
-                  {cart.items.reduce((sum, item) => sum + item.quantity, 0)} sản
-                  phẩm)
+                {/* Header — chỉ đếm non-gift items */}
+                <h2 className="text-lg font-semibold mb-4">
+                  Đơn hàng ({totalNonGiftQty} sản phẩm)
                 </h2>
 
-                {/* Cart Items */}
-                <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
-                  {cart.items.map((item) => (
-                    <div key={item.id} className="flex gap-3">
+                {/* ── Non-gift items ────────────────────────────────── */}
+                <div className="space-y-3 mb-4 max-h-48 overflow-y-auto">
+                  {nonGiftItems.map((item) => (
+                    <div
+                      key={item.productId}
+                      className="flex gap-3 items-center"
+                    >
+                      {item.productImageUrlSnapshot ? (
+                        <img
+                          src={item.productImageUrlSnapshot}
+                          alt={item.productNameSnapshot}
+                          className="w-12 h-12 rounded object-cover shrink-0"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                          <ImageOff size={12} className="text-gray-400" />
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 bg-primary text-primary-foreground text-sm font-medium rounded flex items-center justify-center flex-shrink-0">
                             {item.quantity}
                           </span>
-                          <h4 className="text-sm font-medium text-foreground line-clamp-2">
+                          <h4 className="text-sm font-medium line-clamp-2">
                             {item.productNameSnapshot}
                           </h4>
                         </div>
                       </div>
-                      <div className="text-sm font-medium text-foreground whitespace-nowrap">
+                      <div className="text-sm font-medium whitespace-nowrap">
                         {formatPrice(item.unitPriceSnapshot)}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Discount Code */}
-                <div className="space-y-3 mb-6">
+                {/* ── Gift items ────────────────────────────────────── */}
+                {giftItems.length > 0 && (
+                  <div className="border-t border-green-100 pt-3 mb-4">
+                    <p className="text-xs font-medium text-green-700 flex items-center gap-1 mb-2">
+                      <Gift size={12} />
+                      Quà tặng kèm ({totalGiftQty} sản phẩm)
+                    </p>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {giftItems.map((item) => (
+                        <div
+                          key={`gift-${item.productId}-${item.promotionId}`}
+                          className="flex gap-2 items-center bg-green-50 rounded-md px-2 py-1.5"
+                        >
+                          {item.productImageUrlSnapshot ? (
+                            <img
+                              src={item.productImageUrlSnapshot}
+                              alt={item.productNameSnapshot}
+                              className="w-10 h-10 rounded object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-green-100 rounded flex items-center justify-center shrink-0">
+                              <Gift size={12} className="text-green-400" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-4 h-4 bg-green-500 text-white text-xs font-medium rounded flex items-center justify-center flex-shrink-0">
+                                {item.quantity}
+                              </span>
+                              <p className="text-xs text-green-800 line-clamp-1 font-medium">
+                                {item.productNameSnapshot}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-xs font-semibold text-green-600 whitespace-nowrap shrink-0">
+                            Miễn phí
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Promotion input ───────────────────────────────── */}
+                <div className="space-y-2 mb-4">
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Nhập mã giảm giá"
-                      value={discountCode}
-                      onChange={(e) => setDiscountCode(e.target.value)}
-                      className="bg-background"
-                      disabled={!!appliedVoucher}
+                      placeholder="Nhập mã khuyến mãi"
+                      value={promoCode}
+                      onChange={(e) =>
+                        setPromoCode(e.target.value.toUpperCase())
+                      }
+                      onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                      disabled={isApplyingPromo}
+                      className="bg-background font-mono text-sm"
                     />
                     <Button
                       variant="outline"
                       className="shrink-0 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                      onClick={handleApplyDiscount}
-                      disabled={!!appliedVoucher}
+                      onClick={handleApplyPromo}
+                      disabled={!promoCode.trim() || isApplyingPromo}
                     >
-                      Áp dụng
+                      {isApplyingPromo ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        "Áp dụng"
+                      )}
                     </Button>
                   </div>
 
-                  {/* Applied Voucher Display */}
-                  {appliedVoucher && (
-                    <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
-                      <div className="flex items-center gap-2">
-                        <Tag size={16} className="text-green-600" />
-                        <div>
-                          <p className="text-sm font-medium text-green-700">
-                            {appliedVoucher.name}
-                          </p>
-                          <p className="text-xs text-green-600">
-                            {appliedVoucher.discountType === "percentage"
-                              ? `Giảm ${appliedVoucher.discountValue}%${appliedVoucher.maxDiscount ? ` (tối đa ${formatPrice(appliedVoucher.maxDiscount)})` : ""}`
-                              : `Giảm ${formatPrice(appliedVoucher.discountValue)}`}
-                          </p>
+                  {cart.appliedPromotions.length > 0 && (
+                    <div className="space-y-1.5">
+                      {cart.appliedPromotions.map((promo) => (
+                        <div
+                          key={promo.promotionId}
+                          className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-2.5"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Tag
+                              size={12}
+                              className="text-green-600 shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <p className="text-xs font-mono font-semibold text-green-700 truncate">
+                                {promo.promotionRuleCode}
+                              </p>
+                              <p className="text-xs text-green-600 truncate">
+                                {promo.promotionRuleNameSnapshot}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                            <span className="text-xs text-green-700 font-medium">
+                              {promo.discountAmountApplied > 0
+                                ? `-${formatPrice(promo.discountAmountApplied)}`
+                                : "🎁 Quà tặng"}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 text-green-600 hover:text-red-500 hover:bg-red-50"
+                              onClick={() =>
+                                handleRemovePromo(promo.promotionId)
+                              }
+                              disabled={updateCartMutation.isPending}
+                            >
+                              <X size={12} />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-green-600 hover:text-red-500 hover:bg-red-50"
-                        onClick={handleRemoveVoucher}
-                      >
-                        <X size={14} />
-                      </Button>
+                      ))}
                     </div>
                   )}
                 </div>
 
-                {/* Order Totals */}
-                <div className="space-y-3 text-sm border-t border-border pt-4">
+                {/* ── Totals ────────────────────────────────────────── */}
+                <div className="space-y-2.5 text-sm border-t border-border pt-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tạm tính</span>
                     <span>{formatPrice(cart.totalAmountWithoutDiscount)}</span>
@@ -719,25 +675,34 @@ const EndCustomerCheckoutPage = () => {
                       {shipping === 0 ? "Miễn phí" : formatPrice(shipping)}
                     </span>
                   </div>
-                  {discount > 0 && (
+                  {cart.totalOrderDiscount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span className="flex items-center gap-1">
                         <Tag size={12} />
                         Giảm giá
                       </span>
-                      <span>-{formatPrice(discount)}</span>
+                      <span>-{formatPrice(cart.totalOrderDiscount)}</span>
+                    </div>
+                  )}
+                  {giftItems.length > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span className="flex items-center gap-1">
+                        <Gift size={12} />
+                        Quà tặng
+                      </span>
+                      <span>{totalGiftQty} sản phẩm</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-between items-center border-t border-border pt-4 mt-4">
+                <div className="flex justify-between items-center border-t border-border pt-4 mt-3">
                   <span className="font-medium">Tổng cộng</span>
                   <span className="text-xl font-bold text-primary">
-                    {formatPrice(total)}
+                    {formatPrice(cart.totalAmount)}
                   </span>
                 </div>
 
-                {/* Actions */}
+                {/* ── Actions ──────────────────────────────────────── */}
                 <div className="flex items-center justify-between mt-6 gap-4">
                   <Link
                     to={PATH_END_CUSTOMER.cart}
@@ -767,7 +732,6 @@ const EndCustomerCheckoutPage = () => {
         </div>
       </div>
 
-      {/* Dialogs */}
       <CustomerAddressDialog
         open={addressDialogOpen}
         onOpenChange={setAddressDialogOpen}

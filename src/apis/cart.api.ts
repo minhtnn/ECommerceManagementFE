@@ -1,10 +1,10 @@
 import { apiRequest } from "@/lib/http";
 import { BaseResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
-import { 
-  TGetCustomerCartResponse, 
-  TCreateEndCustomerCartRequest, 
-  TUpdateEndCustomerCartRequest 
+import {
+  TGetCustomerCartResponse,
+  TCreateEndCustomerCartRequest,
+  TUpdateEndCustomerCartRequest,
 } from "@/schemas/cart.schema";
 
 const getEndCustomerCart = async () =>
@@ -21,7 +21,7 @@ const createEndCustomerCart = async (data: TCreateEndCustomerCartRequest) =>
 const updateEndCustomerCart = async (data: TUpdateEndCustomerCartRequest) =>
   await apiRequest.ecommerceCoffee.put<BaseResponse<TGetCustomerCartResponse>>(
     `${API_SUFFIX.END_CUSTOMER_CART_API}`,
-    data // JSON, không phải FormData
+    data
   );
 
 export const endCustomerCartApi = {

@@ -1,1 +1,5 @@
-export {default as NotFoundIcon} from './images/NotFound.png'
+export {default as Banner1} from './banners/1.png'
+export {default as Banner2} from './banners/2.png'
+export {default as Banner3} from './banners/3.png'
+export {default as AboutUniCoffeeRoastery} from './images/AboutUniCoffeeRoastery.png'
+export {default as ContactAndSupport} from './images/ContactAndSupport.png'

@@ -96,7 +96,7 @@ export const AppRoutes = () =>
           element: <CustomerNewsListPage />,
         },
         {
-          path: "news/:slug",
+          path: "news/:id",
           element: <CustomerNewsDetailPage />,
         },
         {
@@ -312,9 +312,36 @@ export const AppRoutes = () =>
           path: "orders/:id/view",
           element: <BrandOrderDetailPage />,
         },
+        {
+          path: "promotion-rules",
+          element: <BrandPromotionRuleListPage />,
+        },
+        {
+          path: "promotion-rules/create",
+          element: <BrandPromotionRuleCreatePage />,
+        },
+        {
+          path: "promotion-rules/:id/view",
+          element: <div>Promotion Rule View Page</div>,
+        },
+        {
+          path: "promotion-rules/:id/edit",
+          element: <BrandPromotionRuleEditPage />,
+        },
+        {
+          path: "posts",
+          element: <BrandPostListPage />,
+        },
+        {
+          path: "posts/create",
+          element: <BrandPostCreatePage />,
+        },
+        {
+          path: "posts/:id/edit",
+          element: <BrandPostEditPage />,
+        }
       ],
     },
-    //#endregion
     {
       path: "/",
       element: <Navigate to={PATH_GUEST.home.root} replace />,
@@ -446,6 +473,24 @@ const BrandOrderListPage = Loadable(
 );
 const BrandOrderDetailPage = Loadable(
   lazy(() => import("@/pages/brand-admin/order/detail")),
+);
+const BrandPromotionRuleListPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/promotion-rule/list")),
+);
+const BrandPromotionRuleCreatePage = Loadable(
+  lazy(() => import("@/pages/brand-admin/promotion-rule/create")),
+);
+const BrandPromotionRuleEditPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/promotion-rule/edit")),
+);
+const BrandPostListPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/post/list")),
+);
+const BrandPostCreatePage = Loadable(
+  lazy(() => import("@/pages/brand-admin/post/create")),
+);
+const BrandPostEditPage = Loadable(
+  lazy(() => import("@/pages/brand-admin/post/edit")),
 );
 
 //#endregion

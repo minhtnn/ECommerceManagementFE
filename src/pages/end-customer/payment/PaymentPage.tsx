@@ -9,7 +9,13 @@ import { usePaymentPolling } from "@/hooks/use-payment-polling";
 import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
 import { formatPrice } from "@/lib/utils";
-import { handleHideCancelConfirm, handleHideSuccessPopup, handleResetPaymentSession, handleShowCancelConfirm, handleStartPaymentSession } from "@/redux/payment/payment-slice";
+import {
+  handleHideCancelConfirm,
+  handleHideSuccessPopup,
+  handleResetPaymentSession,
+  handleShowCancelConfirm,
+  handleStartPaymentSession,
+} from "@/redux/payment/payment-slice";
 import { RootState } from "@/redux/store";
 import { PATH_GUEST } from "@/routes/path";
 import { EPaymentStatus } from "@/types/enums/payment-status.enum";
@@ -19,6 +25,7 @@ import {
   Clock,
   Package,
   QrCode,
+  Tag,
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -38,11 +45,9 @@ const PaymentPage = () => {
   const { cancelPayment: cancelPaymentMutation } = usePayment();
 
   // ⭐ Get state values from Redux
-  const {
-    showSuccessPopup,
-    showCancelConfirm,
-    paymentStatus,
-  } = useSelector((state: RootState) => state.payment);
+  const { showSuccessPopup, showCancelConfirm, paymentStatus } = useSelector(
+    (state: RootState) => state.payment,
+  );
 
   const { formattedTime, isExpired } = useCountdownTimer();
   usePaymentPolling(); // Start polling
@@ -131,7 +136,7 @@ const PaymentPage = () => {
   };
 
   const handleSuccessDialogClose = () => {
-    dispatch(handleHideSuccessPopup()); 
+    dispatch(handleHideSuccessPopup());
     dispatch(handleResetPaymentSession());
   };
 
@@ -309,8 +314,32 @@ const PaymentPage = () => {
                 <Separator />
 
                 {/* Total Amount */}
-                <div className="bg-primary/5 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
+                <div className="bg-primary/5 rounded-lg p-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Tạm tính</span>
+                    <span>{formatPrice(order.totalAmountWithoutDiscount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Phí vận chuyển
+                    </span>
+                    <span>
+                      {order.totalOrderShippingFee === 0
+                        ? "Miễn phí"
+                        : formatPrice(order.totalOrderShippingFee)}
+                    </span>
+                  </div>
+                  {order.totalOrderDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span className="flex items-center gap-1">
+                        <Tag size={12} />
+                        Giảm giá
+                      </span>
+                      <span>-{formatPrice(order.totalOrderDiscount)}</span>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between items-center pt-1">
                     <span className="text-lg font-medium">Tổng tiền</span>
                     <span className="text-2xl font-bold text-primary">
                       {formatPrice(order.totalAmount)}

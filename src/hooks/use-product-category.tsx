@@ -22,7 +22,9 @@ interface UseProductCategoryParams {
 export const useProductCategory = () => {
   const queryClient = useQueryClient();
 
-  const getProductCategories = (params: UseProductCategoryParams = {}) => {
+  const getSuspendProductCategories = (
+    params: UseProductCategoryParams = {},
+  ) => {
     const {
       page = params.page || 1,
       size = params.size || 10,
@@ -36,6 +38,24 @@ export const useProductCategory = () => {
     return useSuspenseQuery({
       queryKey: ["product-categories", params],
       queryFn: () => productCategoryApi.getProductCategories(params),
+    });
+  };
+
+  const getProductCategories = (params: UseProductCategoryParams = {}) => {
+    const {
+      page = params.page || 1,
+      size = params.size || 10,
+      sortBy = params.sortBy || "createdDate",
+      isAsc = params.isAsc || true,
+      code = params.code || null,
+      name = params.name || null,
+      isLeafOnly = params.isLeafOnly || null,
+      status = params.status || null,
+    } = params;
+    return useQuery({
+      queryKey: ["product-categories", params],
+      queryFn: () => productCategoryApi.getProductCategories(params),
+      enabled: params.allowFetch ?? true,
     });
   };
 
@@ -86,6 +106,7 @@ export const useProductCategory = () => {
 
   return {
     getProductCategories,
+    getSuspendProductCategories,
     getProductCategoryById,
     getProductCategorySuspendById,
     createProductCategory,

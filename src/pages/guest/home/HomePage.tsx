@@ -1,5 +1,5 @@
 // pages/guest/home/HomePage.tsx
-import HeroBanner from "@/components/home/HeroBanner";
+import HeroBanner from "@/pages/guest/home/components/HeroBanner";
 import EndUserLayout from "@/layouts/EndUserLayout";
 import QuickLinks from "@/pages/guest/home/components/QuickLinks";
 import { useHomeMenu } from "@/hooks/use-home-menu";
@@ -7,15 +7,11 @@ import { handleApiError } from "@/lib/error";
 import { useMemo } from "react";
 import { TMenuProductCategoryResponse } from "@/schemas/menu-product.schema";
 import ProductSection from "./components/ProductSection";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const HomePage = () => {
   const { getHomeMenuData } = useHomeMenu();
-  const {
-    data: menuData,
-    isLoading,
-    isError,
-    error,
-  } = getHomeMenuData();
+  const { data: menuData, isLoading, isError, error } = getHomeMenuData();
 
   if (isError && error) {
     handleApiError(error);
@@ -27,52 +23,73 @@ const HomePage = () => {
     return menuData.data.data.productCategoriesTree;
   }, [menuData]);
 
+  // ✨ FIX: products now in items array
+  const allProducts = useMemo(() => {
+    if (!menuData?.data?.data?.products?.items) return [];
+    return menuData.data.data.products.items;
+  }, [menuData]);
+
   // Nhóm products theo category
   const productsByCategory = useMemo(() => {
-    if (!menuData?.data?.data) return new Map();
-    
-    const allProducts = menuData.data.data.products || [];
-    const categoriesTree = menuData.data.data.productCategoriesTree || [];
-    
     const categoryProductsMap = new Map<string, typeof allProducts>();
 
-    // Hàm đệ quy để lấy tất cả category IDs (bao gồm cả children)
-    const getAllCategoryIds = (category: TMenuProductCategoryResponse): string[] => {
+    if (!rootCategories.length || !allProducts.length) {
+      return categoryProductsMap;
+    }
+
+    // Hàm đệ quy để lấy tất cả category IDs
+    const getAllCategoryIds = (
+      category: TMenuProductCategoryResponse,
+    ): string[] => {
       const ids = [category.id];
       if (category.children && category.children.length > 0) {
-        category.children.forEach(child => {
+        category.children.forEach((child) => {
           ids.push(...getAllCategoryIds(child));
         });
       }
       return ids;
     };
 
-    // Với mỗi root category, lấy products từ nó và các children
-    categoriesTree.forEach(rootCategory => {
+    rootCategories.forEach((rootCategory) => {
       const categoryIds = getAllCategoryIds(rootCategory);
-      
-      // Filter products thuộc category này
-      // Lưu ý: Bạn cần thêm categoryId vào product response từ backend
-      // Hoặc sử dụng logic filter khác phù hợp với dữ liệu của bạn
-      const categoryProducts = allProducts.filter(product => {
-        // TODO: Điều chỉnh logic này dựa trên cấu trúc dữ liệu thực tế
-        // Có thể cần thêm field categoryId vào GetMenuProductResponse
-        return true; // Tạm thời lấy tất cả
-      });
 
-      categoryProductsMap.set(rootCategory.id, categoryProducts);
+      // ✅ NOW WORKING: Filter by productCategoryId
+      const categoryProducts = allProducts.filter((product) =>
+        categoryIds.includes(product.productCategoryId),
+      );
+
+      // Limit 10 products per category for home page
+      categoryProductsMap.set(rootCategory.id, categoryProducts.slice(0, 10));
     });
 
     return categoryProductsMap;
-  }, [menuData]);
+  }, [rootCategories, allProducts]);
 
   if (isLoading) {
     return (
       <EndUserLayout>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p>Đang tải...</p>
+          {/* Hero Skeleton */}
+          <Skeleton className="h-96 w-full rounded-lg mb-8" />
+
+          {/* Quick Links Skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-lg" />
+            ))}
           </div>
+
+          {/* Product Sections Skeleton */}
+          {[1, 2].map((section) => (
+            <div key={section} className="mb-8">
+              <Skeleton className="h-12 w-64 mb-4" />
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-80 w-full rounded-lg" />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </EndUserLayout>
     );
@@ -82,7 +99,7 @@ const HomePage = () => {
     <EndUserLayout>
       {/* SEO Meta */}
       <title>Uni Coffee Roastery - Cà Phê Việt Nam Chất Lượng Cao</title>
-      
+
       {/* Hero Banner */}
       <HeroBanner />
 
@@ -92,7 +109,7 @@ const HomePage = () => {
       {/* Dynamic Product Sections by Root Categories */}
       {rootCategories.map((category) => {
         const products = productsByCategory.get(category.id) || [];
-        
+
         // Chỉ hiển thị section nếu có products
         if (products.length === 0) return null;
 
@@ -106,6 +123,15 @@ const HomePage = () => {
           />
         );
       })}
+
+      {/* Empty State */}
+      {rootCategories.length === 0 && (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-muted-foreground">
+            Hiện chưa có sản phẩm nào. Vui lòng quay lại sau.
+          </p>
+        </div>
+      )}
     </EndUserLayout>
   );
 };

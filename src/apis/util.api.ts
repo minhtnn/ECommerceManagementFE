@@ -26,6 +26,8 @@ export const API_SUFFIX = {
     PAYMENT_METHOD_API: '/payment-methods',
     PAYMENT_API: '/payments',
     ORDER_API: '/orders',
+    PROMOTION_RULE_API: '/promotion-rules',
+    POST_API: '/posts',
 }
 
 export const MAP_API_SUFFIX = {

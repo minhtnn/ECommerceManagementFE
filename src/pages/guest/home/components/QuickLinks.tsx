@@ -410,12 +410,12 @@ const QuickLinks = () => {
           <div className="p-4 space-y-3">
             {/* Chat Messenger */}
             <a
-              href="https://m.me/thaikiencoffee"
+              href="https://www.facebook.com/unicoffeeroastery"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 rounded-lg border hover:bg-muted transition-colors"
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br  from-blue-500 to-purple-600 flex items-center justify-center">
                 <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-current">
                   <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.936 1.444 5.544 3.683 7.226V22l3.358-1.85c.893.248 1.84.383 2.828.383l.131-.001C17.523 20.532 22 16.387 22 11.243S17.523 2 12 2zm1.197 12.517l-2.758-2.944-5.38 2.944 5.916-6.274 2.827 2.944 5.31-2.944-5.915 6.274z"/>
                 </svg>
@@ -425,7 +425,7 @@ const QuickLinks = () => {
 
             {/* Chat Zalo */}
             <a
-              href="https://zalo.me/0937722522"
+              href="https://zalo.me/0909429323"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 rounded-lg border hover:bg-muted transition-colors"
@@ -437,7 +437,7 @@ const QuickLinks = () => {
             </a>
 
             {/* Register & Leave Message */}
-            <Link
+            {/* <Link
               to="/guest/contact"
               onClick={() => setContactOpen(false)}
               className="flex items-center gap-4 p-4 rounded-lg border hover:bg-muted transition-colors"
@@ -446,11 +446,11 @@ const QuickLinks = () => {
                 <Mail className="w-6 h-6 text-primary" />
               </div>
               <span className="font-medium text-foreground">Đăng kí thông tin và để lại lời nhắn</span>
-            </Link>
+            </Link> */}
 
             {/* Call Now */}
             <a
-              href="tel:0937722522"
+              href="tel:0909429323"
               className="flex items-center gap-4 p-4 rounded-lg border hover:bg-muted transition-colors"
             >
               <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">

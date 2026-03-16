@@ -26,7 +26,7 @@ const ProductCategoryTable = () => {
     ],
   });
 
-  const { getProductCategories } = useProductCategory();
+  const { getSuspendProductCategories } = useProductCategory();
 
   const nameFilter = String(filter.find((f) => f.id === "name")?.value ?? "");
   const codeFilter = String(filter.find((f) => f.id === "code")?.value ?? "");
@@ -41,7 +41,7 @@ const ProductCategoryTable = () => {
   const statusValue =
     statusFilter === "" || statusFilter === null ? null : Number(statusFilter);
 
-  const { data, isLoading, isError, error } = getProductCategories({
+  const { data, isLoading, isError, error } = getSuspendProductCategories({
     page: currentPage,
     size: pageSize,
     sortBy,

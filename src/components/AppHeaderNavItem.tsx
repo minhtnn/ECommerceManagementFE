@@ -57,12 +57,15 @@ export function AppEndUserHeader({
     (state: RootState) => state.user,
   );
   const { theme, setTheme } = useTheme();
-  
+
   // Determine actual theme (resolve 'system' to actual theme)
-  const actualTheme = theme === 'system' 
-    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-    : theme;
-    
+  const actualTheme =
+    theme === "system"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : theme;
+
   const accountLink = isAuthenticated ? PATH_AUTH.account : PATH_AUTH.root;
   const isEndCustomer = isAuthenticated && role === ERole.EndCustomer;
   const navigate = useNavigate();
@@ -85,7 +88,9 @@ export function AppEndUserHeader({
   });
   const cart = cartData?.data?.data;
   const totalItems =
-    cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    cart?.items
+      ?.filter((item) => !item.isGiftItem)
+      .reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
     <header className="bg-background sticky top-0 z-50 shadow-sm">
@@ -114,7 +119,7 @@ export function AppEndUserHeader({
         </div>
       </div>
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-3 gap-4">
+        <div className="flex items-center justify-between gap-4">
           {/* Mobile Menu Button */}
           <button
             className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors"
@@ -133,27 +138,25 @@ export function AppEndUserHeader({
             )}
             <span className="text-xs block">MENU</span>
           </button>
-
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center">
+            <div className="h-16 rounded-full flex items-center justify-center">
               <img
                 src="/UniCoffeeRoastery.png"
                 alt="UniCoffeeRoastery"
-                className="text-primary-foreground font-bold text-lg"
+                className="text-primary-foreground font-bold text-lg h-10 w-auto"
               />
             </div>
-            <div className="hidden sm:block">
+            {/* <div className="hidden sm:block">
               <div className="font-bold text-primary text-lg leading-tight">
                 UNI COFFEE
               </div>
               <div className="text-xs text-muted-foreground">ROASTERY</div>
-            </div>
+            </div> */}
           </Link>
-
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-xl mx-4">
-            <div className="relative w-full">
+            {/* <div className="relative w-full">
               <Input
                 type="text"
                 placeholder="Tìm sản phẩm..."
@@ -162,9 +165,8 @@ export function AppEndUserHeader({
               <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-muted rounded-full transition-colors">
                 <Search size={20} className="text-muted-foreground" />
               </button>
-            </div>
+            </div> */}
           </div>
-
           {/* Right Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
             <Link
@@ -195,32 +197,44 @@ export function AppEndUserHeader({
 
             {/* Theme Toggle Switch */}
             <button
-              onClick={() => setTheme(actualTheme === "dark" ? "light" : "dark")}
+              onClick={() =>
+                setTheme(actualTheme === "dark" ? "light" : "dark")
+              }
               className="relative inline-flex h-9 w-16 shrink-0 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:opacity-90"
               style={{
                 backgroundColor: actualTheme === "dark" ? "#475569" : "#f59e0b",
               }}
               aria-label="Chuyển đổi chế độ giao diện"
-              title={actualTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+              title={
+                actualTheme === "dark"
+                  ? "Chuyển sang chế độ sáng"
+                  : "Chuyển sang chế độ tối"
+              }
             >
               {/* Background Icons */}
-              <Sun 
-                size={14} 
+              <Sun
+                size={14}
                 className={`absolute left-2 transition-opacity duration-300 ${
-                  actualTheme === "dark" ? "opacity-30 text-slate-300" : "opacity-0"
+                  actualTheme === "dark"
+                    ? "opacity-30 text-slate-300"
+                    : "opacity-0"
                 }`}
               />
-              <Moon 
-                size={14} 
+              <Moon
+                size={14}
                 className={`absolute right-2 transition-opacity duration-300 ${
-                  actualTheme === "dark" ? "opacity-0" : "opacity-30 text-amber-100"
+                  actualTheme === "dark"
+                    ? "opacity-0"
+                    : "opacity-30 text-amber-100"
                 }`}
               />
-              
+
               {/* Moving Circle */}
               <span
                 className={`inline-flex h-7 w-7 items-center justify-center transform rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out ${
-                  actualTheme === "dark" ? "translate-x-[30px]" : "translate-x-[2px]"
+                  actualTheme === "dark"
+                    ? "translate-x-[30px]"
+                    : "translate-x-[2px]"
                 }`}
               >
                 {actualTheme === "dark" ? (

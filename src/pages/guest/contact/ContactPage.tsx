@@ -1,12 +1,20 @@
-import { Phone, Mail, MapPin, Clock, Send, MessageCircle, ChevronRight } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Send,
+  MessageCircle,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import heroCoffee from "@/assets/hero-coffee.jpg";
 import EndUserLayout from "@/layouts/EndUserLayout";
+import { AboutUniCoffeeRoastery, ContactAndSupport } from "@/assets";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -64,18 +72,10 @@ const ContactPage = () => {
       {/* Hero */}
       <div className="relative h-[300px] md:h-[400px]">
         <img
-          src={heroCoffee}
+          src={ContactAndSupport}
           alt="Contact Uni Coffee"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-primary/80 flex items-center justify-center">
-          <div className="text-center text-primary-foreground">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Liên hệ & Hỗ trợ</h1>
-            <p className="text-xl text-primary-foreground/80">
-              Chúng tôi luôn sẵn sàng hỗ trợ bạn
-            </p>
-          </div>
-        </div>
       </div>
 
       <div className="container mx-auto px-4 py-12">
@@ -103,14 +103,18 @@ const ContactPage = () => {
           <div className="bg-cream rounded-lg p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
               <MessageCircle className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl font-bold text-foreground">Gửi tin nhắn</h2>
+              <h2 className="text-2xl font-bold text-foreground">
+                Gửi tin nhắn
+              </h2>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
                   placeholder="Họ và tên *"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   className="bg-background"
                 />
@@ -118,7 +122,9 @@ const ContactPage = () => {
                   type="email"
                   placeholder="Email *"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                   className="bg-background"
                 />
@@ -127,13 +133,17 @@ const ContactPage = () => {
                 <Input
                   placeholder="Số điện thoại"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   className="bg-background"
                 />
                 <Input
                   placeholder="Chủ đề"
                   value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, subject: e.target.value })
+                  }
                   className="bg-background"
                 />
               </div>
@@ -141,7 +151,9 @@ const ContactPage = () => {
                 placeholder="Nội dung tin nhắn *"
                 rows={5}
                 value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, message: e.target.value })
+                }
                 required
                 className="bg-background resize-none"
               />
@@ -154,7 +166,9 @@ const ContactPage = () => {
 
           {/* FAQ Section */}
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-6">Câu hỏi thường gặp</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-6">
+              Câu hỏi thường gặp
+            </h2>
             <div className="space-y-4">
               {[
                 {
@@ -182,7 +196,9 @@ const ContactPage = () => {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h3 className="font-semibold text-foreground mb-2">{faq.q}</h3>
+                      <h3 className="font-semibold text-foreground mb-2">
+                        {faq.q}
+                      </h3>
                       <p className="text-sm text-muted-foreground">{faq.a}</p>
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" />

@@ -75,13 +75,13 @@ const ProductCategoryCreatePage = () => {
       { id: "code", value: null },
     ],
   });
-  const { createProductCategory, getProductCategories } = useProductCategory();
+  const { createProductCategory, getSuspendProductCategories } = useProductCategory();
   const {
     data: categoryData,
     isLoading: isCategoryLoading,
     isError: isCategoryError,
     error: categoryError,
-  } = getProductCategories({
+  } = getSuspendProductCategories({
     page: currentPage,
     size: pageSize,
     sortBy,

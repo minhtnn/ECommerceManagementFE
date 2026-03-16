@@ -1,4 +1,3 @@
-import { NotFoundIcon } from "@/assets";
 import { cn } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import {
@@ -113,6 +112,26 @@ const brandAdminRoute = {
       },
     ],
   },
+  promotionRule: {
+    mainTitle: "Quản lý khuyến mãi",
+    items: [
+      {
+        title: "Danh sách khuyến mãi",
+        url: PATH_BRAND_DASHBOARD.promotionRule.root,
+        icon: PackageSearchIcon,
+      },
+    ],
+  },
+  posts: {
+    mainTitle: "Quản lý bài viết",
+    items: [
+      {
+        title: "Danh sách bài viết",
+        url: PATH_BRAND_DASHBOARD.posts.root,
+        icon: PackageSearchIcon,
+      },
+    ],
+  },
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -189,6 +208,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavMain content={brandAdminRoute.catalog} />
                 <NavMain content={brandAdminRoute.customer} />
                 <NavMain content={brandAdminRoute.order} />
+                <NavMain content={brandAdminRoute.promotionRule} />
+                <NavMain content={brandAdminRoute.posts} />
               </SidebarContent>
             );
           default:

@@ -16,11 +16,12 @@ interface UseProductParams {
   code?: string;
   name?: string;
   status?: EProductStatus;
+  allowFetch?: boolean;
 }
 
 export const useProduct = () => {
   const queryClient = useQueryClient();
-  const getProducts = (params: UseProductParams = {}) => {
+  const getSuspendProducts = (params: UseProductParams = {}) => {
     const {
       page = params.page || 1,
       size = params.size || 10,
@@ -49,6 +50,38 @@ export const useProduct = () => {
         }),
     });
   };
+
+  const getProducts = (params: UseProductParams = {}) => {
+    const {
+      page = params.page || 1,
+      size = params.size || 10,
+      sortBy = params.sortBy || "createdDate",
+      isAsc = params.isAsc || true,
+      code = params.code,
+      name = params.name,
+      status = params.status,
+    } = params;
+    return useQuery({
+      queryKey: [
+        "products",
+        {
+          page,
+          size,
+          sortBy,
+          isAsc,
+        },
+      ],
+      queryFn: () =>
+        productApi.getProducts({
+          page: page,
+          size: size,
+          sortBy: sortBy,
+          isAsc: isAsc,
+        }),
+      enabled: params.allowFetch ?? true,
+    });
+  };
+  
 
   const getProductById = (id: string) => {
     return useSuspenseQuery({
@@ -86,6 +119,7 @@ export const useProduct = () => {
 
   return {
     getProducts,
+    getSuspendProducts,
     getProductById,
     getPublicProductById,
     createProduct,

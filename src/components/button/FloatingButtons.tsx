@@ -33,7 +33,7 @@ const FloatingButtons = () => {
           <div className="space-y-3 pr-4">
             {/* Chat Messenger */}
             <a
-              href="https://m.me/thaikiencoffee"
+              href="https://www.facebook.com/unicoffeeroastery"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
@@ -48,7 +48,7 @@ const FloatingButtons = () => {
 
             {/* Chat Zalo */}
             <a
-              href="https://zalo.me/0937722522"
+              href="https://zalo.me/0909429323"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
@@ -60,7 +60,7 @@ const FloatingButtons = () => {
             </a>
 
             {/* Register & Leave Message */}
-            <Link
+            {/* <Link
               to="/guest/contact"
               onClick={() => setContactOpen(false)}
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
@@ -69,11 +69,11 @@ const FloatingButtons = () => {
                 <Mail className="w-5 h-5 text-primary" />
               </div>
               <span className="font-medium text-foreground">Đăng kí thông tin và để lại lời nhắn</span>
-            </Link>
+            </Link> */}
 
             {/* Call Now */}
             <a
-              href="tel:0937722522"
+              href="tel:0909429323"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
             >
               <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">

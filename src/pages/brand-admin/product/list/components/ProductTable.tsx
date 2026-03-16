@@ -25,7 +25,7 @@ const ProductTable = () => {
     ],
   });
 
-  const { getProducts } = useProduct();
+  const { getSuspendProducts } = useProduct();
 
   const nameFilter = String(filter.find((f) => f.id === "name")?.value ?? "");
   const codeFilter =
@@ -34,7 +34,7 @@ const ProductTable = () => {
   const statusValue =
     statusFilter === "" || statusFilter === null ? null : Number(statusFilter);
 
-  const { data, isLoading, isError, error } = getProducts({
+  const { data, isLoading, isError, error } = getSuspendProducts({
     page: currentPage,
     size: pageSize,
     sortBy,

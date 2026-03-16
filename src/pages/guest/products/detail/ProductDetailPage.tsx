@@ -53,84 +53,73 @@ const ProductDetailPage = () => {
   });
 
   const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  e.preventDefault();
+  e.stopPropagation();
 
-    if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
-      navigate(PATH_AUTH.login, {
-        state: { from: window.location.pathname }, // Lưu lại trang hiện tại
-      });
-      return;
-    }
+  if (!isAuthenticated) {
+    toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+    navigate(PATH_AUTH.login, { state: { from: window.location.pathname } });
+    return;
+  }
 
-    try {
-      // Get current cart items
-      const currentCart = cartData?.data?.data;
-      const currentItems = currentCart?.items || [];
+  try {
+    const currentCart = cartData?.data?.data;
 
-      // Check if product already in cart
-      const existingItemIndex = currentItems.findIndex(
-        (item) => item.productId === product.id,
-      );
+    // ← Lọc bỏ gift items
+    const currentItems = (currentCart?.items || []).filter(
+      (item) => !item.isGiftItem,
+    );
 
-      let updatedItems;
+    const existingItemIndex = currentItems.findIndex(
+      (item) => item.productId === product.id,
+    );
 
-      if (existingItemIndex >= 0) {
-        // Product exists → Increase quantity
-        updatedItems = currentItems.map((item, index) =>
+    let updatedItems;
+
+    if (existingItemIndex >= 0) {
+      updatedItems = currentItems.map((item, index) => ({
+        productId: item.productId,
+        productImageUrlSnapshot: item.productImageUrlSnapshot,
+        quantity:
           index === existingItemIndex
-            ? {
-                productId: item.productId,
-                productNameSnapshot: item.productNameSnapshot,
-                quantity: item.quantity + 1,
-                unitPriceSnapshot: item.unitPriceSnapshot,
-              }
-            : {
-                productId: item.productId,
-                productNameSnapshot: item.productNameSnapshot,
-                quantity: item.quantity,
-                unitPriceSnapshot: item.unitPriceSnapshot,
-              },
-        );
-      } else {
-        // Product not in cart → Add new
-        updatedItems = [
-          ...currentItems.map((item) => ({
-            productId: item.productId,
-            productNameSnapshot: item.productNameSnapshot,
-            quantity: item.quantity,
-            unitPriceSnapshot: item.unitPriceSnapshot,
-          })),
-          {
-            productId: product.id,
-            productNameSnapshot: product.name,
-            quantity: 1,
-            unitPriceSnapshot: product.price,
-          },
-        ];
-      }
-
-      // Update cart via API
-      await updateCartMutation.mutateAsync({
-        items: updatedItems,
-        customerNote: currentCart?.customerNote || null,
-        appliedPromotions:
-          currentCart?.appliedPromotions?.map((promo) => ({
-            promotionId: promo.promotionId,
-            promotionRuleNameSnapshot: promo.promotionRuleNameSnapshot,
-            discountAmountApplied: promo.discountAmountApplied,
-          })) || [],
-      });
-
-      toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
-    } catch (error: any) {
-      console.error("Add to cart error:", error);
-      toast.error(
-        error?.response?.data?.message || "Không thể thêm vào giỏ hàng",
-      );
+            ? item.quantity + quantity  // ← cộng đúng quantity đang chọn
+            : item.quantity,
+      }));
+    } else {
+      updatedItems = [
+        ...currentItems.map((item) => ({
+          productId: item.productId,
+          productImageUrlSnapshot: item.productImageUrlSnapshot,
+          quantity: item.quantity,
+        })),
+        {
+          productId: product.id,
+          productImageUrlSnapshot: images.length > 0 ? images[0].imageUrl : null,
+          quantity: quantity,
+        },
+      ];
     }
-  };
+
+    await updateCartMutation.mutateAsync({
+      cartId: currentCart?.id,
+      items: updatedItems,
+      customerNote: currentCart?.customerNote || null,
+      appliedPromotions:
+        currentCart?.appliedPromotions?.map((promo) => ({
+          promotionRuleId: promo.promotionId,
+          promotionRuleCode: promo.promotionRuleCode,
+          promotionRuleNameSnapshot: promo.promotionRuleNameSnapshot,
+          discountAmountApplied: promo.discountAmountApplied,
+        })) || [],
+    });
+
+    toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
+  } catch (error: any) {
+    toast.error(
+      error?.response?.data?.message || "Không thể thêm vào giỏ hàng",
+    );
+  }
+};
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
@@ -291,7 +280,7 @@ const ProductDetailPage = () => {
           {/* Price */}
           <div className="flex items-baseline gap-4 mb-6">
             <span className="text-3xl font-bold text-primary">
-              {formatPrice(product.stockQuantity)}
+              {formatPrice(product.price)}
             </span>
           </div>
 

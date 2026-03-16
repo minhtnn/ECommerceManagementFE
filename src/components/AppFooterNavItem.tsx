@@ -1,4 +1,12 @@
-import { Facebook, Twitter, Youtube, Instagram, Phone, MapPin, Mail } from "lucide-react";
+import {
+  Facebook,
+  Twitter,
+  Youtube,
+  Instagram,
+  Phone,
+  MapPin,
+  Mail,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const AppEndUserFooter = () => {
@@ -41,17 +49,25 @@ const AppEndUserFooter = () => {
               <div className="flex items-start gap-2">
                 <MapPin size={16} className="mt-1 flex-shrink-0" />
                 <span>
-                  Trụ sở văn phòng: 127 Nguyễn Cơ Thạch, An Lợi Đông, Q.2, Tp.
-                  Hồ Chí Minh
+                  Trụ sở văn phòng: Tầng 1, Tòa nhà QTSC Building 9, Lô 42,
+                  Đường só 3, Công Viên Phần Mềm Quang Trung, P. Tân Chánh Hiệp,
+                  Q12, Tp. HCM
+                </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <MapPin size={16} className="mt-1 flex-shrink-0" />
+                <span>
+                  Trụ sở nhà máy: 25 Lý Thường Kiệt, Hóc Môn, Huyện Hóc Môn, Tp.
+                  HCM
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={16} className="flex-shrink-0" />
-                <span>Điện thoại: 0917561212</span>
+                <span>Điện thoại: 0909 429 323</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={16} className="flex-shrink-0" />
-                <span>Email: support@unicoffee.vn</span>
+                <span>Email: unicoffeeroasteryvn@gmail.com</span>
               </div>
             </div>
           </div>
@@ -117,20 +133,17 @@ const AppEndUserFooter = () => {
                   <div className="text-sm text-muted-foreground">
                     Cà phê đóng gói:
                   </div>
-                  <div className="font-bold text-foreground">091.756.1212</div>
+                  <div className="font-bold text-foreground">0909 429 323</div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Phone size={20} className="text-primary" />
+                <Mail size={20} className="text-primary" />
                 <div>
                   <div className="text-sm text-muted-foreground">
-                    Cà phê tại quán:
+                    Email:
                   </div>
-                  <div className="font-bold text-foreground">1900.1755</div>
+                  <div className="font-bold text-foreground">unicoffeeroasteryvn@gmail.com</div>
                 </div>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                support@unicoffee.vn
               </div>
             </div>
 
@@ -141,18 +154,18 @@ const AppEndUserFooter = () => {
               </div>
               <div className="flex items-center gap-3">
                 <a
-                  href="#"
+                  href="https://www.facebook.com/unicoffeeroastery"
                   className="w-10 h-10 bg-muted rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
                 >
                   <Facebook size={20} />
                 </a>
-                <a
+                {/* <a
                   href="#"
                   className="w-10 h-10 bg-muted rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
                 >
                   <Twitter size={20} />
-                </a>
-                <a
+                </a> */}
+                {/* <a
                   href="#"
                   className="w-10 h-10 bg-muted rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
                 >
@@ -163,7 +176,7 @@ const AppEndUserFooter = () => {
                   className="w-10 h-10 bg-muted rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
                 >
                   <Instagram size={20} />
-                </a>
+                </a> */}
               </div>
             </div>
           </div>
@@ -177,7 +190,6 @@ const AppEndUserFooter = () => {
           <span className="font-semibold text-foreground">
             Uni Coffee Roastery
           </span>{" "}
-          | Thiết kế bởi Lovable
         </div>
       </div>
     </footer>
