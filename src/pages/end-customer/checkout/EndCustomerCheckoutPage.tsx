@@ -1,3 +1,4 @@
+import { PageLoader } from "@/components/LoadingScreen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/hooks/use-cart";
 import { useCustomer } from "@/hooks/use-customer";
 import { useOrder } from "@/hooks/use-order";
-import EndUserLayout from "@/layouts/EndUserLayout";
+import { usePayment } from "@/hooks/use-payment";
 import { handleApiError } from "@/lib/error";
 import { formatPrice } from "@/lib/utils";
 import { PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
@@ -35,8 +36,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import CustomerAddressDialog from "./components/CustomerAddressDialog";
-import { PageLoader } from "@/components/LoadingScreen";
-import { usePayment } from "@/hooks/use-payment";
 import OrderSuccessDialog from "./components/OrderSuccessDialog";
 
 const EndCustomerCheckoutPage = () => {
@@ -119,14 +118,14 @@ const EndCustomerCheckoutPage = () => {
 
   if (!cart || nonGiftItems.length === 0) {
     return (
-      <EndUserLayout>
+      <>
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-muted-foreground mb-4">Giỏ hàng trống</p>
           <Link to={PATH_GUEST.home.root}>
             <Button>Về trang chủ</Button>
           </Link>
         </div>
-      </EndUserLayout>
+      </>
     );
   }
 
@@ -262,7 +261,7 @@ const EndCustomerCheckoutPage = () => {
   };
 
   return (
-    <EndUserLayout>
+    <>
       <div className="bg-muted/30 min-h-screen py-6">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
@@ -733,7 +732,7 @@ const EndCustomerCheckoutPage = () => {
         onOpenChange={handleCloseSuccessDialog}
         orderData={createdOrderData}
       />
-    </EndUserLayout>
+    </>
   );
 };
 

@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/utils";
+import { useCartContext } from "@/contexts/CartContext";
 import { useProduct } from "@/hooks/use-product";
-import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
+import { formatPrice } from "@/lib/utils";
+import { RootState } from "@/redux/store";
+import { PATH_AUTH } from "@/routes/path";
 import {
+  ChevronLeft,
+  ChevronRight,
   Heart,
   Minus,
   Plus,
@@ -12,19 +16,17 @@ import {
   Shield,
   ShoppingCart,
   Truck,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { PATH_AUTH } from "@/routes/path";
-import { useCart } from "@/hooks/use-cart";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 const ProductDetailPage = () => {
   const { productId } = useParams<{ productId: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { getPublicProductById } = useProduct();
@@ -44,82 +46,77 @@ const ProductDetailPage = () => {
   const images = product?.getProductImagesResponse || [];
   const hasMultipleImages = images.length > 1;
 
-  const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
-  const { getEndCustomerCart, updateEndCustomerCart } = useCart();
-  const updateCartMutation = updateEndCustomerCart();
-  const { data: cartData } = getEndCustomerCart({
-    isAllowFetch: isAuthenticated,
-  });
+  const { cartData, updateCartMutation } = useCartContext();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-  if (!isAuthenticated) {
-    toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
-    navigate(PATH_AUTH.login, { state: { from: window.location.pathname } });
-    return;
-  }
-
-  try {
-    const currentCart = cartData?.data?.data;
-
-    // Lọc bỏ gift items
-    const currentItems = (currentCart?.items || []).filter(
-      (item) => !item.isGiftItem,
-    );
-
-    const existingItemIndex = currentItems.findIndex(
-      (item) => item.productId === product.id,
-    );
-
-    let updatedItems;
-
-    if (existingItemIndex >= 0) {
-      updatedItems = currentItems.map((item, index) => ({
-        productId: item.productId,
-        productImageUrlSnapshot: item.productImageUrlSnapshot,
-        quantity:
-          index === existingItemIndex
-            ? item.quantity + quantity  // cộng đúng quantity đang chọn
-            : item.quantity,
-      }));
-    } else {
-      updatedItems = [
-        ...currentItems.map((item) => ({
-          productId: item.productId,
-          productImageUrlSnapshot: item.productImageUrlSnapshot,
-          quantity: item.quantity,
-        })),
-        {
-          productId: product.id,
-          productImageUrlSnapshot: images.length > 0 ? images[0].imageUrl : null,
-          quantity: quantity,
-        },
-      ];
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+      navigate(PATH_AUTH.login, { state: { from: window.location.pathname } });
+      return;
     }
 
-    await updateCartMutation.mutateAsync({
-      cartId: currentCart?.id,
-      items: updatedItems,
-      customerNote: currentCart?.customerNote || null,
-      appliedPromotions:
-        currentCart?.appliedPromotions?.map((promo) => ({
-          promotionRuleId: promo.promotionId,
-          promotionRuleCode: promo.promotionRuleCode,
-          promotionRuleNameSnapshot: promo.promotionRuleNameSnapshot,
-          discountAmountApplied: promo.discountAmountApplied,
-        })) || [],
-    });
+    try {
+      const currentCart = cartData?.data?.data;
 
-    toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
-  } catch (error: any) {
-    toast.error(
-      error?.response?.data?.message || "Không thể thêm vào giỏ hàng",
-    );
-  }
-};
+      // Lọc bỏ gift items
+      const currentItems = (currentCart?.items || []).filter(
+        (item) => !item.isGiftItem,
+      );
+
+      const existingItemIndex = currentItems.findIndex(
+        (item) => item.productId === product.id,
+      );
+
+      let updatedItems;
+
+      if (existingItemIndex >= 0) {
+        updatedItems = currentItems.map((item, index) => ({
+          productId: item.productId,
+          productImageUrlSnapshot: item.productImageUrlSnapshot,
+          quantity:
+            index === existingItemIndex
+              ? item.quantity + quantity // cộng đúng quantity đang chọn
+              : item.quantity,
+        }));
+      } else {
+        updatedItems = [
+          ...currentItems.map((item) => ({
+            productId: item.productId,
+            productImageUrlSnapshot: item.productImageUrlSnapshot,
+            quantity: item.quantity,
+          })),
+          {
+            productId: product.id,
+            productImageUrlSnapshot:
+              images.length > 0 ? images[0].imageUrl : null,
+            quantity: quantity,
+          },
+        ];
+      }
+
+      await updateCartMutation.mutateAsync({
+        cartId: currentCart?.id,
+        items: updatedItems,
+        customerNote: currentCart?.customerNote || null,
+        appliedPromotions:
+          currentCart?.appliedPromotions?.map((promo) => ({
+            promotionRuleId: promo.promotionId,
+            promotionRuleCode: promo.promotionRuleCode,
+            promotionRuleNameSnapshot: promo.promotionRuleNameSnapshot,
+            discountAmountApplied: promo.discountAmountApplied,
+          })) || [],
+      });
+
+      toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Không thể thêm vào giỏ hàng",
+      );
+    }
+  };
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
@@ -129,48 +126,18 @@ const ProductDetailPage = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
-  if (isLoading) {
+  if (isLoading || !product) {
     return (
-      <EndUserLayout
-        breadcrumbs={[
-          { title: "Sản phẩm", url: "/guest/products" },
-          { title: "Đang tải..." },
-        ]}
-        showBreadcrumb={true}
-      >
+      <>
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
         </div>
-      </EndUserLayout>
-    );
-  }
-
-  if (!product) {
-    return (
-      <EndUserLayout
-        breadcrumbs={[
-          { title: "Sản phẩm", url: "/guest/products" },
-          { title: "Không tìm thấy" },
-        ]}
-        showBreadcrumb={true}
-      >
-        <div className="text-center py-12">
-          <p className="text-lg text-muted-foreground">
-            Không tìm thấy sản phẩm
-          </p>
-        </div>
-      </EndUserLayout>
+      </>
     );
   }
 
   return (
-    <EndUserLayout
-      breadcrumbs={[
-        { title: "Sản phẩm", url: "/guest/products" },
-        { title: product.name },
-      ]}
-      showBreadcrumb={true}
-    >
+    <>
       {/* Product Detail */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         {/* Image Gallery */}
@@ -182,6 +149,9 @@ const ProductDetailPage = () => {
                 <img
                   src={images[currentImageIndex].imageUrl}
                   alt={images[currentImageIndex].altText || product.name}
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                   className="max-w-full max-h-full object-contain animate-scale-in"
                 />
 
@@ -233,13 +203,11 @@ const ProductDetailPage = () => {
                   <img
                     src={image.imageUrl}
                     alt={image.altText || `${product.name} - ${index + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                     className="w-full h-full object-cover"
                   />
-                  {image.isMainImage && (
-                    <div className="absolute top-1 right-1 bg-primary text-white text-xs px-1 rounded">
-                      Chính
-                    </div>
-                  )}
                 </button>
               ))}
             </div>
@@ -373,7 +341,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
       </div>
-    </EndUserLayout>
+    </>
   );
 };
 

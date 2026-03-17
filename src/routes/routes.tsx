@@ -10,7 +10,7 @@ import { ERole } from "@/types/enums/role.enum";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { lazy, Suspense, type ElementType } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Navigate, useRoutes } from "react-router-dom";
+import { Navigate, Outlet, useRoutes } from "react-router-dom";
 import {
   PATH_AUTH,
   PATH_BRAND_DASHBOARD,
@@ -18,7 +18,7 @@ import {
   PATH_GUEST,
   PATH_SYSTEM_ADMIN_DASHBOARD,
 } from "./path";
-import VietnamAddressSelector from "@/pages/unneed/Map";
+import EndUserLayout from "@/layouts/EndUserLayout";
 
 const Loadable = (Component: ElementType) => (props: any) => {
   return (
@@ -33,6 +33,12 @@ const Loadable = (Component: ElementType) => (props: any) => {
     </QueryErrorResetBoundary>
   );
 };
+
+const EndUserRoute = () => (
+  <EndUserLayout>
+    <Outlet />
+  </EndUserLayout>
+);
 
 export const AppRoutes = () =>
   useRoutes([
@@ -70,6 +76,7 @@ export const AppRoutes = () =>
     //#region Guest Routes
     {
       path: PATH_GUEST.root,
+      element: <EndUserRoute />,
       children: [
         {
           element: <Navigate to={PATH_GUEST.home.root} replace />,
@@ -109,6 +116,7 @@ export const AppRoutes = () =>
     //#region End Customer Routes
     {
       path: PATH_END_CUSTOMER.root,
+      element: <EndUserRoute />,
       children: [
         {
           path: "cart",
@@ -339,7 +347,7 @@ export const AppRoutes = () =>
         {
           path: "posts/:id/edit",
           element: <BrandPostEditPage />,
-        }
+        },
       ],
     },
     {

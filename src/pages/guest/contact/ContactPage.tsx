@@ -1,20 +1,19 @@
-import {
-  Phone,
-  Mail,
-  MapPin,
-  Clock,
-  Send,
-  MessageCircle,
-  ChevronRight,
-} from "lucide-react";
+import { ContactAndSupport } from "@/assets";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  ChevronRight,
+  Clock,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Send,
+} from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import EndUserLayout from "@/layouts/EndUserLayout";
-import { AboutUniCoffeeRoastery, ContactAndSupport } from "@/assets";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -68,7 +67,7 @@ const ContactPage = () => {
   ];
 
   return (
-    <EndUserLayout>
+    <>
       {/* Hero */}
       <div className="relative h-[300px] md:h-[400px]">
         <img
@@ -224,7 +223,7 @@ const ContactPage = () => {
           </a>
         </div>
       </div>
-    </EndUserLayout>
+    </>
   );
 };
 

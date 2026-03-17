@@ -1,9 +1,7 @@
 import { usePost } from "@/hooks/use-post";
-import EndUserLayout from "@/layouts/EndUserLayout";
-
+import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 import { PostCard, PostCardSkeleton } from "./components/PostCard";
-import { Loader2 } from "lucide-react";
 
 // Adjust to your actual route param name
 const PAGE_SIZE = 10;
@@ -44,7 +42,7 @@ const PublicPostListPage = () => {
     data?.pages.flatMap((page) => page?.data?.data?.items ?? []) ?? [];
 
   return (
-    <EndUserLayout>
+    <>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-foreground mb-8 text-center uppercase tracking-wide">
           Tin tức
@@ -95,7 +93,7 @@ const PublicPostListPage = () => {
         {/* Invisible sentinel for IntersectionObserver */}
         <div ref={sentinelRef} className="h-1" />
       </div>
-    </EndUserLayout>
+    </>
   );
 };
 

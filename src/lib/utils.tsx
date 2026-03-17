@@ -43,3 +43,40 @@ export const copyToClipboard = async (text: string, label: string) => {
     );
   }
 };
+
+export const getOptimizedImageUrl = (
+  url: string | null,
+  options: {
+    width?: number;
+    height?: number;
+    quality?: number;
+    format?: "webp" | "avif" | "auto";
+  } = {}
+): string => {
+  if (!url) return "";
+
+  const { width, height, quality = 75, format = "auto" } = options;
+
+  // Cloudinary
+  if (url.includes("cloudinary.com")) {
+    const transforms = [
+      "f_auto",           // tự chọn format tốt nhất (webp/avif)
+      `q_${quality}`,     // quality
+      width ? `w_${width}` : "",
+      height ? `h_${height}` : "",
+      "c_fill",
+    ]
+      .filter(Boolean)
+      .join(",");
+
+    return url.replace("/upload/", `/upload/${transforms}/`);
+  }
+
+  if (url.includes("imagekit.io")) {
+    const params = new URLSearchParams();
+    if (width) params.set("tr", `w-${width},h-${height || width},q-${quality},f-auto`);
+    return `${url}?${params.toString()}`;
+  }
+
+  return url;
+};

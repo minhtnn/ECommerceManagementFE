@@ -11,6 +11,26 @@ interface UseProductMenuParams {
   pageSize?: number;
 }
 
+export const usePublicProductMenu = (params: UseProductMenuParams = {}) => {
+  const { categoryId, pageSize = 20 } = params;
+
+  return useInfiniteQuery({
+    queryKey: ["public-product-menu", categoryId ?? null, pageSize],
+    queryFn: async ({ pageParam }) => {
+      const apiParams: any = { pageSize };
+      if (categoryId) apiParams.categoryId = categoryId;
+      if (pageParam) apiParams.cursor = pageParam;
+      return menuProductApi.getPublicMenuProducts(envConfig.BRAND_CODE, apiParams);
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      const products = lastPage?.data?.data?.products;
+      return products?.hasMore ? products.nextCursor : undefined;
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+};
+
 export const useProductMenu = () => {
   const getProductMenu = (params: UseProductMenuParams = {}) => {
     const { categoryId } = params;
@@ -21,38 +41,8 @@ export const useProductMenu = () => {
     });
   };
 
-  const getPublicProductMenu = (params: UseProductMenuParams = {}) => {
-    const { categoryId, pageSize = 20 } = params;
-
-    return useInfiniteQuery({
-      queryKey: ["public-product-menu", categoryId, pageSize],
-      queryFn: async ({ pageParam }) => {
-        const apiParams: any = { pageSize };
-
-        if (categoryId) {
-          apiParams.categoryId = categoryId;
-        }
-
-        if (pageParam) {
-          apiParams.cursor = pageParam;
-        }
-
-        return menuProductApi.getPublicMenuProducts(
-          envConfig.BRAND_CODE,
-          apiParams,
-        );
-      },
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) => {
-        const products = lastPage?.data?.data?.products;
-        return products?.hasMore ? products.nextCursor : undefined;
-      },
-      staleTime: 2 * 60 * 1000, // 2 minutes
-    });
-  };
 
   return {
     getProductMenu,
-    getPublicProductMenu,
   };
 };

@@ -1,16 +1,16 @@
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useCartContext } from "@/contexts/CartContext";
+import { formatPrice } from "@/lib/utils";
+import { RootState } from "@/redux/store";
 import { PATH_AUTH, PATH_GUEST } from "@/routes/path";
 import { TMenuProductListResponse } from "@/schemas/menu-product.schema";
-import { formatPrice } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { ImageOff, ShoppingCart } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { useCart } from "@/hooks/use-cart";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-const ProductCard = (product: TMenuProductListResponse) => {
+const ProductCard = memo((product: TMenuProductListResponse) => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
@@ -19,12 +19,7 @@ const ProductCard = (product: TMenuProductListResponse) => {
   // Auth check
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
 
-  // Cart hooks
-  const { getEndCustomerCart, updateEndCustomerCart } = useCart();
-  const { data: cartData } = getEndCustomerCart({
-    isAllowFetch: isAuthenticated,
-  });
-  const updateCartMutation = updateEndCustomerCart();
+  const { cartData, updateCartMutation } = useCartContext();
 
   const images = product.images || [];
   const hasMultipleImages = images.length > 1;
@@ -140,6 +135,9 @@ const ProductCard = (product: TMenuProductListResponse) => {
                 key={image.id}
                 src={image.url}
                 alt={image.altText || product.name}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={index === 0 ? "high" : "low"}
                 className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ${
                   index === currentImageIndex
                     ? "opacity-100 translate-x-0"
@@ -200,6 +198,6 @@ const ProductCard = (product: TMenuProductListResponse) => {
       </div>
     </div>
   );
-};
+});
 
 export default ProductCard;

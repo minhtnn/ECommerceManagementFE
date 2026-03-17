@@ -5,7 +5,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
-  useSuspenseQuery
+  useSuspenseQuery,
 } from "@tanstack/react-query";
 
 interface UseProductParams {
@@ -81,7 +81,6 @@ export const useProduct = () => {
       enabled: params.allowFetch ?? true,
     });
   };
-  
 
   const getProductById = (id: string) => {
     return useSuspenseQuery({
@@ -96,6 +95,7 @@ export const useProduct = () => {
       queryFn: async () =>
         productApi.getPublicProductById(envConfig.BRAND_CODE, id),
       enabled: !!id,
+      staleTime: 0,
     });
   };
 
@@ -123,6 +123,6 @@ export const useProduct = () => {
     getProductById,
     getPublicProductById,
     createProduct,
-    updateProduct
+    updateProduct,
   };
 };

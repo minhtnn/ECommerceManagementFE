@@ -12,11 +12,11 @@ interface ProductSectionProps {
   showCarousel?: boolean;
 }
 
-const ProductSection = ({ 
-  title, 
-  products, 
+const ProductSection = ({
+  title,
+  products,
   categoryId,
-  showCarousel = true 
+  showCarousel = true,
 }: ProductSectionProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -56,8 +56,8 @@ const ProductSection = ({
         <div
           ref={scrollRef}
           className={
-            showCarousel 
-              ? "flex gap-4 overflow-x-auto scrollbar-hide pb-4" 
+            showCarousel
+              ? "flex gap-4 overflow-x-auto scrollbar-hide pb-4"
               : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
           }
         >
@@ -65,11 +65,11 @@ const ProductSection = ({
             <div
               key={product.id}
               className={
-                showCarousel 
-                  ? "min-w-[180px] max-w-[180px] sm:min-w-[250px] sm:max-w-[250px] animate-fade-in" 
+                showCarousel
+                  ? "min-w-[180px] max-w-[180px] sm:min-w-[250px] sm:max-w-[250px] animate-fade-in"
                   : "animate-fade-in"
               }
-              style={{ animationDelay: `${index * 0.1}s` }}
+              style={{ animationDelay: `${Math.min(index * 0.05, 0.3)}s` }}
             >
               <ProductCard {...product} />
             </div>
@@ -92,7 +92,8 @@ const ProductSection = ({
         <div className="flex justify-center mt-8">
           <Link to={`/products?categoryId=${categoryId}`}>
             <Button variant="outline" className="btn-add-cart px-8">
-              Xem tất cả <span className="font-bold ml-1">{title.toLowerCase()}</span>
+              Xem tất cả{" "}
+              <span className="font-bold ml-1">{title.toLowerCase()}</span>
             </Button>
           </Link>
         </div>

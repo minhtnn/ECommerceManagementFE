@@ -1,5 +1,4 @@
 import { usePost } from "@/hooks/use-post";
-import EndUserLayout from "@/layouts/EndUserLayout";
 import { formatDateTimeInShort } from "@/lib/utils";
 import { PATH_GUEST } from "@/routes/path";
 import { Calendar, ChevronLeft, Clock, ImageOff, User } from "lucide-react";
@@ -74,7 +73,7 @@ const PublicPostDetailPage = () => {
 
 
   return (
-    <EndUserLayout>
+    <>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* ── Sidebar ── */}
@@ -226,7 +225,7 @@ const PublicPostDetailPage = () => {
           </main>
         </div>
       </div>
-    </EndUserLayout>
+    </>
   );
 };
 

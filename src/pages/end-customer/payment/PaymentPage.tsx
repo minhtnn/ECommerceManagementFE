@@ -6,7 +6,6 @@ import { useCountdownTimer } from "@/hooks/use-countdown-timer";
 import { useOrder } from "@/hooks/use-order";
 import { usePayment } from "@/hooks/use-payment";
 import { usePaymentPolling } from "@/hooks/use-payment-polling";
-import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
 import { formatPrice } from "@/lib/utils";
 import {
@@ -33,8 +32,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import PaymentSuccessDialog from "./components/PaymentSuccessDialog";
 import CancelPaymentDialog from "./components/CancelPaymentDialog";
+import PaymentSuccessDialog from "./components/PaymentSuccessDialog";
 
 const PaymentPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -103,14 +102,14 @@ const PaymentPage = () => {
 
   if (!order) {
     return (
-      <EndUserLayout>
+      <>
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-muted-foreground mb-4">Không tìm thấy đơn hàng</p>
           <Button onClick={() => navigate(PATH_GUEST.home.root)}>
             Về trang chủ
           </Button>
         </div>
-      </EndUserLayout>
+      </>
     );
   }
 
@@ -145,7 +144,7 @@ const PaymentPage = () => {
   const isPaymentFailed = paymentStatus === EPaymentStatus.Failed;
 
   return (
-    <EndUserLayout>
+    <>
       <div className="bg-muted/30 min-h-screen py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
@@ -434,7 +433,7 @@ const PaymentPage = () => {
         onConfirm={handleCancelPayment}
         isLoading={cancelMutation.isPending}
       />
-    </EndUserLayout>
+    </>
   );
 };
 

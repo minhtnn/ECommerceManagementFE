@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatPrice } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import EndUserLayout from "@/layouts/EndUserLayout";
 import { useCart } from "@/hooks/use-cart";
 import { handleApiError } from "@/lib/error";
 import { toast } from "sonner";
@@ -193,7 +192,7 @@ const EndCustomerCartPage = () => {
   );
 
   return (
-    <EndUserLayout>
+    <>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
           <ShoppingCart size={28} />
@@ -431,7 +430,7 @@ const EndCustomerCartPage = () => {
           </div>
         )}
       </div>
-    </EndUserLayout>
+    </>
   );
 };
 

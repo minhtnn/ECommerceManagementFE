@@ -1,26 +1,25 @@
+import { useCartContext } from "@/contexts/CartContext";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/providers/theme-provider";
 import { handleChangeHeaderMenuOpenWhenChangingMobile } from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
 import { PATH_AUTH, PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
 import { ERole } from "@/types/enums/role.enum";
 import {
-  ChevronRight,
   Mail,
   Menu,
+  Moon,
   Phone,
   Search,
   ShoppingCart,
-  User,
-  X,
   Sun,
-  Moon,
+  User,
+  X
 } from "lucide-react";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "./ui/input";
-import { useCart } from "@/hooks/use-cart";
-import { useTheme } from "@/providers/theme-provider";
 
 const EndUserHeaderRoutes = {
   home: {
@@ -79,10 +78,7 @@ export function AppEndUserHeader({
 
     return matchedKey ? matchedKey[0] : "home";
   }, [location.pathname]);
-  const { getEndCustomerCart } = useCart();
-  const { data: cartData } = getEndCustomerCart({
-    isAllowFetch: isEndCustomer,
-  });
+  const { cartData } = useCartContext();
   const cart = cartData?.data?.data;
   const totalItems =
     cart?.items

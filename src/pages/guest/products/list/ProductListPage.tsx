@@ -1,21 +1,22 @@
 // pages/guest/products/list/ProductPage.tsx
 import { Button } from "@/components/ui/button";
-import { useProductMenu } from "@/hooks/use-product-menu";
-import EndUserLayout from "@/layouts/EndUserLayout";
+import { useProductMenu, usePublicProductMenu } from "@/hooks/use-product-menu";
 import { handleApiError } from "@/lib/error";
 import ProductCard from "@/pages/guest/products/list/components/ProductCard";
 import { handleSetChosenCategoryId } from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
 import { Loader2, Zap } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CategoryTreeItem } from "./components/CategoryTreeItem";
 
 const ProductListPage = () => {
   const dispatch = useDispatch();
   const { chosenCategoryId } = useSelector((state: RootState) => state.modal);
-  const { getPublicProductMenu } = useProductMenu();
-
+  const params = useMemo(
+    () => (chosenCategoryId ? { categoryId: chosenCategoryId } : {}),
+    [chosenCategoryId],
+  );
   const {
     data,
     isLoading,
@@ -24,9 +25,7 @@ const ProductListPage = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = getPublicProductMenu(
-    chosenCategoryId ? { categoryId: chosenCategoryId } : {},
-  );
+  } = usePublicProductMenu(params);
 
   // Infinite scroll observer
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -68,19 +67,19 @@ const ProductListPage = () => {
 
   if (isLoading) {
     return (
-      <EndUserLayout>
+      <>
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         </div>
-      </EndUserLayout>
+      </>
     );
   }
 
   if (!data?.pages?.[0]?.data?.data) {
     return (
-      <EndUserLayout>
+      <>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-foreground/70">
             <h2 className="text-2xl font-semibold mb-4">
@@ -92,13 +91,13 @@ const ProductListPage = () => {
             </p>
           </div>
         </div>
-      </EndUserLayout>
+      </>
     );
   }
 
   if (categoriesTree.length === 0 && allProducts.length === 0) {
     return (
-      <EndUserLayout>
+      <>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-foreground/70">
             <h2 className="text-2xl font-semibold mb-4">
@@ -110,7 +109,7 @@ const ProductListPage = () => {
             </p>
           </div>
         </div>
-      </EndUserLayout>
+      </>
     );
   }
 
@@ -119,7 +118,7 @@ const ProductListPage = () => {
   };
 
   return (
-    <EndUserLayout>
+    <>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Sidebar */}
@@ -162,7 +161,7 @@ const ProductListPage = () => {
                 <div
                   key={product.id}
                   className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.05}s` }}
+                  style={{ animationDelay: `${Math.min(index * 0.05, 0.3)}s` }}
                 >
                   <ProductCard {...product} />
                 </div>
@@ -199,7 +198,7 @@ const ProductListPage = () => {
           </div>
         </div>
       </div>
-    </EndUserLayout>
+    </>
   );
 };
 

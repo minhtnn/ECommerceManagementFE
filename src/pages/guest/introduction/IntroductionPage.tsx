@@ -1,11 +1,10 @@
-import { Coffee, Users, Award, Heart } from "lucide-react";
-import EndUserLayout from "@/layouts/EndUserLayout";
-import { PATH_GUEST } from "@/routes/path";
 import { AboutUniCoffeeRoastery } from "@/assets";
+import { PATH_GUEST } from "@/routes/path";
+import { Award, Coffee, Heart, Users } from "lucide-react";
 
 const IntroductionPage = () => {
   return (
-    <EndUserLayout>
+    <>
       {/* Hero */}
       <div className="relative h-[300px] md:h-[400px]">
         <img 
@@ -59,7 +58,7 @@ const IntroductionPage = () => {
           </a>
         </div>
       </div>
-    </EndUserLayout>
+    </>
   );
 }   
 export default IntroductionPage;
