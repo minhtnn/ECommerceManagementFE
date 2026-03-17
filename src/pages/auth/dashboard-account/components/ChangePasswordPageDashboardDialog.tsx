@@ -22,16 +22,12 @@ import {
   TChangePasswordRequest,
 } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 
 export const ChangePasswordPageDashboardDialog = () => {
   const dispatch = useDispatch();
-  // const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  // const [showNewPassword, setShowNewPassword] = useState(false);
-  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { isChangePasswordDashboardDialogOpen } = useSelector(
     (state: RootState) => state.modal,
   );
@@ -81,25 +77,11 @@ export const ChangePasswordPageDashboardDialog = () => {
                   <FormControl>
                     <div className="relative">
                       <Input
-                        // type={showCurrentPassword ? "text" : "password"}
                         type="password"
                         placeholder="Nhập mật khẩu hiện tại"
                         className="pr-10"
                         {...field}
                       />
-                      {/* <button
-                        type="button"
-                        onClick={() =>
-                          // setShowCurrentPassword(!showCurrentPassword)
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showCurrentPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button> */}
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -117,23 +99,11 @@ export const ChangePasswordPageDashboardDialog = () => {
                   <FormControl>
                     <div className="relative">
                       <Input
-                        // type={showNewPassword ? "text" : "password"}
                         type="password"
                         placeholder="Nhập mật khẩu mới"
                         className="pr-10"
                         {...field}
                       />
-                      {/* <button
-                        type="button"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showNewPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button> */}
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -165,25 +135,11 @@ export const ChangePasswordPageDashboardDialog = () => {
                   <FormControl>
                     <div className="relative">
                       <Input
-                        // type={showConfirmPassword ? "text" : "password"}
                         type="password"
                         placeholder="Nhập lại mật khẩu mới"
                         className="pr-10"
                         {...field}
                       />
-                      {/* <button
-                        type="button"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button> */}
                     </div>
                   </FormControl>
                   <FormMessage />

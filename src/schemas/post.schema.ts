@@ -1,7 +1,6 @@
 import { EPostStatus } from "@/types/enums/post-status.enum";
 import z from "zod";
 
-// ── Brand (authed) ──────────────────────────────────────────────
 
 export const PostListSchema = z.object({
     id: z.string().uuid(),
@@ -57,8 +56,6 @@ export const UpdatePostSchema = z.object({
     status: z.nativeEnum(EPostStatus),
 });
 
-// ── Public (end-customer) ───────────────────────────────────────
-
 export const PublicPostItemSchema = z.object({
     id: z.string().uuid(),
     code: z.string(),
@@ -83,7 +80,6 @@ export const PublicPostDetailSchema = z.object({
     publishedAt: z.date().nullable(),
 });
 
-// ── Types ───────────────────────────────────────────────────────
 
 export type TPostList = z.infer<typeof PostListSchema>;
 export type TPostDetail = z.infer<typeof PostDetailSchema>;

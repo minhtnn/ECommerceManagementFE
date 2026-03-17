@@ -1,4 +1,5 @@
 // pages/guest/products/list/ProductPage.tsx
+import { Button } from "@/components/ui/button";
 import { useProductMenu } from "@/hooks/use-product-menu";
 import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
@@ -6,10 +7,9 @@ import ProductCard from "@/pages/guest/products/list/components/ProductCard";
 import { handleSetChosenCategoryId } from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
 import { Loader2, Zap } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CategoryTreeItem } from "./components/CategoryTreeItem";
-import { useEffect, useRef, useMemo } from "react";
-import { Button } from "@/components/ui/button";
 
 const ProductListPage = () => {
   const dispatch = useDispatch();
@@ -25,7 +25,7 @@ const ProductListPage = () => {
     hasNextPage,
     isFetchingNextPage,
   } = getPublicProductMenu(
-    chosenCategoryId ? { categoryId: chosenCategoryId } : {}
+    chosenCategoryId ? { categoryId: chosenCategoryId } : {},
   );
 
   // Infinite scroll observer
@@ -38,7 +38,7 @@ const ProductListPage = () => {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentTarget = observerTarget.current;
@@ -58,13 +58,9 @@ const ProductListPage = () => {
   }
 
   // Flatten all pages into single array
-  const allProducts = useMemo(() => {
-    return (
-      data?.pages?.flatMap(
-        (page) => page?.data?.data?.products?.items || []
-      ) || []
-    );
-  }, [data]);
+  const allProducts =
+    data?.pages?.flatMap((page) => page?.data?.data?.products?.items || []) ||
+    [];
 
   // Get categories from first page only (they're the same in all pages)
   const categoriesTree =

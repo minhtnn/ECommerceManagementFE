@@ -1,91 +1,77 @@
-import { PageLoader } from "@/components/LoadingScreen";
 import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { useProductCategory } from "@/hooks/use-product-category";
+import { useBrand } from "@/hooks/use-brand";
 import { handleApiError } from "@/lib/error";
-import { cn, formatDateTimeInShort } from "@/lib/utils";
-import {
-  TUpdateProductCategory,
-  UpdateProductCategorySchema,
-} from "@/schemas/product-category.schema";
-import { ECategoryStatus } from "@/types/enums/product-category-status.enum";
+import { PATH_SYSTEM_ADMIN_DASHBOARD } from "@/routes/path";
+import { TUpdateBrandRequest, UpdateBrandSchema } from "@/schemas/brand.schema";
+import { EBrandStatus } from "@/types/enums/brand-status.enum";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Upload, X } from "lucide-react";
+import { LoaderCircleIcon, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const ProductCategoryEditPage = () => {
-  const { id } = useParams<{ id: string }>();
+export const BrandEditForm = ({
+  brand,
+  id,
+}: {
+  brand: any;
+  id: string;
+}) => {
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    brand.logoUrl ?? null,
+  );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isImageChanged, setIsImageChanged] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const { getProductCategorySuspendById, updateProductCategory } =
-    useProductCategory();
+  const { updateBrand } = useBrand();
+  const updateBrandMutation = updateBrand(id);
 
-  const {
-    data: productCategoryData,
-    isError,
-    error,
-    isLoading,
-  } = getProductCategorySuspendById(id);
-  if (isLoading) {
-    return <PageLoader />;
-  }
-  if (isError && error) {
-    handleApiError(error);
-  }
-
-  var productCategory = productCategoryData.data.data;
-  const form = useForm<TUpdateProductCategory>({
-    resolver: zodResolver(UpdateProductCategorySchema),
+  const form = useForm<TUpdateBrandRequest>({
+    resolver: zodResolver(UpdateBrandSchema),
     defaultValues: {
-      id: productCategory.id,
-      name: productCategory.name,
-      description: productCategory.description,
-      displayOrder: productCategory.displayOrder,
-      status: productCategory.status,
+      id,
+      name: brand.name,
+      fullname: brand.fullName,
+      email: brand.email,
+      address: brand.address.trim() || undefined,
+      status: brand.status,
+      ...(brand.configuration && { configuration: brand.configuration }),
+      ...(brand.slogan && { slogan: brand.slogan }),
+      ...(brand.phoneNumber && { phoneNumber: brand.phoneNumber }),
     },
   });
-
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    productCategory.imageUrl ?? null,
-  );
-  const updateProductCategoryMutation = updateProductCategory(id!);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       alert("Vui lòng chọn file ảnh");
       return;
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       alert("Kích thước ảnh không được vượt quá 5MB");
       return;
     }
 
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
@@ -93,7 +79,6 @@ const ProductCategoryEditPage = () => {
     };
     reader.readAsDataURL(file);
 
-    // Store file for upload
     setImageFile(file);
     setIsImageChanged(true);
   };
@@ -108,12 +93,11 @@ const ProductCategoryEditPage = () => {
     }
   };
 
-  // Xử lý khi ảnh từ signed URL bị lỗi (expired hoặc không load được)
   const handleImageError = () => {
     setImageError(true);
   };
 
-  const onSubmit = async (data: TUpdateProductCategory) => {
+  const onSubmit = async (data: TUpdateBrandRequest) => {
     const hasFormChanges = Object.keys(form.formState.dirtyFields).length > 0;
     const hasImageChanges = isImageChanged;
 
@@ -121,36 +105,45 @@ const ProductCategoryEditPage = () => {
       toast.warning("Bạn chưa thay đổi dữ kiện nào!");
       return;
     }
-
-    if (updateProductCategoryMutation.isPending) return;
+    if (updateBrandMutation.isPending) return;
 
     const formData = new FormData();
-    formData.append("Id", data.id);
+    formData.append("Id", id);
     formData.append("Name", data.name);
-    if (data.description) {
-      formData.append("Description", data.description);
-    }
-
-    // Add image if exists
-    if (imageFile) {
-      formData.append("Image", imageFile);
-    }
-
-    formData.append("DisplayOrder", data.displayOrder.toString());
+    if (data.fullname) formData.append("Fullname", data.fullname);
+    if (data.slogan) formData.append("Slogan", data.slogan);
+    formData.append("Email", data.email);
+    if (data.phoneNumber) formData.append("PhoneNumber", data.phoneNumber);
+    formData.append("Address", data.address);
+    if (data.configuration) formData.append("Configuration", data.configuration);
     formData.append("Status", data.status.toString());
+    if (isImageChanged && imageFile) formData.append("Logo", imageFile);
 
     try {
-      const result = await updateProductCategoryMutation.mutateAsync(formData);
-      if (result.data.status >= 200 && result.data.status < 300) {
-        toast.success(result.data.message);
+      const result = await updateBrandMutation.mutateAsync(formData);
+      const { message, status } = result.data;
+      if (message) {
+        status >= 200 && status < 300
+          ? toast.success(message)
+          : toast.error(message);
       }
     } catch (err) {
       handleApiError(err);
     }
   };
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Cập nhật danh mục</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Cập nhật thương hiệu</h1>
+        <Button
+          variant="outline"
+          onClick={() => navigate(PATH_SYSTEM_ADMIN_DASHBOARD.brand.root)}
+        >
+          Quay lại
+        </Button>
+      </div>
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -161,7 +154,6 @@ const ProductCategoryEditPage = () => {
             <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-muted-foreground/25 rounded-lg p-8">
               {imagePreview ? (
                 <div className="relative w-full max-w-[300px]">
-                  {/* Hiển thị ảnh hoặc placeholder khi lỗi */}
                   {imageError && !isImageChanged ? (
                     <div className="w-full aspect-square bg-muted rounded-lg flex flex-col items-center justify-center gap-4">
                       <div className="text-center">
@@ -241,11 +233,10 @@ const ProductCategoryEditPage = () => {
             </div>
           </div>
 
-          {/* Right side - Category info */}
+          {/* Right side - Brand info */}
           <div className="bg-background rounded-lg border p-6 space-y-6">
-            {/* Header with status toggle */}
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Thông tin danh mục</h2>
+              <h2 className="text-lg font-semibold">Thông tin thương hiệu</h2>
               <div className="flex items-center">
                 <FormField
                   control={form.control}
@@ -255,60 +246,150 @@ const ProductCategoryEditPage = () => {
                       <FormLabel htmlFor="code">Trạng thái</FormLabel>
                       <FormControl className="flex items-center">
                         <Switch
-                          checked={field.value === ECategoryStatus.Active}
+                          checked={field.value === EBrandStatus.Active}
                           onCheckedChange={(checked) =>
                             field.onChange(
-                              checked
-                                ? ECategoryStatus.Active
-                                : ECategoryStatus.Inactive,
+                              checked ? EBrandStatus.Active : EBrandStatus.Inactive,
                             )
                           }
-                          disabled={updateProductCategoryMutation.isPending}
+                          disabled={updateBrandMutation.isPending}
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
             </div>
-            <div
-              className={cn(
-                productCategory.parentProductCategoryName != null
-                  ? "grid grid-cols-2 gap-4"
-                  : "",
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="name">
+                    Tên thương hiệu<span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Nhập tên thương hiệu"
+                      {...field}
+                      disabled={updateBrandMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            >
-              <div>
-                <Label>Mã danh mục</Label>
-                <div className="h-10 px-3 py-2 border rounded-md bg-muted">
-                  {productCategory.code}
-                </div>
-              </div>
-              {productCategory.parentProductCategoryName != null && (
-                <div>
-                  <Label>Danh mục cha</Label>
-                  <div className="h-10 px-3 py-2 border rounded-md bg-muted">
-                    {productCategory.parentProductCategoryName}
-                  </div>
-                </div>
+            />
+
+            <FormField
+              control={form.control}
+              name="fullname"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="fullname">Tên đầy đủ</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Nhập tên đầy đủ"
+                      {...field}
+                      disabled={updateBrandMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
-            <div className="space-y-2">
+            />
+
+            <FormField
+              control={form.control}
+              name="slogan"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="slogan">Slogan</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Nhập slogan"
+                      {...field}
+                      disabled={updateBrandMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="address">
+                    Địa chỉ<span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Địa chỉ của thương hiệu"
+                      {...field}
+                      disabled={updateBrandMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="configuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="configuration">Cấu hình</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Cấu hình của thương hiệu"
+                      {...field}
+                      disabled={updateBrandMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="name">
-                      Tên danh mục<span className="text-destructive">*</span>
-                    </FormLabel>
+                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Nhập email"
+                        {...field}
+                        disabled={updateBrandMutation.isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="phoneNumber">Số điện thoại</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="Nhập tên danh mục"
+                        placeholder="Nhập số điện thoại"
                         {...field}
-                        disabled={updateProductCategoryMutation.isPending}
+                        disabled={updateBrandMutation.isPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -316,69 +397,29 @@ const ProductCategoryEditPage = () => {
                 )}
               />
             </div>
-            <div className="space-y-2">
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="configuration">Mô tả</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        id="description"
-                        placeholder="Mô tả về danh mục"
-                        {...field}
-                        disabled={updateProductCategoryMutation.isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="space-y-2">
-              <FormField
-                control={form.control}
-                name="displayOrder"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="displayOrder">
-                      Thứ tự hiển thị
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        min={1}
-                        onChange={(e) => {
-                          const value =
-                            e.target.value === "" ? "" : Number(e.target.value);
-                          field.onChange(value);
-                        }}
-                        disabled={updateProductCategoryMutation.isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Submit button */}
-            <div className="flex justify-between items-center pt-4">
-              <div className="text-gray">
-                Ngày cập nhật:{" "}
-                {formatDateTimeInShort(
-                  productCategory.lastModifiedDate
-                    ? productCategory.lastModifiedDate
-                    : productCategory.createdDate,
-                )}
-              </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(PATH_SYSTEM_ADMIN_DASHBOARD.brand.root)}
+                disabled={updateBrandMutation.isPending}
+              >
+                Hủy
+              </Button>
               <Button
                 type="submit"
                 className="bg-primary hover:bg-primary/90"
-                disabled={updateProductCategoryMutation.isPending}
+                disabled={updateBrandMutation.isPending}
               >
-                Lưu
+                {updateBrandMutation.isPending ? (
+                  <>
+                    <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  "Cập nhật"
+                )}
               </Button>
             </div>
           </div>
@@ -387,5 +428,3 @@ const ProductCategoryEditPage = () => {
     </div>
   );
 };
-
-export default ProductCategoryEditPage;

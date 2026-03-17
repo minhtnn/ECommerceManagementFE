@@ -1,4 +1,3 @@
-// pages/end-customer/account/Account.tsx
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import EndUserLayout from "@/layouts/EndUserLayout";

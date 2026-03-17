@@ -1,4 +1,3 @@
-// components/account/AccountLayout.tsx
 import EndUserLayout from "@/layouts/EndUserLayout";
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";

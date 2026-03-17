@@ -59,19 +59,6 @@ export const useProductCategory = () => {
     });
   };
 
-  // const getProductCategoriesinfinity = () => {
-  //   return useInfiniteQuery({
-  //     queryKey: ["categories-infinity"],
-  //     queryFn: productCategoryApi.getProductCategories({
-  //       page: 1,
-  //       size: size,
-  //       isAsc: true,
-  //     }),
-  //     initialPageParam: 0,
-  //     getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
-  //   });
-  // };
-
   const getProductCategoryById = (id: string, isAllowFetch?: boolean) => {
     return useQuery({
       queryKey: ["product-category", id],

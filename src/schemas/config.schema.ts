@@ -13,7 +13,6 @@ const configProject = configSchema.safeParse({
 });
 
 if (!configProject.success) {
-    // console.error('Các giá trị khai báo trong file .env không hợp lệ:', configProject.error.issues);
     throw new Error('Các giá trị khai báo trong file .env không hợp lệ. Vui lòng kiểm tra lại file .env.');
 }
 

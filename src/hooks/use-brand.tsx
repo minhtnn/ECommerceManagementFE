@@ -73,13 +73,6 @@ export const useBrand = () => {
     });
   };
 
-  //   const getPublicBrandById = (id: string) => {
-  //     return useSuspenseQuery({
-  //       queryKey: ["brandPublic", id],
-  //       queryFn: async () => brandApi.getPublicBrandById(envConfig.BRAND_CODE, id),
-  //     });
-  //   };
-
   const createBrand = () =>
     useMutation({
       mutationFn: (data: FormData) => brandApi.createBrand(data),

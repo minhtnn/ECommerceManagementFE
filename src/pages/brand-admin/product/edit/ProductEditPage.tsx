@@ -572,7 +572,6 @@ const ProductEditPage = () => {
   });
   const [sideAttributes, setSideAttributes] = useState<SideAttribute[]>([]);
   const [isRefreshingImages, setIsRefreshingImages] = useState(false);
-  const [isDataReady, setIsDataReady] = useState(false);
   const [hasImageChanges, setHasImageChanges] = useState(false);
   const [hasAttributeChanges, setHasAttributeChanges] = useState(false);
 
@@ -599,66 +598,6 @@ const ProductEditPage = () => {
   });
 
   //#region EFFECTS
-
-  // Load images
-  useEffect(() => {
-    if (!product?.getProductImagesResponse) return;
-
-    const existingImages: ImagePreview[] = product.getProductImagesResponse.map(
-      (img) => ({
-        id: img.id,
-        preview: img.imageUrl,
-        altText: img.altText || "",
-        isMainImage: img.isMainImage,
-        isExisting: true,
-      }),
-    );
-
-    setImagesState({
-      list: existingImages,
-      errorIds: new Set(),
-    });
-  }, [product?.getProductImagesResponse]);
-
-  // Load side attributes
-  useEffect(() => {
-    if (!product?.getProductSideAttributesResponse) return;
-
-    const attrs: SideAttribute[] = product.getProductSideAttributesResponse.map(
-      (attr) => ({
-        id: attr.id,
-        key: attr.key,
-        value: attr.value,
-      }),
-    );
-
-    setSideAttributes(attrs);
-  }, [product?.getProductSideAttributesResponse]);
-
-  useEffect(() => {
-    if (!product) {
-      setIsDataReady(false);
-      return;
-    }
-
-    // Check if form is populated
-    const isFormReady = form.getValues().name !== "";
-
-    // Check if images are loaded (or no images exist)
-    const isImagesReady =
-      !product.getProductImagesResponse?.length || imagesState.list.length > 0;
-
-    // Check if attributes are loaded (or no attributes exist)
-    const isAttributesReady =
-      !product.getProductSideAttributesResponse?.length ||
-      sideAttributes.length > 0;
-
-    if (isFormReady && isImagesReady && isAttributesReady) {
-      // Small delay to ensure smooth transition
-      const timer = setTimeout(() => setIsDataReady(true), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [product, form, imagesState.list.length, sideAttributes.length]);
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -915,7 +854,7 @@ const ProductEditPage = () => {
   //#endregion
 
   // Show loading while fetching data OR while data is not ready
-  if (isLoading || !isDataReady) {
+  if (isLoading) {
     return <PageLoader />;
   }
 

@@ -38,63 +38,6 @@ const LoginPage = () => {
     }
   };
 
-  // const handleRegister = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setErrors({});
-
-  //   const nameValid = validateField(nameSchema, registerName, "registerName");
-  //   const phoneValid = validateField(
-  //     phoneSchema,
-  //     registerPhone,
-  //     "registerPhone"
-  //   );
-  //   const emailValid = validateField(
-  //     emailSchema,
-  //     registerEmail,
-  //     "registerEmail"
-  //   );
-  //   const passwordValid = validateField(
-  //     passwordSchema,
-  //     registerPassword,
-  //     "registerPassword"
-  //   );
-
-  //   if (!nameValid || !phoneValid || !emailValid || !passwordValid) return;
-
-  //   setIsLoading(true);
-  //   // try {
-  //   //   const redirectUrl = `${window.location.origin}/`;
-
-  //   //   const { error } = await supabase.auth.signUp({
-  //   //     email: registerEmail.trim(),
-  //   //     password: registerPassword,
-  //   //     options: {
-  //   //       emailRedirectTo: redirectUrl,
-  //   //       data: {
-  //   //         full_name: registerName.trim(),
-  //   //         phone: registerPhone.trim(),
-  //   //       }
-  //   //     }
-  //   //   });
-
-  //   //   if (error) {
-  //   //     if (error.message.includes("User already registered")) {
-  //   //       toast.error("Email này đã được đăng ký. Vui lòng đăng nhập.");
-  //   //     } else {
-  //   //       toast.error(error.message);
-  //   //     }
-  //   //     return;
-  //   //   }
-
-  //   //   toast.success("Đăng ký thành công! Chào mừng bạn đến với UNI COFFEE.");
-  //   //   navigate("/");
-  //   // } catch (error) {
-  //   //   toast.error("Có lỗi xảy ra, vui lòng thử lại");
-  //   // } finally {
-  //   //   setIsLoading(false);
-  //   // }
-  // };
-
   const memberBenefits = [
     "Giảm giá độc quyền",
     "Tích luỹ điểm thưởng",

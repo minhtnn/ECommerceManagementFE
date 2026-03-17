@@ -108,5 +108,4 @@ export const PATH_END_CUSTOMER = {
     payment: (id: string) => path(ROOTS_END_CUSTOMER, `/payment/${id}`),
     addresses: path(ROOTS_END_CUSTOMER, '/addresses'),
     changePassword: path(ROOTS_END_CUSTOMER, '/change-password')
-    // profile: path(ROOTS_END_CUSTOMER, '/profile'),
 }

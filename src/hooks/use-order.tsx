@@ -59,7 +59,7 @@ export const useOrder = () => {
         const data = lastPage?.data?.data;
         return data?.hasMore ? data.nextCursor : undefined;
       },
-      staleTime: 2 * 60 * 1000, // 2 minutes
+      staleTime: 2 * 60 * 1000,
     });
   };
 
@@ -98,7 +98,6 @@ export const useOrder = () => {
     });
   };
 
-  // ✅ FIX: Correct mutation signature
   const updateOrder = () => {
     return useMutation({
       mutationFn: ({ id, data }: { id: string; data: TUpdateOrderRequest }) =>
@@ -117,11 +116,11 @@ export const useOrder = () => {
         // Invalidate list queries
         queryClient.invalidateQueries({ 
           queryKey: ["customer-orders"],
-          exact: false // ✅ Invalidate all customer-orders queries regardless of params
+          exact: false
         });
         queryClient.invalidateQueries({ 
           queryKey: ["brand-orders"],
-          exact: false // ✅ Invalidate all brand-orders queries regardless of params
+          exact: false
         });
       },
       onError: (error: any) => {

@@ -1,10 +1,8 @@
-import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { usePost } from "@/hooks/use-post";
 import EndUserLayout from "@/layouts/EndUserLayout";
 import { formatDateTimeInShort } from "@/lib/utils";
 import { PATH_GUEST } from "@/routes/path";
 import { Calendar, ChevronLeft, Clock, ImageOff, User } from "lucide-react";
-import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 
 const estimateReadingTime = (text?: string | null) => {
@@ -12,7 +10,6 @@ const estimateReadingTime = (text?: string | null) => {
   return Math.max(1, Math.ceil(text.split(/\s+/).filter(Boolean).length / 200));
 };
 
-// ── Skeleton ─────────────────────────────────────────────────────
 const DetailSkeleton = () => (
   <div className="animate-pulse space-y-6">
     <div className="space-y-3">
@@ -31,8 +28,6 @@ const DetailSkeleton = () => (
     </div>
   </div>
 );
-
-// ── Related post sidebar card ────────────────────────────────────
 interface SidebarCardProps {
   id: string;
   title: string;
@@ -58,10 +53,8 @@ const SidebarCard = ({ id, title, imageUrl }: SidebarCardProps) => (
   </Link>
 );
 
-// ── Page ─────────────────────────────────────────────────────────
 const PublicPostDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { setBreadcrumbs, setShowBreadcrumb } = useBreadcrumb();
 
   const { getPublicPostById, getInfinitePosts } = usePost();
   const {
@@ -79,18 +72,6 @@ const PublicPostDetailPage = () => {
       .filter((p) => p.id !== id)
       .slice(0, 4) ?? [];
 
-  useEffect(() => {
-    if (post) {
-      setBreadcrumbs([
-        { title: "Tin tức", url: PATH_GUEST.news.root },
-        { title: post.title },
-      ]);
-      setShowBreadcrumb(true);
-    }
-    return () => setShowBreadcrumb(false);
-  }, [post, setBreadcrumbs, setShowBreadcrumb]);
-
-  // ── Error / not found ────────────────────────────────────────
 
   return (
     <EndUserLayout>

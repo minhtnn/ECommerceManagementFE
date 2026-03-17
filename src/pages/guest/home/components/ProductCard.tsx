@@ -67,7 +67,7 @@ const ProductCard = (product: TMenuProductListResponse) => {
     try {
       const currentCart = cartData?.data?.data;
 
-      //  Lọc bỏ gift items, chỉ gửi items thật
+      // Lọc bỏ gift items, chỉ gửi items thật
       const currentItems = (currentCart?.items || []).filter(
         (item) => !item.isGiftItem,
       );
@@ -101,13 +101,11 @@ const ProductCard = (product: TMenuProductListResponse) => {
       }
 
       await updateCartMutation.mutateAsync({
-        cartId: currentCart?.id, //  truyền cartId
+        cartId: currentCart?.id,
         items: updatedItems,
         customerNote: currentCart?.customerNote || null,
-        //  mapping đúng field theo schema mới
         appliedPromotions:
           currentCart?.appliedPromotions
-            // ?.filter((p) => !p.isGiftItem)
             .map((promo) => ({
               promotionRuleId: promo.promotionId,
               promotionRuleCode: promo.promotionRuleCode,

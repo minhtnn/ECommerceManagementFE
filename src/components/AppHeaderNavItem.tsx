@@ -1,4 +1,3 @@
-import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { cn } from "@/lib/utils";
 import { handleChangeHeaderMenuOpenWhenChangingMobile } from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
@@ -58,7 +57,6 @@ export function AppEndUserHeader({
   );
   const { theme, setTheme } = useTheme();
 
-  // Determine actual theme (resolve 'system' to actual theme)
   const actualTheme =
     theme === "system"
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -69,7 +67,6 @@ export function AppEndUserHeader({
   const accountLink = isAuthenticated ? PATH_AUTH.account : PATH_AUTH.root;
   const isEndCustomer = isAuthenticated && role === ERole.EndCustomer;
   const navigate = useNavigate();
-  const { breadcrumbs, showBreadcrumb } = useBreadcrumb();
   const activeRoute = useMemo(() => {
     const path = location.pathname;
     const matchedKey = Object.entries(EndUserHeaderRoutes).find(
@@ -99,18 +96,18 @@ export function AppEndUserHeader({
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline">Cần hỗ trợ?</span>
             <a
-              href="tel:1900123456"
+              href="tel:0909429323"
               className="flex items-center gap-1 hover:opacity-80 transition-opacity"
             >
               <Phone size={14} />
-              <span>1900.123.456</span>
+              <span>0909.429.323</span>
             </a>
             <a
-              href="mailto:support@unicoffee.vn"
+              href="mailto:unicoffeeroasteryvn@gmail.com"
               className="hidden md:flex items-center gap-1 hover:opacity-80 transition-opacity"
             >
               <Mail size={14} />
-              <span>support@unicoffee.vn</span>
+              <span>unicoffeeroasteryvn@gmail.com</span>
             </a>
           </div>
           <div className="font-medium animate-pulse">
@@ -302,7 +299,7 @@ export function AppEndUserHeader({
         </div>
       )}
 
-      {showBreadcrumb && breadcrumbs.length > 0 && (
+      {/* {showBreadcrumb && breadcrumbs.length > 0 && (
         <div className="bg-background border-b border-border">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center gap-2 text-sm flex-wrap">
@@ -328,7 +325,7 @@ export function AppEndUserHeader({
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </header>
   );
 }

@@ -6,29 +6,14 @@ import { useEffect, useState } from "react";
 const banners = [
   {
     id: 1,
-    // title: "Siêu Sale 12.12",
-    // subtitle: "Đông Này, Mang Uni Coffee Về Nhà",
-    // promo: "Từ 09.12 đến 17.12",
-    // cta: "Mua Ngay",
-    // bgColor: "from-primary to-primary/80",
     image: Banner1,
   },
   {
     id: 2,
-    // title: "Tặng 01 Túi 200g",
-    // subtitle: "Khi Mua Túi 1kg Cà Phê Truyền Thống",
-    // promo: "Ưu đãi có hạn",
-    // cta: "Khám Phá",
-    // bgColor: "from-coffee-dark to-primary/90",
     image: Banner2,
   },
   {
     id: 3,
-    // title: "Freeship Toàn Quốc",
-    // subtitle: "Cho đơn hàng từ 399.000đ",
-    // promo: "Áp dụng toàn bộ sản phẩm",
-    // cta: "Mua Sắm",
-    // bgColor: "from-accent to-primary",
     image: Banner3,
   },
 ];
@@ -65,37 +50,14 @@ const HeroBanner = () => {
             {/* Background Image */}
             <img
               src={banner.image}
-              // alt={banner.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
             {/* Overlay */}
             <div
               className={cn(
                 "absolute inset-0",
-                // "bg-gradient-to-r from-primary/90 via-primary/50 to-transparent",
               )}
             />
-            {/* Content */}
-            {/* <div className="container mx-auto px-4 py-16 md:py-24 relative z-10 h-full flex items-center">
-              <div className="max-w-2xl">
-                <div className="text-primary-foreground/80 text-sm md:text-base mb-2 animate-fade-in">
-                  {banner.promo}
-                </div>
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-4 animate-fade-in-up drop-shadow-lg">
-                  {banner.title}
-                </h1>
-                <p className="text-lg md:text-2xl text-primary-foreground/90 mb-8 animate-fade-in-up drop-shadow" style={{ animationDelay: "0.1s" }}>
-                  {banner.subtitle}
-                </p>
-                <Button
-                  size="lg"
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-bold px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up"
-                  style={{ animationDelay: "0.2s" }}
-                >
-                  {banner.cta}
-                </Button>
-              </div>
-            </div> */}
           </div>
         ))}
       </div>

@@ -50,7 +50,6 @@ export function LoginForm({
       };
       const result = await loginMutation.mutateAsync(loginData);
       const accessToken = result.data.data.accessToken;
-      // console.log("Access Token:", jwtDecode(accessToken));
       const role = (jwtDecode(accessToken) as any).role;
       if ((!(role in ERole))) {
         toast.error("Vai trò người dùng không hợp lệ.");

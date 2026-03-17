@@ -16,7 +16,7 @@ interface PaymentState {
 
 const STORAGE_KEY = "payment_session";
 
-// ⭐ Load from localStorage
+// Load from localStorage
 const loadFromStorage = (): Partial<PaymentState> => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -33,7 +33,7 @@ const loadFromStorage = (): Partial<PaymentState> => {
   return {};
 };
 
-// ⭐ Save to localStorage
+// Save to localStorage
 const saveToStorage = (state: PaymentState) => {
   try {
     const dataToSave = {
@@ -49,7 +49,7 @@ const saveToStorage = (state: PaymentState) => {
   }
 };
 
-// ⭐ Clear storage
+// Clear storage
 const clearStorage = () => {
   try {
     localStorage.removeItem(STORAGE_KEY);
@@ -92,7 +92,7 @@ export const paymentSlice = createSlice({
       state.expiresAt = Date.now() + expiryMinutes * 60 * 1000;
       state.timeRemaining = expiryMinutes * 60;
       
-      // ⭐ Save to localStorage
+      // Save to localStorage
       saveToStorage(state);
     },
 
@@ -116,10 +116,10 @@ export const paymentSlice = createSlice({
           state.showSuccessPopup = true;
         }
         
-        // ⭐ Clear storage when payment completed/failed
+        // Clear storage when payment completed/failed
         clearStorage();
       } else {
-        // ⭐ Update storage
+        // Update storage
         saveToStorage(state);
       }
     },
@@ -139,7 +139,7 @@ export const paymentSlice = createSlice({
 
       if (action.payload <= 0) {
         state.isPolling = false;
-        // ⭐ Clear storage when expired
+        // Clear storage when expired
         clearStorage();
       }
     },
@@ -161,7 +161,7 @@ export const paymentSlice = createSlice({
     },
 
     handleResetPaymentSession() {
-      // ⭐ Clear storage
+      // Clear storage
       clearStorage();
       return initialState;
     },

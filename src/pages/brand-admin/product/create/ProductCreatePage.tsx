@@ -188,11 +188,7 @@ const ProductCreatePage = () => {
   const onSubmit = async (data: TCreateProduct) => {
     if (createProductMutation.isPending) return;
 
-    // Validate có ít nhất 1 ảnh nếu status = Active
-    // if (data.status === EProductStatus.Active && imageFiles.length === 0) {
-    //     toast.error("Sản phẩm đang hoạt động phải có ít nhất 1 ảnh");
-    //     return;
-    // }
+
 
     const formData = new FormData();
 
@@ -232,13 +228,6 @@ const ProductCreatePage = () => {
     }
 
     try {
-      // for (const [key, value] of formData.entries()) {
-      //   if (value instanceof File) {
-      //     console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
-      //   } else {
-      //     console.log(`  ${key}: ${value}`);
-      //   }
-      // }
       const result = await createProductMutation.mutateAsync(formData);
       if (result?.data?.status >= 200 && result?.data?.status < 300) {
         toast.success("Tạo sản phẩm thành công");
@@ -246,7 +235,6 @@ const ProductCreatePage = () => {
         setImageFiles([]);
         setImagePreviews([]);
       }
-      // navigate(PATH_BRAND_DASHBOARD.product.root);
     } catch (err) {
       handleApiError(err);
     }

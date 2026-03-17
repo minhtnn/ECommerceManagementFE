@@ -50,7 +50,6 @@ export const useCustomer = () => {
           name: name,
           status: status,
         }),
-      // placeholderData: keepPreviousData,
       staleTime: 5 * 1000,
     });
   };

@@ -1,10 +1,9 @@
-// components/home/ProductSection.tsx
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProductCard from "@/pages/guest/products/list/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { TMenuProductListResponse } from "@/schemas/menu-product.schema";
+import ProductCard from "./ProductCard";
 
 interface ProductSectionProps {
   title: string;
@@ -67,7 +66,7 @@ const ProductSection = ({
               key={product.id}
               className={
                 showCarousel 
-                  ? "min-w-[250px] max-w-[250px] animate-fade-in" 
+                  ? "min-w-[180px] max-w-[180px] sm:min-w-[250px] sm:max-w-[250px] animate-fade-in" 
                   : "animate-fade-in"
               }
               style={{ animationDelay: `${index * 0.1}s` }}

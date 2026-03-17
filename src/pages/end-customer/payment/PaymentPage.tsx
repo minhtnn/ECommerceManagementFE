@@ -44,7 +44,7 @@ const PaymentPage = () => {
   const { getCustomerOrderById } = useOrder();
   const { cancelPayment: cancelPaymentMutation } = usePayment();
 
-  // ⭐ Get state values from Redux
+  // Get state values from Redux
   const { showSuccessPopup, showCancelConfirm, paymentStatus } = useSelector(
     (state: RootState) => state.payment,
   );
@@ -427,7 +427,7 @@ const PaymentPage = () => {
 
       {/* Cancel Confirmation Dialog */}
       <CancelPaymentDialog
-        open={showCancelConfirm} // ⭐ This is the STATE value
+        open={showCancelConfirm}
         onOpenChange={(open) => {
           if (!open) dispatch(handleHideCancelConfirm());
         }}

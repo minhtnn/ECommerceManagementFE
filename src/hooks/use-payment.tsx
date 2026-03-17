@@ -85,9 +85,6 @@ export const usePayment = () => {
         queryClient.invalidateQueries({ queryKey: ["paymentMethod", id] });
       },
     });
-  //#endregion
-
-  // #region Brand payment method hooks
   const getBrandPaymentMethods = (params: UseBrandPaymentMethodParams = {}) => {
     const {
       page = params.page || 1,
@@ -157,12 +154,10 @@ export const usePayment = () => {
     });
   };
 
-  // ⭐ Get payment status - NOT a query, just return the function
   const getPaymentStatus = async (orderId: string) => {
     return await paymentApi.getPaymentStatus(orderId);
   };
 
-  // Cancel payment
   const cancelPayment = () => {
     return useMutation({
       mutationFn: ({

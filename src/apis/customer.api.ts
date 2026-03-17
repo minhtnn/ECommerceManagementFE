@@ -24,18 +24,6 @@ const updateCustomerAddress = async (id: string, data: TUpdateCustomerAddress) =
         data
     );
 
-// const getCustomerById = async (id: string) =>
-//     await apiRequest.ecommerceCoffee.get<BaseResponse<TCustomerDetailResponse>>(`${API_SUFFIX.Customer_API}/${id}`);
-
-// const getCustomerDetails = async () =>
-//     await apiRequest.ecommerceCoffee.get<BaseResponse<TCustomerDetailResponse>>(`${API_SUFFIX.Customer_API}/details`);
-
-// const updateCustomer = async (id: string, data: FormData) =>
-//     await apiRequest.ecommerceCoffee.patch<BaseResponse<string>>(
-//         `${API_SUFFIX.Customer_API}/${id}`,
-//         data
-//     );
-
 export const customerApi = {
     getCustomers,
     getCustomerAddresses,

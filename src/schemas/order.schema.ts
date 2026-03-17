@@ -32,7 +32,6 @@ export const CreateOrderRequestSchema = z.object({
   customerNote: z.string().max(500).optional().nullable(),
 });
 
-// Create Order Response
 export const CreateOrderResponseSchema = z.object({
   orderId: z.string().uuid(),
   orderCode: z.string(),

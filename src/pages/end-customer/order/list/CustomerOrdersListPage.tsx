@@ -24,7 +24,7 @@ import { EPaymentStatus } from "@/types/enums/payment-status.enum";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Eye, Loader2, Package, Search, ShoppingBag } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Helper functions (same as before)
@@ -100,7 +100,9 @@ const EndCustomerOrdersListPage = () => {
   // Filters
   const [searchKeyword, setSearchKeyword] = useState("");
   const [orderStatus, setOrderStatus] = useState<EOrderStatus | undefined>();
-  const [paymentStatus, setPaymentStatus] = useState<EPaymentStatus | undefined>();
+  const [paymentStatus, setPaymentStatus] = useState<
+    EPaymentStatus | undefined
+  >();
 
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -127,10 +129,8 @@ const EndCustomerOrdersListPage = () => {
   });
 
   // Flatten all pages
-  const allOrders = useMemo(() => {
-    return data?.pages?.flatMap((page) => page?.data?.data?.items || []) || [];
-  }, [data]);
-
+  const allOrders =
+    data?.pages?.flatMap((page) => page?.data?.data?.items || []) || [];
   // Infinite scroll observer
   const observerTarget = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -140,10 +140,10 @@ const EndCustomerOrdersListPage = () => {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    console.log(allOrders)
+    console.log(allOrders);
     const currentTarget = observerTarget.current;
     if (currentTarget) {
       observer.observe(currentTarget);
@@ -282,7 +282,9 @@ const EndCustomerOrdersListPage = () => {
             <p className="text-muted-foreground mb-4">
               Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm!
             </p>
-            <Button onClick={() => navigate(PATH_GUEST.products.root)}>Khám phá sản phẩm</Button>
+            <Button onClick={() => navigate(PATH_GUEST.products.root)}>
+              Khám phá sản phẩm
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -290,7 +292,7 @@ const EndCustomerOrdersListPage = () => {
           {allOrders.map((order) => {
             const orderStatusConfig = getOrderStatusConfig(order.orderStatus);
             const paymentStatusConfig = getPaymentStatusConfig(
-              order.paymentStatus
+              order.paymentStatus,
             );
 
             return (
@@ -314,7 +316,7 @@ const EndCustomerOrdersListPage = () => {
                         {format(
                           new Date(order.createdDate),
                           "dd/MM/yyyy HH:mm",
-                          { locale: vi }
+                          { locale: vi },
                         )}
                       </p>
                     </div>
@@ -331,7 +333,7 @@ const EndCustomerOrdersListPage = () => {
                       <Badge
                         className={cn(
                           orderStatusConfig.className,
-                          "border text-sm"
+                          "border text-sm",
                         )}
                       >
                         {orderStatusConfig.label}
@@ -345,7 +347,7 @@ const EndCustomerOrdersListPage = () => {
                       <Badge
                         className={cn(
                           paymentStatusConfig.className,
-                          "border text-sm"
+                          "border text-sm",
                         )}
                       >
                         {paymentStatusConfig.label}

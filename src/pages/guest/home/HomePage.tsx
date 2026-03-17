@@ -1,13 +1,11 @@
-// pages/guest/home/HomePage.tsx
-import HeroBanner from "@/pages/guest/home/components/HeroBanner";
-import EndUserLayout from "@/layouts/EndUserLayout";
-import QuickLinks from "@/pages/guest/home/components/QuickLinks";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useHomeMenu } from "@/hooks/use-home-menu";
+import EndUserLayout from "@/layouts/EndUserLayout";
 import { handleApiError } from "@/lib/error";
-import { useMemo } from "react";
+import HeroBanner from "@/pages/guest/home/components/HeroBanner";
+import QuickLinks from "@/pages/guest/home/components/QuickLinks";
 import { TMenuProductCategoryResponse } from "@/schemas/menu-product.schema";
 import ProductSection from "./components/ProductSection";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const HomePage = () => {
   const { getHomeMenuData } = useHomeMenu();
@@ -17,27 +15,13 @@ const HomePage = () => {
     handleApiError(error);
   }
 
-  // Lấy các category cha (root categories)
-  const rootCategories = useMemo(() => {
-    if (!menuData?.data?.data?.productCategoriesTree) return [];
-    return menuData.data.data.productCategoriesTree;
-  }, [menuData]);
+  const rootCategories = menuData.data.data.productCategoriesTree;
 
-  // ✨ FIX: products now in items array
-  const allProducts = useMemo(() => {
-    if (!menuData?.data?.data?.products?.items) return [];
-    return menuData.data.data.products.items;
-  }, [menuData]);
+  const allProducts = menuData.data.data.products.items;
 
-  // Nhóm products theo category
-  const productsByCategory = useMemo(() => {
-    const categoryProductsMap = new Map<string, typeof allProducts>();
+  const productsByCategory = new Map<string, typeof allProducts>();
 
-    if (!rootCategories.length || !allProducts.length) {
-      return categoryProductsMap;
-    }
-
-    // Hàm đệ quy để lấy tất cả category IDs
+  if (rootCategories.length && allProducts.length) {
     const getAllCategoryIds = (
       category: TMenuProductCategoryResponse,
     ): string[] => {
@@ -53,17 +37,13 @@ const HomePage = () => {
     rootCategories.forEach((rootCategory) => {
       const categoryIds = getAllCategoryIds(rootCategory);
 
-      // ✅ NOW WORKING: Filter by productCategoryId
       const categoryProducts = allProducts.filter((product) =>
         categoryIds.includes(product.productCategoryId),
       );
 
-      // Limit 10 products per category for home page
-      categoryProductsMap.set(rootCategory.id, categoryProducts.slice(0, 10));
+      productsByCategory.set(rootCategory.id, categoryProducts.slice(0, 10));
     });
-
-    return categoryProductsMap;
-  }, [rootCategories, allProducts]);
+  }
 
   if (isLoading) {
     return (

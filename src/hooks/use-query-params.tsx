@@ -25,7 +25,6 @@ export const useQueryParams = ( {
     defaultFilter = [], // Now we can specify multiple search parameters
 }: UseQueryParamsOptions = {} ) =>
 {
-    // //console.log( "defaultFilter", defaultFilter );
     const [ searchParams, setSearchParams ] = useSearchParams();
 
     // --- Get values from URL with fallback defaults ---
@@ -33,8 +32,7 @@ export const useQueryParams = ( {
     const pageSize = parseInt( searchParams.get( "size" ) || `${ defaultPageSize }`, 10 );
     const name = searchParams.get( "name" ) || `${ defaultName }`;
     const sortBy = searchParams.get( "sortBy" ) || defaultSortBy;
-    // const isAsc = searchParams.get( "isAsc" ) === "false" ? false : defaultIsAsc;
-    const isAsc = ( searchParams.get( "isAsc" ) || defaultIsAsc.toString() ) === "true"; // Default to true if not specified
+    const isAsc = ( searchParams.get( "isAsc" ) || defaultIsAsc.toString() ) === "true";
     const filter: ColumnFiltersState = [];
     defaultFilter.forEach( ( f, _ ) =>
     {

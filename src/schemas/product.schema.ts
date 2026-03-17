@@ -67,12 +67,10 @@ export const CreateProductSchema = z.object({
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number({ invalid_type_error: "Sai định dạng" })
         .optional(),
-    // Images metadata (JSON string sẽ được stringify khi gửi)
     images: z.array(z.object({
         altText: z.string().optional(),
         isMainImage: z.boolean(),
     })).max(4, { message: "Chỉ được upload tối đa 4 ảnh" }).optional(),
-    // Side attributes
     sideAttributes: z.array(z.object({
         key: z.string()
             .nonempty({ message: "Tên thuộc tính không được bỏ trống" })

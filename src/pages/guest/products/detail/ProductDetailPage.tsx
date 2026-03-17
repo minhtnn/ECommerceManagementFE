@@ -65,7 +65,7 @@ const ProductDetailPage = () => {
   try {
     const currentCart = cartData?.data?.data;
 
-    // ← Lọc bỏ gift items
+    // Lọc bỏ gift items
     const currentItems = (currentCart?.items || []).filter(
       (item) => !item.isGiftItem,
     );
@@ -82,7 +82,7 @@ const ProductDetailPage = () => {
         productImageUrlSnapshot: item.productImageUrlSnapshot,
         quantity:
           index === existingItemIndex
-            ? item.quantity + quantity  // ← cộng đúng quantity đang chọn
+            ? item.quantity + quantity  // cộng đúng quantity đang chọn
             : item.quantity,
       }));
     } else {

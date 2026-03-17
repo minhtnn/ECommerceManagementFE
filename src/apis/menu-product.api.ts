@@ -1,4 +1,3 @@
-// apis/menu-product.api.ts
 import { apiRequest } from "@/lib/http";
 import { TMenuProductResponse } from "@/schemas/menu-product.schema";
 import { BaseResponse } from "@/types/response.type";

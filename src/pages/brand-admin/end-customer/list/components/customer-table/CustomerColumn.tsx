@@ -20,7 +20,6 @@ export const columns: ColumnDef<TCustomerListResponse>[] = [
     accessorKey: "avatarUrl",
     colSpan: 1,
     header: () => <div className="font-semibold text-base"></div>,
-    // <div className="font-semibold text-base">Ảnh</div>,
     cell: (info) => {
       const avatarUrl = info.getValue() as string;
 

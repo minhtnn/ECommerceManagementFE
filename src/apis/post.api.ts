@@ -3,7 +3,6 @@ import { TPostDetail, TPostList, TPublicPostDetail, TPublicPostItem } from "@/sc
 import { BaseResponse, InfiniteScrollResponse, PaginationResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
 
-// ── Brand (authed) ──────────────────────────────────────────────
 const getPosts = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TPostList>>>(
         `${API_SUFFIX.POST_API}`, { params }
@@ -24,7 +23,6 @@ const updatePost = async (id: string, data: FormData) =>
         `${API_SUFFIX.POST_API}/${id}`, data
     );
 
-// ── Public (end-customer) ───────────────────────────────────────
 const getPublicPosts = async (brandCode: string, pageSize: number, cursor?: string | null) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<InfiniteScrollResponse<TPublicPostItem>>>(
         `${API_SUFFIX.POST_API}/public/${brandCode}`,

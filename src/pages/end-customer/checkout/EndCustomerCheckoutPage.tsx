@@ -46,7 +46,6 @@ const EndCustomerCheckoutPage = () => {
   const { getBrandPublicPaymentMethods } = usePayment();
   const { createOrder } = useOrder();
 
-  // ── State ──────────────────────────────────────────────────────────────────
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
@@ -63,7 +62,6 @@ const EndCustomerCheckoutPage = () => {
   const [promoCode, setPromoCode] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
-  // ── Queries ────────────────────────────────────────────────────────────────
   const {
     data: cartData,
     error: cartError,
@@ -85,16 +83,13 @@ const EndCustomerCheckoutPage = () => {
     error: brandPublicPaymentMethodsError,
   } = getBrandPublicPaymentMethods();
 
-  // ── Mutations ──────────────────────────────────────────────────────────────
   const createOrderMutation = createOrder();
   const updateCartMutation = updateEndCustomerCart();
 
-  // ── Derived data ───────────────────────────────────────────────────────────
   const cart = cartData?.data?.data;
   const addresses = addressesData?.data?.data || [];
   const paymentMethods = brandPublicPaymentMethodsData?.data?.data || [];
 
-  // ── Effects ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddressId) {
       const primary = addresses.find((a) => a.isPrimary);
@@ -109,7 +104,6 @@ const EndCustomerCheckoutPage = () => {
     }
   }, [paymentMethods, selectedPaymentMethodId]);
 
-  // ── Loading / Error guards ─────────────────────────────────────────────────
   if (isCartLoading || isAddressesLoading || isBrandPublicPaymentMethodsLoading)
     return <PageLoader />;
 
@@ -118,7 +112,6 @@ const EndCustomerCheckoutPage = () => {
   if (isBrandPublicPaymentMethodsError && brandPublicPaymentMethodsError)
     handleApiError(brandPublicPaymentMethodsError);
 
-  // ── Derived cart data ──────────────────────────────────────────────────────
   const nonGiftItems = cart?.items.filter((i) => !i.isGiftItem) ?? [];
   const giftItems = cart?.items.filter((i) => i.isGiftItem) ?? [];
   const totalNonGiftQty = nonGiftItems.reduce((s, i) => s + i.quantity, 0);
@@ -137,7 +130,6 @@ const EndCustomerCheckoutPage = () => {
     );
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
   const shipping = cart.totalOrderShippingFee;
 
@@ -162,7 +154,6 @@ const EndCustomerCheckoutPage = () => {
     items: buildCurrentItems(),
   });
 
-  // ── Promo handlers ─────────────────────────────────────────────────────────
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
     setIsApplyingPromo(true);
@@ -194,7 +185,6 @@ const EndCustomerCheckoutPage = () => {
     }
   };
 
-  // ── Other handlers ─────────────────────────────────────────────────────────
   const handleInputChange = (field: string, value: string) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -271,7 +261,6 @@ const EndCustomerCheckoutPage = () => {
     navigate(PATH_GUEST.home.root);
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <EndUserLayout>
       <div className="bg-muted/30 min-h-screen py-6">

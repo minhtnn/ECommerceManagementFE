@@ -1,8 +1,3 @@
-// ============================================
-// AUTHPROVIDER - FIXED
-// File: providers/AuthProvider.tsx
-// ============================================
-
 import { authApi } from "@/apis/auth.api";
 import { handleSetIsAuthLoading } from "@/redux/modal/modal-slice";
 import { RootState } from "@/redux/store";
@@ -25,7 +20,7 @@ const AuthProvider = ({ children }: Props) => {
             dispatch(handleSetIsAuthLoading(true));
 
             try {
-                // ✅ BƯỚC 1: ĐỌC LOCALSTORAGE TRƯỚC
+                // BƯỚC 1: ĐỌC LOCALSTORAGE TRƯỚC
                 const userInfoStr = localStorage.getItem("userInfo");
 
                 if (userInfoStr) {
@@ -44,7 +39,7 @@ const AuthProvider = ({ children }: Props) => {
                     }
                 }
 
-                // ✅ BƯỚC 3: KIỂM TRA CÓ REFRESH TOKEN COOKIE
+                // BƯỚC 3: KIỂM TRA CÓ REFRESH TOKEN COOKIE
                 const hasRefreshToken = document.cookie.includes('refreshToken');
 
                 if (!hasRefreshToken) {
@@ -100,9 +95,9 @@ export default AuthProvider;
 function isTokenExpired(token: string): boolean {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        const exp = payload.exp * 1000; // Convert to milliseconds
+        const exp = payload.exp * 1000;
 
-        // ✅ Thêm buffer 30 giây để tránh edge case
+        // Thêm buffer 30 giây để tránh edge case
         const bufferTime = 30 * 1000;
         return Date.now() >= (exp - bufferTime);
     } catch {

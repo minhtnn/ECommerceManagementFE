@@ -67,7 +67,7 @@ const userSlice = createSlice({
                 state.accessToken = userData.accessToken;
                 state.isInitialized = true;
 
-                // ✅ LƯU VÀO LOCALSTORAGE (bao gồm cả accessToken)
+                // LƯU VÀO LOCALSTORAGE (bao gồm cả accessToken)
                 const userInfoToStore = {
                     username: userData.username,
                     role: decodedToken.role,
@@ -92,7 +92,7 @@ const userSlice = createSlice({
                 state.accessToken = newToken;
                 state.isAuthenticated = true;
 
-                // ✅ CẬP NHẬT LOCALSTORAGE
+                // CẬP NHẬT LOCALSTORAGE
                 const userInfoStr = localStorage.getItem("userInfo");
                 if (userInfoStr) {
                     try {

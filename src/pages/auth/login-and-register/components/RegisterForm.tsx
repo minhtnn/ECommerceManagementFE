@@ -117,7 +117,7 @@ export function RegisterForm({
   };
 
   const handleVerifySuccess = () => {
-    navigate("/"); // hoặc trang nào đó
+    navigate("/"); 
   };
 
   const onSubmit = async (data: TFERegisterSchema) => {

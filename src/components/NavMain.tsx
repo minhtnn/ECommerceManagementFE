@@ -24,7 +24,6 @@ export function NavMain({
 }) {
   const { open, toggleSidebar } = useSidebar();
   const pathname = useLocation().pathname;
-  //console.log( "NavMain: ", ( '/' + pathname.replace( /^\//, '' ).split( '/' ).slice( 0, 2 ).join( '/' ) ) );
   const checkIsActive = (itemUrl: string) => {
     const normalizedPath =
       "/" + pathname.replace(/^\//, "").split("/").slice(0, 3).join("/");

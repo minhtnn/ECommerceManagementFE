@@ -108,7 +108,6 @@ const Account = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      // setEditFormData({ ...customerInfo });
                       dispatch(handleSetIsEditAccountDialogOpen(true));
                     }}
                   >

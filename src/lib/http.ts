@@ -89,7 +89,7 @@ const request = (apiUrl: string, withAuth: boolean = true): AxiosInstance => {
                     return Promise.reject(error);
                 }
 
-                // ✅ CHỈ REFRESH KHI NHẬN 401 (ACCESS TOKEN HẾT HẠN)
+                // CHỈ REFRESH KHI NHẬN 401 (ACCESS TOKEN HẾT HẠN)
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     if (isRefreshing) {
                         return new Promise((resolve, reject) => {

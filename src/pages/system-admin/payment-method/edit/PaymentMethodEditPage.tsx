@@ -21,7 +21,7 @@ import {
 import { EPaymentMethodStatus } from "@/types/enums/payment-method-status.enum";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircleIcon, Upload, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -31,7 +31,6 @@ const PaymentMethodEditPage = () => {
   const { id } = useParams<{ id: string }>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isImageChanged, setIsImageChanged] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -53,6 +52,9 @@ const PaymentMethodEditPage = () => {
   }
 
   const paymentMethod = paymentMethodData.data.data;
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    paymentMethod?.imageUrl ?? null,
+  );
 
   const updatePaymentMethodMutation = updatePaymentMethod(id!);
 
@@ -65,16 +67,6 @@ const PaymentMethodEditPage = () => {
       status: paymentMethod.status,
     },
   });
-
-  useEffect(() => {
-    if (!paymentMethod.imageUrl) return;
-
-    // Chỉ set image preview từ server khi chưa có thay đổi từ user
-    if (!isImageChanged) {
-      setImagePreview(paymentMethod.imageUrl);
-      setImageError(false);
-    }
-  }, [paymentMethod.imageUrl, isImageChanged]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -152,7 +144,6 @@ const PaymentMethodEditPage = () => {
           : toast.error(message);
       }
 
-      // navigate(PATH_SYSTEM_ADMIN_DASHBOARD.brand.root);
     } catch (err) {
       handleApiError(err);
     }

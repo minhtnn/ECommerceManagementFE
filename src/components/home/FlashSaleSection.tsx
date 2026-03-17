@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
-// import { flashSaleProducts } from "@/data/mockData";
 import ProductCard from "@/pages/guest/products/list/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";

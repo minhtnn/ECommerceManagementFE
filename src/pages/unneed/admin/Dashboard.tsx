@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +30,7 @@ import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useNotifications, type Notification } from "@/contexts/NotificationContext";
 import { useSupportChat } from "@/contexts/SupportChatContext";
+import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -387,8 +387,5 @@ const Dashboard = () => {
     </AdminLayout>
   );
 };
-
-// Helper function
-const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(" ");
 
 export default Dashboard;

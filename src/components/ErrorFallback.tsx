@@ -1,4 +1,3 @@
-// import ImageNotFound from "@/assets/illustration/image-not-found";
 import { Button } from "@/components/ui/button";
 import { handleApiError } from "@/lib/error";
 import { RefreshCw } from "lucide-react";
@@ -14,7 +13,6 @@ export const ErrorFallback = ( { error, resetErrorBoundary }: FallbackProps ) =>
             <p className="text-sm text-gray-500 mb-4">
                 Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ nếu sự cố vẫn tiếp diễn.
             </p>
-            {/* <ImageNotFound className="w-80 h-80 mx-auto mb-4" /> */}
             <Button onClick={ resetErrorBoundary }>
                 <RefreshCw className="mr-2" />
                 Thử lại

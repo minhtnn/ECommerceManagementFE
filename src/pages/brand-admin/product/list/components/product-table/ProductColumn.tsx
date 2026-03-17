@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn, formatNumber, formatPrice } from "@/lib/utils";
+import { cn, copyToClipboard, formatNumber, formatPrice } from "@/lib/utils";
 import { PATH_BRAND_DASHBOARD } from "@/routes/path";
 import { TProductList } from "@/schemas/product.schema";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -58,7 +58,7 @@ export const columns: ColumnDef<TProductList>[] = [
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0 flex-shrink-0"
-            // onClick={ () => copyToClipboard( code, "Mã thương hiệu" ) }
+            onClick={ () => copyToClipboard( code, "Mã thương hiệu" ) }
           >
             <Copy className="h-3 w-3" />
           </Button>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useCustomer } from "@/hooks/use-customer";
 import { EndCustomerAccountLayout } from "@/layouts/EndCustomerAccountLayout";
 import { handleApiError } from "@/lib/error";
+import { TCustomerAddressListResponse } from "@/schemas/customer.schema";
 import {
   Edit,
   LocateFixedIcon,
@@ -12,9 +13,8 @@ import {
   Star,
   User,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CustomerAddressDialog from "./components/CustomerAddressDialog";
-import { TCustomerAddressListResponse } from "@/schemas/customer.schema";
 
 const EndCustomerAddressListPage = () => {
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);

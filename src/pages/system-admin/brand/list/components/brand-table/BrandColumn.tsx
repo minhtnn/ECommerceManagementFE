@@ -75,7 +75,6 @@ export const columns: ColumnDef<TBrandListResponse>[] = [
   {
     accessorKey: "name",
     header: ({ column }) =>
-      // <div className="font-semibold text-base">Tên thương hiệu</div>,
       createFormattedHeader("Tên thương hiệu", column, {
         sortable: true,
         className: "font-semibold text-base",

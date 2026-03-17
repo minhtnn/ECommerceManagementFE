@@ -12,7 +12,6 @@ export const ProductCategoryListSchema = z.object({
 });
 export const ProductCategoryDetailSchema = z.object({
     id: z.string().uuid(),
-    // brandId: z.string().uuid(),
     parentProductCategoryName: z.string().nullable(),
     code: z.string(),
     name: z.string(),

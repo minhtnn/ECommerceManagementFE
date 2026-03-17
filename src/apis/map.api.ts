@@ -2,9 +2,6 @@ import { apiRequest } from "@/lib/http"
 import { TOpenApiProvinceDetailResponse, TOpenApiProvinceListResponse, TOpenApiWardDetailResponse, TOpenApiWardListResponse } from "@/schemas/map.schema"
 import { MAP_API_SUFFIX } from "./util.api";
 
-// const getCountries = async (params?: any) =>
-//     await apiRequest.mapApiUrl.get<T>
-
 const getProvinces = async (params?: any) =>
     await apiRequest.mapApiUrl.get<TOpenApiProvinceListResponse[]>(`${MAP_API_SUFFIX.PROVINCE_API}`, { params: params });
 

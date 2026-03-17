@@ -46,8 +46,6 @@ export const CreateBrandSchema = z.object({
     )
         .min(2, { message: "Tên thương hiệu không ít hơn 2 kí tự" })
         .max(50, { message: "Tên thương hiệu không được vượt quá 50 ký tự" }),
-    // fullName: z.string().max(100, { message: "Tên đầy đủ không được vượt quá 100 ký tự" }).optional(),
-    // slogan: z.string().max(200, { message: "Khẩu hiệu không được vượt quá 200 ký tự" }).optional(),
     configuration: z.string().optional(),
     username: z.string({required_error: "Tên đăng nhập không được bỏ trống"})
         .min(4, { message: "Tên đăng nhập không ít hơn 4 kí tự" })

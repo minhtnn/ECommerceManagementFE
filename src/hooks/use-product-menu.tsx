@@ -1,4 +1,3 @@
-// hooks/use-product-menu.ts
 import { menuProductApi } from "@/apis/menu-product.api";
 import envConfig from "@/schemas/config.schema";
 import {

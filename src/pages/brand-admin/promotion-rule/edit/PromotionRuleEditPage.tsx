@@ -27,16 +27,15 @@ import {
   TUpdatePromotionRule,
   UpdatePromotionRuleSchema,
 } from "@/schemas/promotion-rule.schema";
+import { EActionTargetRole } from "@/types/enums/action-target-role.enum";
+import { EActionTargetType } from "@/types/enums/action-target-type.enum";
 import { EPromotionStatus } from "@/types/enums/promotion-status.enum";
 import { EPromotionType } from "@/types/enums/promotion-type.enum";
 import { ERuleActionType } from "@/types/enums/rule-action-type.enum";
 import { ERuleConditionOperator } from "@/types/enums/rule-condition-operator.enum";
 import { ERuleConditionType } from "@/types/enums/rule-condition-type.enum";
-import { EActionTargetRole } from "@/types/enums/action-target-role.enum";
-import { EActionTargetType } from "@/types/enums/action-target-type.enum";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Plus, Trash2 } from "lucide-react";
-import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -52,20 +51,50 @@ const PROMOTION_TYPE_LABEL: Record<number, string> = {
   [EPromotionType.FreeShipping]: "Miễn phí ship",
 };
 
-const STATUS_CONFIG: Record<EPromotionStatus, { label: string; className: string }> = {
-  [EPromotionStatus.Draft]: { label: "Nháp", className: "bg-gray-100 text-gray-600" },
-  [EPromotionStatus.Active]: { label: "Đang chạy", className: "bg-green-100 text-green-700" },
-  [EPromotionStatus.Inactive]: { label: "Đã tắt", className: "bg-red-100 text-red-600" },
-  [EPromotionStatus.Expired]: { label: "Hết hạn", className: "bg-slate-100 text-slate-500" },
+const STATUS_CONFIG: Record<
+  EPromotionStatus,
+  { label: string; className: string }
+> = {
+  [EPromotionStatus.Draft]: {
+    label: "Nháp",
+    className: "bg-gray-100 text-gray-600",
+  },
+  [EPromotionStatus.Active]: {
+    label: "Đang chạy",
+    className: "bg-green-100 text-green-700",
+  },
+  [EPromotionStatus.Inactive]: {
+    label: "Đã tắt",
+    className: "bg-red-100 text-red-600",
+  },
+  [EPromotionStatus.Expired]: {
+    label: "Hết hạn",
+    className: "bg-slate-100 text-slate-500",
+  },
 };
 
 const CONDITION_TYPE_OPTIONS = [
   { value: ERuleConditionType.CartSubtotal, label: "Tổng giá trị giỏ hàng" },
-  { value: ERuleConditionType.CartContainsProduct, label: "Giỏ hàng có sản phẩm" },
-  { value: ERuleConditionType.CartContainsCategory, label: "Giỏ hàng có danh mục" },
-  { value: ERuleConditionType.MinQuantityOfProduct, label: "Số lượng sản phẩm tối thiểu" },
-  { value: ERuleConditionType.MinQuantityInCategory, label: "Số lượng trong danh mục" },
-  { value: ERuleConditionType.TotalCartQuantity, label: "Tổng số lượng giỏ hàng" },
+  {
+    value: ERuleConditionType.CartContainsProduct,
+    label: "Giỏ hàng có sản phẩm",
+  },
+  {
+    value: ERuleConditionType.CartContainsCategory,
+    label: "Giỏ hàng có danh mục",
+  },
+  {
+    value: ERuleConditionType.MinQuantityOfProduct,
+    label: "Số lượng sản phẩm tối thiểu",
+  },
+  {
+    value: ERuleConditionType.MinQuantityInCategory,
+    label: "Số lượng trong danh mục",
+  },
+  {
+    value: ERuleConditionType.TotalCartQuantity,
+    label: "Tổng số lượng giỏ hàng",
+  },
 ];
 
 const CONDITION_OPERATOR_OPTIONS = [
@@ -78,10 +107,19 @@ const CONDITION_OPERATOR_OPTIONS = [
 
 const ACTION_TYPE_OPTIONS = [
   { value: ERuleActionType.CartPercentageDiscount, label: "Giảm % toàn đơn" },
-  { value: ERuleActionType.CartFixedDiscount, label: "Giảm tiền cố định toàn đơn" },
+  {
+    value: ERuleActionType.CartFixedDiscount,
+    label: "Giảm tiền cố định toàn đơn",
+  },
   { value: ERuleActionType.ItemPercentageDiscount, label: "Giảm % sản phẩm" },
-  { value: ERuleActionType.ItemFixedDiscount, label: "Giảm tiền cố định / sản phẩm" },
-  { value: ERuleActionType.BuyXGetYFreeProducts, label: "Mua X tặng Y sản phẩm" },
+  {
+    value: ERuleActionType.ItemFixedDiscount,
+    label: "Giảm tiền cố định / sản phẩm",
+  },
+  {
+    value: ERuleActionType.BuyXGetYFreeProducts,
+    label: "Mua X tặng Y sản phẩm",
+  },
   { value: ERuleActionType.FreeGiftProduct, label: "Tặng quà cố định" },
   { value: ERuleActionType.FreeShipping, label: "Miễn phí vận chuyển" },
 ];
@@ -137,22 +175,21 @@ const PromotionRuleEditPage = () => {
   const promotion = promotionData?.data?.data;
 
   const lifecycleState: LifecycleState = promotion
-    ? getLifecycleState(promotion.status, promotion.startDate, promotion.endDate)
+    ? getLifecycleState(
+        promotion.status,
+        promotion.startDate,
+        promotion.endDate,
+      )
     : "NotStarted";
 
-  const isReadOnly = lifecycleState === "Expired" || lifecycleState === "Inactive";
+  const isReadOnly =
+    lifecycleState === "Expired" || lifecycleState === "Inactive";
   const isRunning = lifecycleState === "Running";
   const isPending = updateMutation.isPending || deactivateMutation.isPending;
 
   const form = useForm<TUpdatePromotionRule>({
     resolver: zodResolver(UpdatePromotionRuleSchema),
-    defaultValues: { id: id! },
-  });
-
-  // Populate form khi data load xong
-  useEffect(() => {
-    if (!promotion) return;
-    form.reset({
+    defaultValues: {
       id: promotion.id,
       name: promotion.name,
       shortDescription: promotion.shortDescription ?? "",
@@ -171,7 +208,8 @@ const PromotionRuleEditPage = () => {
       ruleActions: promotion.ruleActions.map((a) => ({
         actionType: a.actionType,
         value: a.value ?? "",
-        maxDiscountAmountForPercentage: a.maxDiscountAmountForPercentage ?? undefined,
+        maxDiscountAmountForPercentage:
+          a.maxDiscountAmountForPercentage ?? undefined,
         ruleActionTargets: a.ruleActionTargets.map((t) => ({
           targetType: t.targetType,
           targetId: t.targetId,
@@ -179,8 +217,8 @@ const PromotionRuleEditPage = () => {
           role: t.role,
         })),
       })),
-    });
-  }, [promotion]);
+    },
+  });
 
   const {
     fields: conditionFields,
@@ -274,15 +312,14 @@ const PromotionRuleEditPage = () => {
       {/* Running warning */}
       {isRunning && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-          Khuyến mãi đang chạy. Chỉ có thể chỉnh sửa: Tên, Mô tả, Ngày kết
-          thúc (chỉ kéo dài), Cap giảm tối đa và Trạng thái (tắt).
-          Conditions và Actions không thể thay đổi.
+          Khuyến mãi đang chạy. Chỉ có thể chỉnh sửa: Tên, Mô tả, Ngày kết thúc
+          (chỉ kéo dài), Cap giảm tối đa và Trạng thái (tắt). Conditions và
+          Actions không thể thay đổi.
         </div>
       )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
           {/* ── THÔNG TIN CƠ BẢN ─────────────────────────────────── */}
           <div className="bg-background rounded-lg border p-6 space-y-4">
             <h2 className="text-lg font-semibold">Thông tin cơ bản</h2>
@@ -340,7 +377,11 @@ const PromotionRuleEditPage = () => {
                 <FormItem>
                   <FormLabel>Mô tả chi tiết</FormLabel>
                   <FormControl>
-                    <Textarea rows={3} {...field} disabled={isPending || isReadOnly} />
+                    <Textarea
+                      rows={3}
+                      {...field}
+                      disabled={isPending || isReadOnly}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -398,7 +439,9 @@ const PromotionRuleEditPage = () => {
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value === "" ? undefined : Number(e.target.value),
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value),
                           )
                         }
                         disabled={isPending || isReadOnly}
@@ -489,7 +532,10 @@ const PromotionRuleEditPage = () => {
                         </FormControl>
                         <SelectContent>
                           {CONDITION_TYPE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={String(opt.value)}>
+                            <SelectItem
+                              key={opt.value}
+                              value={String(opt.value)}
+                            >
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -517,7 +563,10 @@ const PromotionRuleEditPage = () => {
                         </FormControl>
                         <SelectContent>
                           {CONDITION_OPERATOR_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={String(opt.value)}>
+                            <SelectItem
+                              key={opt.value}
+                              value={String(opt.value)}
+                            >
                               {opt.label}
                             </SelectItem>
                           ))}
@@ -611,7 +660,9 @@ const PromotionRuleEditPage = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(PATH_BRAND_DASHBOARD.promotionRule.root)}
+                onClick={() =>
+                  navigate(PATH_BRAND_DASHBOARD.promotionRule.root)
+                }
                 disabled={isPending}
               >
                 {isReadOnly ? "Quay lại" : "Hủy"}
@@ -653,11 +704,14 @@ const EditActionBlock = ({
   canRemove: boolean;
   isReadOnly: boolean;
 }) => {
-  const { fields: targetFields, append: appendTarget, remove: removeTarget } =
-    useFieldArray({
-      control: form.control,
-      name: `ruleActions.${actionIndex}.ruleActionTargets`,
-    });
+  const {
+    fields: targetFields,
+    append: appendTarget,
+    remove: removeTarget,
+  } = useFieldArray({
+    control: form.control,
+    name: `ruleActions.${actionIndex}.ruleActionTargets`,
+  });
 
   return (
     <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
@@ -715,7 +769,9 @@ const EditActionBlock = ({
                   value={field.value ?? ""}
                   onChange={(e) =>
                     field.onChange(
-                      e.target.value === "" ? undefined : Number(e.target.value),
+                      e.target.value === ""
+                        ? undefined
+                        : Number(e.target.value),
                     )
                   }
                   disabled={isPending || isReadOnly}
