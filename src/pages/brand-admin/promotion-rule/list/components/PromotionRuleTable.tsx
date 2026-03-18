@@ -64,6 +64,7 @@ const PromotionRuleTable = () => {
         ? [
             { label: "Tất cả", value: null },
             { label: "Nháp", value: EPromotionStatus.Draft.toString() },
+            { label: "Đang chờ", value: EPromotionStatus.Pending.toString() },
             { label: "Đang hoạt động", value: EPromotionStatus.Active.toString() },
             { label: "Đã tắt", value: EPromotionStatus.Inactive.toString() },
             { label: "Hết hạn", value: EPromotionStatus.Expired.toString() },

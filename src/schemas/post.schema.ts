@@ -7,6 +7,7 @@ export const PostListSchema = z.object({
     code: z.string(),
     title: z.string(),
     imageUrl: z.string().nullable(),
+    status: z.nativeEnum(EPostStatus),
 });
 
 export const PostDetailSchema = z.object({

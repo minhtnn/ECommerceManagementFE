@@ -1439,6 +1439,7 @@ const PromotionRuleCreatePage = () => {
       ruleActions: [
         { ...PROMOTION_CONFIG[EPromotionType.OrderDiscount].defaultHanhDong },
       ],
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
   });
 

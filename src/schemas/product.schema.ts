@@ -32,7 +32,7 @@ export const ProductSideAttributeSchema = z.object({
 
 export const ProductDetailSchema = z.object({
     id: z.string().uuid(),
-    productCategoryName: z.string().uuid(),
+    productCategoryName: z.string(),
     code: z.string().nonempty({ message: "Mã sản phẩm không được bỏ trống" }),
     name: z.string().nonempty({ message: "Tên sản phẩm không được bỏ trống" }),
     fullName: z.string().optional(),

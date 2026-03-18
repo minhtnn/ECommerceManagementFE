@@ -63,14 +63,14 @@ export const PostCard = ({ post }: PostCardProps) => (
         </div>
 
         <Link to={PATH_GUEST.news.detail(post.id)}>
-          <h2 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors leading-tight line-clamp-2">
+          <h2 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors leading-tight line-clamp-2 whitespace-pre-line">
             {post.title}
           </h2>
         </Link>
 
         {/* Excerpt — điểm khác biệt lớn nhất */}
         {post.excerpt && (
-          <p className="text-muted-foreground leading-relaxed mb-4 line-clamp-3">
+          <p className="text-muted-foreground leading-relaxed mb-4 line-clamp-3 whitespace-pre-line">
             {post.excerpt}
           </p>
         )}

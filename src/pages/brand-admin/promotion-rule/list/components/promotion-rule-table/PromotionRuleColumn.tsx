@@ -23,6 +23,10 @@ const STATUS_CONFIG: Record<
     label: "Nháp",
     className: "bg-gray-100 text-gray-600",
   },
+  [EPromotionStatus.Pending]: {
+    label: "Đang chờ",
+    className: "bg-yellow-100 text-yellow-700",
+  },
   [EPromotionStatus.Active]: {
     label: "Đang chạy",
     className: "bg-green-100 text-green-700",

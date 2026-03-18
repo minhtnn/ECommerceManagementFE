@@ -12,6 +12,7 @@ interface UsePostParams {
     status?: EPostStatus | null;
     fromDate?: string | null;
     toDate?: string | null;
+    timeZone?: string;
     allowFetch?: boolean;
 }
 

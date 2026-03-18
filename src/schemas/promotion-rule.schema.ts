@@ -5,6 +5,7 @@ import { EPromotionType } from "@/types/enums/promotion-type.enum";
 import { ERuleActionType } from "@/types/enums/rule-action-type.enum";
 import { ERuleConditionOperator } from "@/types/enums/rule-condition-operator.enum";
 import { ERuleConditionType } from "@/types/enums/rule-condition-type.enum";
+import { time } from "console";
 
 import z from "zod";
 
@@ -98,6 +99,7 @@ export const CreatePromotionRuleSchema = z.object({
     priority: z.number().min(0).optional(),
     startDate: z.string().nonempty({ message: "Ngày bắt đầu không được để trống" }),
     endDate: z.string().nonempty({ message: "Ngày kết thúc không được để trống" }),
+    timeZone: z.string({required_error: "Múi giờ không được để trống"}).nonempty({ message: "Múi giờ không được để trống" }),
     ruleConditions: z.array(RuleConditionSchema)
         .min(1, { message: "Phải có ít nhất 1 điều kiện" }),
     ruleActions: z.array(RuleActionSchema)

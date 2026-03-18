@@ -46,7 +46,7 @@ const SidebarCard = ({ id, title, imageUrl }: SidebarCardProps) => (
         <ImageOff className="w-4 h-4 text-muted-foreground/40" />
       )}
     </div>
-    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug whitespace-pre-line">
       {title}
     </p>
   </Link>
@@ -182,7 +182,8 @@ const PublicPostDetailPage = () => {
                                             prose-strong:text-foreground
                                             prose-em:text-primary
                                             prose-ul:text-muted-foreground prose-ul:my-4
-                                            prose-li:my-1"
+                                            prose-li:my-1
+                                            whitespace-pre-line"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                   />
                 ) : (
