@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/utils";
 import { PATH_GUEST } from "@/routes/path";
 import { CheckCircle, Home } from "lucide-react";
@@ -36,7 +37,6 @@ const PaymentSuccessDialog = ({
       return;
     }
 
-    // Start countdown
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -59,7 +59,7 @@ const PaymentSuccessDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[450px] p-0 gap-0">
-        {/* Success Animation */}
+        {/* ── Header ──────────────────────────────────────────────── */}
         <div className="bg-gradient-to-b from-green-50 to-white p-8 pb-6">
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4 animate-bounce-once">
@@ -76,12 +76,13 @@ const PaymentSuccessDialog = ({
           </div>
         </div>
 
-        {/* Order Info */}
+        {/* ── Order Info ──────────────────────────────────────────── */}
         <div className="px-8 py-6 space-y-4">
+          {/* Order code + amount */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Mã đơn hàng</span>
-              <span className="font-bold text-green-700">{orderCode || "N/A"}</span>
+              <span className="font-bold text-green-700">{orderCode ?? "N/A"}</span>
             </div>
             {amount && (
               <div className="flex items-center justify-between">
@@ -93,15 +94,17 @@ const PaymentSuccessDialog = ({
             )}
           </div>
 
-          {/* Countdown Info */}
-          <div className="text-center py-4">
+          <Separator />
+
+          {/* Countdown */}
+          <div className="text-center py-2">
             <p className="text-sm text-gray-600">
               Tự động chuyển về trang chủ sau{" "}
               <span className="font-bold text-primary">{countdown}</span> giây
             </p>
           </div>
 
-          {/* Action Button */}
+          {/* Action */}
           <Button
             className="w-full bg-green-600 hover:bg-green-700 gap-2"
             onClick={handleGoHome}

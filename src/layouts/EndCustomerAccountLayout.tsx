@@ -14,7 +14,7 @@ export const EndCustomerAccountLayout = ({
   breadcrumbs = [],
 }: EndCustomerAccountLayoutProps) => {
   return (
-    <EndUserLayout>
+    <>
       {/* Breadcrumb */}
       <div className="bg-muted/30 py-3 border-b">
         <div className="container mx-auto px-4">
@@ -62,6 +62,6 @@ export const EndCustomerAccountLayout = ({
           <div className="md:col-span-2">{children}</div>
         </div>
       </div>
-    </EndUserLayout>
+    </>
   );
 };

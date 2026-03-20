@@ -103,6 +103,7 @@ export const BrandPaymentMethodUpdateSchema = z.object({
 export const BrandPublicPaymentMethodListResponseSchema = z.object({
     id: z.string(),
     paymentMethodId: z.string(),
+    brandPaymentMethodCode: z.string(),
     name: z.string(),
     imageUrl: z.string().nullable(),
     isActive: z.boolean(),

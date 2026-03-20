@@ -10,6 +10,7 @@ interface ModalState {
   isEditAccountDialogOpen: boolean;
   registerEmail: string | undefined;
   showOTPModal: boolean;
+  // isOrderSuccessDialogOpen?: boolean;
 }
 
 const initialState: ModalState = {
@@ -22,6 +23,7 @@ const initialState: ModalState = {
   registerEmail: undefined,
   showOTPModal: false,
   isChangePasswordDashboardDialogOpen: false,
+  // isOrderSuccessDialogOpen: false,
 };
 
 export const modalSlice = createSlice({
@@ -76,6 +78,12 @@ export const modalSlice = createSlice({
     ) {
       state.isChangePasswordDashboardDialogOpen = action?.payload;
     },
+    // handleSetIsOrderSuccessDialogOpen(
+    //   state,
+    //   action: PayloadAction<boolean>
+    // ) {
+    //   state.isOrderSuccessDialogOpen = action?.payload;
+    // }
   },
 });
 
@@ -88,7 +96,8 @@ export const {
   handleSetIsEditAccountDialogOpen,
   handleSetRegisterEmail,
   handleToggleOTPModal,
-  handleChangePasswordDashboardDialogOpen
+  handleChangePasswordDashboardDialogOpen,
+  // handleSetIsOrderSuccessDialogOpen,
 } = modalSlice.actions;
 
 export default modalSlice.reducer;

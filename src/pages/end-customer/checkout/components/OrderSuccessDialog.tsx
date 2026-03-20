@@ -6,12 +6,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/utils";
 import { PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
 import { CheckCircle, Package, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TCreateOrderResponse } from "@/schemas/order.schema";
-import { Separator } from "@/components/ui/separator";
 
 interface OrderSuccessDialogProps {
   open: boolean;
@@ -19,6 +19,47 @@ interface OrderSuccessDialogProps {
   orderData: TCreateOrderResponse | null;
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────
+const formatDate = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateString;
+  }
+};
+
+const ORDER_STATUS_MAP: Record<string, string> = {
+  WaitingPayment: "Chờ thanh toán",
+  Pending: "Chờ xử lý",
+  Processing: "Đang xử lý",
+  Shipped: "Đang giao hàng",
+  Delivered: "Đã giao hàng",
+  Cancelled: "Đã hủy",
+};
+
+const PAYMENT_STATUS_MAP: Record<string, string> = {
+  Pending: "Chờ thanh toán",
+  Processing: "Đang xử lý",
+  Completed: "Đã thanh toán",
+  Failed: "Thất bại",
+  Expired: "Hết hạn",
+};
+
+const PAYMENT_STATUS_COLOR: Record<string, string> = {
+  Pending: "text-yellow-600 bg-yellow-50 border border-yellow-200",
+  Processing: "text-blue-600 bg-blue-50 border border-blue-200",
+  Completed: "text-green-600 bg-green-50 border border-green-200",
+  Failed: "text-red-600 bg-red-50 border border-red-200",
+  Expired: "text-gray-600 bg-gray-50 border border-gray-200",
+};
+
+// ── Component ──────────────────────────────────────────────────────────────
 const OrderSuccessDialog = ({
   open,
   onOpenChange,
@@ -26,130 +67,76 @@ const OrderSuccessDialog = ({
 }: OrderSuccessDialogProps) => {
   if (!orderData) return null;
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return dateString;
-    }
-  };
-
-  const getOrderStatusText = (status: string) => {
-    const statusMap: Record<string, string> = {
-      WaitingPayment: "Chờ thanh toán",
-      Pending: "Chờ xử lý",
-      Processing: "Đang xử lý",
-      Shipped: "Đang giao hàng",
-      Delivered: "Đã giao hàng",
-      Cancelled: "Đã hủy",
-    };
-    return statusMap[status] || status;
-  };
-
-  const getPaymentStatusText = (status: string) => {
-    const statusMap: Record<string, string> = {
-      Pending: "Chờ thanh toán",
-      Processing: "Đang xử lý",
-      Completed: "Đã thanh toán",
-      Failed: "Thất bại",
-      Expired: "Hết hạn",
-    };
-    return statusMap[status] || status;
-  };
-
-  const getPaymentStatusColor = (status: string) => {
-    const colorMap: Record<string, string> = {
-      Pending: "text-yellow-600 bg-yellow-50",
-      Processing: "text-blue-600 bg-blue-50",
-      Completed: "text-green-600 bg-green-50",
-      Failed: "text-red-600 bg-red-50",
-      Expired: "text-gray-600 bg-gray-50",
-    };
-    return colorMap[status] || "text-gray-600 bg-gray-50";
-  };
+  const orderStatus = orderData.orderStatus.toString();
+  const paymentStatus = orderData.paymentStatus.toString();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-0 gap-0">
-        {/* Header with Success Icon */}
-        <div className="bg-gradient-to-b from-green-50 to-white p-6 pb-4">
+      <DialogContent className="sm:max-w-[450px] p-0 gap-0">
+        {/* ── Header ──────────────────────────────────────────────── */}
+        <div className="bg-gradient-to-b from-green-50 to-white p-8 pb-6">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4 animate-bounce-once">
-              <CheckCircle size={32} className="text-green-600" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4 animate-bounce-once">
+              <CheckCircle size={48} className="text-green-600" />
             </div>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-center">
+              <DialogTitle className="text-2xl font-bold text-center text-green-700">
                 Đặt hàng thành công!
               </DialogTitle>
-              <DialogDescription className="text-center text-base mt-2">
-                Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ xử lý đơn hàng của bạn sớm
-                nhất có thể.
+              <DialogDescription className="text-center text-base mt-3 text-gray-600">
+                Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ xử lý đơn hàng của bạn
+                sớm nhất có thể.
               </DialogDescription>
             </DialogHeader>
           </div>
         </div>
 
-        {/* Order Details */}
-        <div className="px-6 py-4 space-y-4">
-          {/* Order Code Card */}
-          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+        {/* ── Order Info ──────────────────────────────────────────── */}
+        <div className="px-8 py-6 space-y-4">
+          {/* Order code + total */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">Mã đơn hàng</span>
+              <span className="font-bold text-green-700">{orderData.orderCode}</span>
+            </div>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">
-                  Mã đơn hàng
-                </p>
-                <p className="font-bold text-lg text-primary">
-                  {orderData.orderCode}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground mb-1">Tổng tiền</p>
-                <p className="font-bold text-lg text-foreground">
-                  {formatPrice(orderData.totalAmount)}
-                </p>
-              </div>
+              <span className="text-sm text-gray-600">Tổng tiền</span>
+              <span className="font-bold text-lg text-green-700">
+                {formatPrice(orderData.totalAmount)}
+              </span>
             </div>
           </div>
 
           <Separator />
 
-          {/* Order Info */}
+          {/* Status rows */}
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Trạng thái đơn hàng</span>
+              <span className="text-gray-600">Trạng thái đơn hàng</span>
               <span className="font-medium">
-                {getOrderStatusText(orderData.orderStatus.toString())}
+                {ORDER_STATUS_MAP[orderStatus] ?? orderStatus}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                Trạng thái thanh toán
-              </span>
+              <span className="text-gray-600">Trạng thái thanh toán</span>
               <span
-                className={`font-medium px-2 py-1 rounded-full text-xs ${getPaymentStatusColor(orderData.paymentStatus.toString())}`}
+                className={`font-medium px-2 py-1 rounded-full text-xs ${
+                  PAYMENT_STATUS_COLOR[paymentStatus] ??
+                  "text-gray-600 bg-gray-50 border border-gray-200"
+                }`}
               >
-                {getPaymentStatusText(orderData.paymentStatus.toString())}
+                {PAYMENT_STATUS_MAP[paymentStatus] ?? paymentStatus}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Thời gian đặt hàng</span>
-              <span className="font-medium">
-                {formatDate(orderData.createdDate)}
-              </span>
+              <span className="text-gray-600">Thời gian đặt hàng</span>
+              <span className="font-medium">{formatDate(orderData.createdDate)}</span>
             </div>
           </div>
 
-          {/* Payment URL Info (if COD) */}
+          {/* COD notice */}
           {!orderData.paymentUrl && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm text-blue-800">
@@ -158,7 +145,7 @@ const OrderSuccessDialog = ({
             </div>
           )}
 
-          {/* QR Code (if available) */}
+          {/* QR Code */}
           {orderData.qrCode && (
             <div className="bg-muted rounded-lg p-4 text-center">
               <p className="text-sm text-muted-foreground mb-3">
@@ -171,31 +158,34 @@ const OrderSuccessDialog = ({
               />
             </div>
           )}
-        </div>
 
-        {/* Actions */}
-        <div className="px-6 pb-6 space-y-3">
-          <Link
-            to={PATH_END_CUSTOMER.orders.view(orderData.orderId)}
-            onClick={() => onOpenChange(false)}
-            className="block w-full"
-          >
-            <Button variant="outline" className="w-full gap-2">
-              <Package size={16} />
-              Xem chi tiết đơn hàng
-            </Button>
-          </Link>
+          {/* Actions */}
+          <div className="space-y-3 pt-1">
+            <Link
+              to={PATH_END_CUSTOMER.orders.view(orderData.orderId)}
+              onClick={() => onOpenChange(false)}
+              className="block w-full"
+            >
+              <Button variant="outline" className="w-full gap-2" size="lg">
+                <Package size={18} />
+                Xem chi tiết đơn hàng
+              </Button>
+            </Link>
 
-          <Link
-            to={PATH_GUEST.products.root}
-            onClick={() => onOpenChange(false)}
-            className="block w-full"
-          >
-            <Button className="w-full gap-2 bg-primary hover:bg-primary/90">
-              <ShoppingBag size={16} />
-              Tiếp tục mua sắm
-            </Button>
-          </Link>
+            <Link
+              to={PATH_GUEST.products.root}
+              onClick={() => onOpenChange(false)}
+              className="block w-full"
+            >
+              <Button
+                className="w-full gap-2 bg-green-600 hover:bg-green-700"
+                size="lg"
+              >
+                <ShoppingBag size={18} />
+                Tiếp tục mua sắm
+              </Button>
+            </Link>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

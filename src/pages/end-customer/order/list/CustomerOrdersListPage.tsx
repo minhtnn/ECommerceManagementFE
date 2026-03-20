@@ -19,80 +19,22 @@ import { useOrder } from "@/hooks/use-order";
 import { EndCustomerAccountLayout } from "@/layouts/EndCustomerAccountLayout";
 import { cn, formatPrice } from "@/lib/utils";
 import { PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
-import { EOrderStatus } from "@/types/enums/order-status.enum";
-import { EPaymentStatus } from "@/types/enums/payment-status.enum";
+import {
+  EOrderStatus,
+  getOrderStatusConfig,
+} from "@/types/enums/order-status.enum";
+import {
+  EPaymentStatus,
+  getPaymentStatusConfig,
+} from "@/types/enums/payment-status.enum";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Eye, Loader2, Package, Search, ShoppingBag } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { OrderCard } from "./components/OrderCard";
 
 // Helper functions (same as before)
-const getOrderStatusConfig = (status: EOrderStatus) => {
-  const configs = {
-    [EOrderStatus.WaitingPayment]: {
-      label: "Chờ thanh toán",
-      className: "bg-yellow-100 text-yellow-800 border-yellow-300",
-    },
-    [EOrderStatus.Pending]: {
-      label: "Chờ xác nhận",
-      className: "bg-orange-100 text-orange-800 border-orange-300",
-    },
-    [EOrderStatus.Processing]: {
-      label: "Đang xử lý",
-      className: "bg-blue-100 text-blue-800 border-blue-300",
-    },
-    [EOrderStatus.Shipped]: {
-      label: "Đang giao hàng",
-      className: "bg-purple-100 text-purple-800 border-purple-300",
-    },
-    [EOrderStatus.Delivered]: {
-      label: "Đã giao hàng",
-      className: "bg-green-100 text-green-800 border-green-300",
-    },
-    [EOrderStatus.Cancelled]: {
-      label: "Đã hủy",
-      className: "bg-red-100 text-red-800 border-red-300",
-    },
-  };
-  return (
-    configs[status] || {
-      label: "Không xác định",
-      className: "bg-gray-100 text-gray-800",
-    }
-  );
-};
-
-const getPaymentStatusConfig = (status: EPaymentStatus) => {
-  const configs = {
-    [EPaymentStatus.Pending]: {
-      label: "Chờ thanh toán",
-      className: "bg-yellow-100 text-yellow-800 border-yellow-300",
-    },
-    [EPaymentStatus.Processing]: {
-      label: "Đang xử lý",
-      className: "bg-blue-100 text-blue-800 border-blue-300",
-    },
-    [EPaymentStatus.Completed]: {
-      label: "Thành công",
-      className: "bg-green-100 text-green-800 border-green-300",
-    },
-    [EPaymentStatus.Failed]: {
-      label: "Thất bại",
-      className: "bg-red-100 text-red-800 border-red-300",
-    },
-    [EPaymentStatus.Expired]: {
-      label: "Hết hạn",
-      className: "bg-gray-100 text-gray-800 border-gray-300",
-    },
-  };
-  return (
-    configs[status] || {
-      label: "Không xác định",
-      className: "bg-gray-100 text-gray-800",
-    }
-  );
-};
 
 const EndCustomerOrdersListPage = () => {
   const navigate = useNavigate();
@@ -290,91 +232,7 @@ const EndCustomerOrdersListPage = () => {
       ) : (
         <div className="space-y-4">
           {allOrders.map((order) => {
-            const orderStatusConfig = getOrderStatusConfig(order.orderStatus);
-            const paymentStatusConfig = getPaymentStatusConfig(
-              order.paymentStatus,
-            );
-
-            return (
-              <Card
-                key={order.id}
-                className="hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() =>
-                  navigate(PATH_END_CUSTOMER.orders.view(order.id))
-                }
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold">
-                          Mã đơn hàng:{" "}
-                          <span className="font-mono">{order.code}</span>
-                        </h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {format(
-                          new Date(order.createdDate),
-                          "dd/MM/yyyy HH:mm",
-                          { locale: vi },
-                        )}
-                      </p>
-                    </div>
-                    <Button variant="ghost" size="icon">
-                      <Eye className="w-5 h-5" />
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Trạng thái đơn
-                      </p>
-                      <Badge
-                        className={cn(
-                          orderStatusConfig.className,
-                          "border text-sm",
-                        )}
-                      >
-                        {orderStatusConfig.label}
-                      </Badge>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Thanh toán
-                      </p>
-                      <Badge
-                        className={cn(
-                          paymentStatusConfig.className,
-                          "border text-sm",
-                        )}
-                      >
-                        {paymentStatusConfig.label}
-                      </Badge>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Số sản phẩm
-                      </p>
-                      <p className="font-semibold">
-                        {order.itemCount} sản phẩm
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Tổng tiền
-                      </p>
-                      <p className="font-bold text-primary">
-                        {formatPrice(order.totalAmount)}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
+            return <OrderCard order={order} />;
           })}
 
           {/* Loading more indicator */}
