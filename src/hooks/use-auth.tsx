@@ -11,36 +11,34 @@ interface UseAccountDetailParams {}
 export const useAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const loginMutation = useMutation({
-    mutationFn: authApi.login,
-    onSuccess: (response) => {
-      const userData = response.data.data;
-      dispatch(setUser(userData));
-    },
-    onError: (error: any) => {
-      toast.error("Đăng nhập thất bại:", error);
-    },
-  });
+  const login = () =>
+    useMutation({
+      mutationFn: authApi.login,
+    });
 
-  const registerMutation = useMutation({
-    mutationFn: authApi.endCustomerRegister,
-    onError: (error: any) => {
-      toast.error("Đăng ký thất bại:", error);
-    },
-  });
+  const loginGoogle = () =>
+    useMutation({
+      mutationFn: authApi.loginGoogle,
+    });
 
-  const verifyEmailMutation = useMutation({
-    mutationFn: authApi.verifyEmail,
-    onError: (error: any) => {
-      toast.error("Xác thực email thất bại:", error);
-    },
-  });
-  const resendOtpVerifyEmailMutation = useMutation({
-    mutationFn: authApi.resendOTPVerifyEmail,
-    onError: (error: any) => {
-      toast.error("Gửi lại mã OTP thất bại:", error);
-    },
-  });
+  const customerNormalRegister = () =>
+    useMutation({
+      mutationFn: authApi.endCustomerNormalRegister,
+    });
+
+  const customerGoogleRegister = () =>
+    useMutation({
+      mutationFn: authApi.endCustomerGoogleRegister,
+    });
+
+  const verifyEmail = () =>
+    useMutation({
+      mutationFn: authApi.verifyEmail,
+    });
+  const resendOtpVerifyEmail = () =>
+    useMutation({
+      mutationFn: authApi.resendOTPVerifyEmail,
+    });
 
   const getAccountDetail = (params: UseAccountDetailParams = {}) => {
     return useSuspenseQuery({
@@ -105,17 +103,16 @@ export const useAuth = () => {
           navigate(PATH_AUTH.login);
         }, 2000);
       },
-      onError: (error: any) => {
-        toast.error(error.response?.data?.message || "Đổi mật khẩu thất bại");
-      },
     });
 
   return {
-    loginMutation,
-    registerMutation,
+    login,
+    loginGoogle,
+    customerNormalRegister,
+    customerGoogleRegister,
     getAccountDetail,
-    verifyEmailMutation,
-    resendOtpVerifyEmailMutation,
+    verifyEmail,
+    resendOtpVerifyEmail,
     logout: handleLogout,
     logoutAllDevices: handleLogoutAllDevices,
     changePassword,

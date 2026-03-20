@@ -25,15 +25,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { OTPVerificationModal } from "./OTPVerificationModal";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
+import { jwtDecode } from "jwt-decode";
+import { setUser } from "@/redux/user/user-slice";
+import { ERole } from "@/types/enums/role.enum";
+import { GoogleIcon } from "@/assets";
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { registerMutation } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { showOTPModal, registerEmail } = useSelector((state: RootState) => state.modal);
+  const { customerNormalRegister, customerGoogleRegister } = useAuth();
+  const customerNormalRegisterMutation = customerNormalRegister();
+  const customerGoogleRegisterMutation = customerGoogleRegister();
+  const { showOTPModal, registerEmail } = useSelector(
+    (state: RootState) => state.modal,
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -117,11 +127,11 @@ export function RegisterForm({
   };
 
   const handleVerifySuccess = () => {
-    navigate("/"); 
+    navigate("/");
   };
 
-  const onSubmit = async (data: TFERegisterSchema) => {
-    if (registerMutation.isPending) return;
+  const onNormalRegisterSubmit = async (data: TFERegisterSchema) => {
+    if (customerNormalRegisterMutation.isPending) return;
     const formData = new FormData();
     formData.append("BrandCode", envConfig.BRAND_CODE);
     formData.append("Email", data.email);
@@ -134,13 +144,73 @@ export function RegisterForm({
     }
 
     try {
-      const result = await registerMutation.mutateAsync(formData);
+      const result = await customerNormalRegisterMutation.mutateAsync(formData);
       if (result.data.status >= 200 && result.data.status < 300) {
         toast.info(result.data.message);
         dispatch(handleSetRegisterEmail(data.email));
         dispatch(handleToggleOTPModal(true));
+      }else{
+        toast.error(result.data.message || "Đăng ký thất bại");
       }
     } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  const onGoogleRegisterSubmit = async () => {
+    if (customerGoogleRegisterMutation.isPending) return;
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+
+      const response = await customerGoogleRegisterMutation.mutateAsync({
+        IdToken: idToken,
+      });
+
+
+      if (response?.data?.status === 200 || response?.data?.status === 201) {
+        const accessToken = response.data.data.accessToken;
+        const role = (jwtDecode(accessToken) as any).role;
+
+        if (!(role in ERole)) {
+          toast.error("Vai trò người dùng không hợp lệ.");
+          return;
+        }
+
+        dispatch(setUser({ ...response.data.data, role: ERole[role] }));
+        toast.success("Đăng ký thành công với Google!");
+      }else{
+        toast.error(response?.data?.message || "Đăng ký Google thất bại");
+      }
+    } catch (error: any) {
+
+      // Firebase errors
+      if (error.code && error.code.startsWith("auth/")) {
+        const firebaseErrors: Record<string, string> = {
+          "auth/popup-closed-by-user": "Bạn đã đóng cửa sổ đăng nhập",
+          "auth/cancelled-popup-request": "Yêu cầu đăng nhập đã bị hủy",
+          "auth/popup-blocked":
+            "Trình duyệt chặn popup. Vui lòng cho phép popup.",
+          "auth/account-exists-with-different-credential":
+            "Email đã được đăng ký bằng phương thức khác",
+        };
+
+        if (
+          ![
+            "auth/popup-closed-by-user",
+            "auth/cancelled-popup-request",
+          ].includes(error.code)
+        ) {
+          toast.error(firebaseErrors[error.code] || error.message, {
+            duration: 5000,
+            position: "top-right",
+          });
+        }
+        return;
+      }
+
+      // API errors
       handleApiError(error);
     }
   };
@@ -148,7 +218,10 @@ export function RegisterForm({
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onNormalRegisterSubmit)}
+          className="space-y-4"
+        >
           {/* Avatar Upload Section */}
           <div className="flex flex-col items-center mb-6">
             <input
@@ -157,7 +230,7 @@ export function RegisterForm({
               accept="image/*"
               onChange={handleImageChange}
               className="hidden"
-              disabled={registerMutation.isPending}
+              disabled={customerNormalRegisterMutation.isPending}
             />
 
             <div
@@ -188,7 +261,7 @@ export function RegisterForm({
                         handleUploadClick();
                       }}
                       className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
-                      disabled={registerMutation.isPending}
+                      disabled={customerNormalRegisterMutation.isPending}
                     >
                       <Camera className="w-4 h-4 text-gray-700" />
                     </button>
@@ -199,7 +272,7 @@ export function RegisterForm({
                         removeImage();
                       }}
                       className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
-                      disabled={registerMutation.isPending}
+                      disabled={customerNormalRegisterMutation.isPending}
                     >
                       <X className="w-4 h-4 text-gray-700" />
                     </button>
@@ -244,7 +317,7 @@ export function RegisterForm({
                           ? "border-destructive"
                           : ""
                       }`}
-                      disabled={registerMutation.isPending}
+                      disabled={customerNormalRegisterMutation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -275,7 +348,7 @@ export function RegisterForm({
                           ? "border-destructive"
                           : ""
                       }`}
-                      disabled={registerMutation.isPending}
+                      disabled={customerNormalRegisterMutation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -304,7 +377,7 @@ export function RegisterForm({
                       className={`h-11 ${
                         form.formState.errors.email ? "border-destructive" : ""
                       }`}
-                      disabled={registerMutation.isPending}
+                      disabled={customerNormalRegisterMutation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -335,7 +408,7 @@ export function RegisterForm({
                           ? "border-destructive"
                           : ""
                       }`}
-                      disabled={registerMutation.isPending}
+                      disabled={customerNormalRegisterMutation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -363,7 +436,7 @@ export function RegisterForm({
                           ? "border-destructive"
                           : ""
                       }`}
-                      disabled={registerMutation.isPending}
+                      disabled={customerNormalRegisterMutation.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -376,9 +449,9 @@ export function RegisterForm({
           <Button
             type="submit"
             className="w-full h-11 text-base font-medium"
-            disabled={registerMutation.isPending}
+            disabled={customerNormalRegisterMutation.isPending}
           >
-            {registerMutation.isPending ? (
+            {customerNormalRegisterMutation.isPending ? (
               <>
                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 Đang xử lý...
@@ -387,7 +460,33 @@ export function RegisterForm({
               "ĐĂNG KÝ"
             )}
           </Button>
+          {/* Divider */}
+          <div className="relative my-2">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Hoặc
+              </span>
+            </div>
+          </div>
 
+          {/* Nút Google */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11 gap-2"
+            onClick={onGoogleRegisterSubmit}
+            disabled={customerGoogleRegisterMutation.isPending}
+          >
+            {customerGoogleRegisterMutation.isPending ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <img src={GoogleIcon} alt="Google" className="w-5 h-5" />
+            )}
+            Đăng ký với Google
+          </Button>
           <p className="text-xs text-muted-foreground text-center mt-4">
             Bằng việc đăng ký, bạn đã đồng ý với{" "}
             <Link to="/terms" className="text-primary hover:underline">

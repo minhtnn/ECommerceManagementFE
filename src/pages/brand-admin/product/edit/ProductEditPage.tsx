@@ -565,12 +565,6 @@ const ProductEditPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [imagesState, setImagesState] = useState<ImagesState>({
-    list: [],
-    errorIds: new Set(),
-  });
-  const [sideAttributes, setSideAttributes] = useState<SideAttribute[]>([]);
   const [isRefreshingImages, setIsRefreshingImages] = useState(false);
   const [hasImageChanges, setHasImageChanges] = useState(false);
   const [hasAttributeChanges, setHasAttributeChanges] = useState(false);
@@ -580,6 +574,25 @@ const ProductEditPage = () => {
   const updateProductMutation = updateProduct();
 
   const product = productData?.data.data;
+  const [imagesState, setImagesState] = useState<ImagesState>({
+    list:
+      product.getProductImagesResponse?.map((img) => ({
+        id: img.id,
+        preview: img.imageUrl,
+        altText: img.altText || "",
+        isMainImage: img.isMainImage,
+        isExisting: true,
+      })) ?? [],
+    errorIds: new Set(),
+  });
+
+  const [sideAttributes, setSideAttributes] = useState<SideAttribute[]>(
+    product.getProductSideAttributesResponse?.map((attr) => ({
+      id: attr.id,
+      key: attr.key,
+      value: attr.value,
+    })) ?? [],
+  );
 
   const form = useForm<TUpdateProduct>({
     resolver: zodResolver(UpdateProductSchema),

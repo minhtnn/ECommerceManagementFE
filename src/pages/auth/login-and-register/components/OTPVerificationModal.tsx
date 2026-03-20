@@ -30,7 +30,9 @@ export function OTPVerificationModal({
   onVerifySuccess,
 }: OTPVerificationModalProps) {
   const [otp, setOtp] = useState("");
-  const { verifyEmailMutation, resendOtpVerifyEmailMutation } = useAuth();
+  const { verifyEmail, resendOtpVerifyEmail } = useAuth();
+  const verifyEmailMutation = verifyEmail();
+  const resendOtpVerifyEmailMutation = resendOtpVerifyEmail();
   const dispatch = useDispatch();
 
   const handleVerifyOTP = async () => {
