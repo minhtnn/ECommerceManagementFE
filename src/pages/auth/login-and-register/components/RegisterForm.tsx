@@ -53,7 +53,6 @@ export function RegisterForm({
   const form = useForm<TFERegisterSchema>({
     resolver: zodResolver(FERegisterSchema),
     defaultValues: {
-      brandCode: "",
       phoneNumber: "",
       email: "",
       username: "",

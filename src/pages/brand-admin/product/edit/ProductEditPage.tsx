@@ -33,9 +33,6 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-//#endregion
-
-//#region TYPES & INTERFACES
 interface ImagePreview {
   id: string;
   file?: File;
@@ -56,9 +53,6 @@ interface ImagesState {
   errorIds: Set<string>;
 }
 
-//#endregion
-
-//#region MEMOIZED COMPONENTS
 const ImageCard = memo(
   ({
     img,
@@ -187,9 +181,6 @@ const AttributeRow = memo(
 );
 
 AttributeRow.displayName = "AttributeRow";
-//#endregion
-
-//#region SECTION COMPONENTS
 interface ImagesSectionProps {
   imagesState: ImagesState;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -395,22 +386,52 @@ const BasicInfoSection = memo(
             </div>
           </div>
         </div>
-        <div className="space-y-2">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Tên sản phẩm<span className="text-destructive">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={isPending} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Tên sản phẩm<span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="displayOrder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="displayOrder">
+                    Thứ tự hiển thị
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Nhập thứ tự hiển thị"
+                      {...field}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "" ? "" : Number(e.target.value);
+                        field.onChange(value);
+                      }}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <FormField
@@ -604,6 +625,7 @@ const ProductEditPage = () => {
       price: product.price || 0,
       status: product.status,
       stockQuantity: product.stockQuantity || 0,
+      displayOrder: product.displayOrder || 0,
       existingImageIds: [],
       newImages: [],
       sideAttributes: [],
@@ -775,9 +797,6 @@ const ProductEditPage = () => {
     },
     [],
   );
-  //#endregion
-
-  //#region SUBMIT HANDLER
 
   const onSubmit = useCallback(
     async (data: TUpdateProduct) => {
@@ -796,6 +815,7 @@ const ProductEditPage = () => {
       formData.append("FullName", data.fullName || "");
       formData.append("Description", data.description || "");
       formData.append("Price", data.price.toString());
+      formData.append("DisplayOrder", data.displayOrder.toString());
       formData.append("Status", data.status.toString());
       formData.append("StockQuantity", data.stockQuantity.toString());
 
@@ -863,8 +883,6 @@ const ProductEditPage = () => {
       form.formState.dirtyFields,
     ],
   );
-
-  //#endregion
 
   // Show loading while fetching data OR while data is not ready
   if (isLoading) {

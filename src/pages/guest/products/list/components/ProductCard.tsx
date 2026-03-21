@@ -137,7 +137,9 @@ const ProductCard = memo((product: TMenuProductListResponse) => {
                 alt={image.altText || product.name}
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding="async"
-                fetchPriority={index === 0 ? "high" : "low"}
+                {...({
+                  fetchpriority: index === 0 ? "high" : "low",
+                } as React.HTMLAttributes<HTMLImageElement>)}
                 className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ${
                   index === currentImageIndex
                     ? "opacity-100 translate-x-0"

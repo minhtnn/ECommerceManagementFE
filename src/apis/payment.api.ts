@@ -2,6 +2,7 @@ import { apiRequest } from "@/lib/http";
 import { BaseResponse, PaginationResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
 import { TBrandPaymentMethodDetailResponse, TBrandPaymentMethodListResponse, TBrandPublicPaymentMethodListResponse, TCancelPaymentRequest, TGetPaymentStatusResponse, TPaymentMethodDetailResponse, TPaymentMethodListResponse } from "@/schemas/payment-method.schema";
+import envConfig from "@/schemas/config.schema";
 
 //#region System payment method APIs
 const getPaymentMethods = async (params?: any) =>
@@ -39,7 +40,10 @@ const updateBrandPaymentMethod = async (id: string, data: FormData) =>
         data
     );
 const getBrandPublicPaymentMethods = async (params?: any) =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandPublicPaymentMethodListResponse[]>>(`${API_SUFFIX.PAYMENT_METHOD_API}/brand/public`, { params: params });
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandPublicPaymentMethodListResponse[]>>(
+        `${API_SUFFIX.PAYMENT_METHOD_API}/brand/public`,
+        { brandCode: envConfig.BRAND_CODE, ...params }
+    );
 
 const getPaymentStatus = async (orderId: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TGetPaymentStatusResponse>>(

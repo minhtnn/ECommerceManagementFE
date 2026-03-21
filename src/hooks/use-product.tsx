@@ -92,8 +92,7 @@ export const useProduct = () => {
   const getPublicProductById = (id: string) => {
     return useQuery({
       queryKey: ["productPublic", id],
-      queryFn: async () =>
-        productApi.getPublicProductById(envConfig.BRAND_CODE, id),
+      queryFn: async () => productApi.getPublicProductById(id),
       enabled: !!id,
       staleTime: 0,
     });

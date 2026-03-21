@@ -16,6 +16,13 @@ interface UsePostParams {
     allowFetch?: boolean;
 }
 
+interface UsePublicPostParams {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    isAsc?: boolean;
+}
+
 export const usePost = () => {
     const queryClient = useQueryClient();
 
@@ -66,18 +73,26 @@ export const usePost = () => {
             },
         });
 
-    const getInfinitePosts = (pageSize = 10) =>
-        useInfiniteQuery({
-            queryKey: ["public-posts", envConfig.BRAND_CODE, pageSize],
+    const getInfinitePublicPosts = (
+        params: Omit<UsePublicPostParams, "page"> = {}
+    ) => {
+        return useInfiniteQuery({
+            queryKey: ["public-posts", envConfig.BRAND_CODE, params],
             queryFn: ({ pageParam }) =>
-                postApi.getPublicPosts(envConfig.BRAND_CODE, pageSize, pageParam as string | null),
-            initialPageParam: null as string | null,
+                postApi.getPublicPosts({
+                    ...params,
+                    page: pageParam,
+                }),
+            initialPageParam: 1,
             getNextPageParam: (lastPage) => {
-                const scroll = lastPage?.data?.data;
-                return scroll?.hasMore ? (scroll.nextCursor ?? null) : null;
+                const pagination = lastPage.data?.data;
+                if (!pagination) return undefined;
+                const { page, totalPages } = pagination;
+                return page < totalPages ? page + 1 : undefined;
             },
-            enabled: !!envConfig.BRAND_CODE,
+            staleTime: 2 * 60 * 1000,
         });
+    };
 
     const getPublicPostById = (id: string) =>
         useQuery({
@@ -92,7 +107,7 @@ export const usePost = () => {
         getSuspendPostById,
         createPost,
         updatePost,
-        getInfinitePosts,
+        getInfinitePublicPosts,
         getPublicPostById
     };
 };

@@ -57,9 +57,8 @@ export const UpdatePostSchema = z.object({
     status: z.nativeEnum(EPostStatus),
 });
 
-export const PublicPostItemSchema = z.object({
+export const PublicPostListSchema = z.object({
     id: z.string().uuid(),
-    code: z.string(),
     title: z.string(),
     author: z.string().nullable(),
     excerpt: z.string().nullable(),
@@ -86,5 +85,5 @@ export type TPostList = z.infer<typeof PostListSchema>;
 export type TPostDetail = z.infer<typeof PostDetailSchema>;
 export type TCreatePost = z.infer<typeof CreatePostSchema>;
 export type TUpdatePost = z.infer<typeof UpdatePostSchema>;
-export type TPublicPostItem = z.infer<typeof PublicPostItemSchema>;
+export type TPublicPostList = z.infer<typeof PublicPostListSchema>;
 export type TPublicPostDetail = z.infer<typeof PublicPostDetailSchema>;

@@ -7,7 +7,7 @@ export const CategoryTreeItem = ({
   selectedId,
   onSelect,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  // const [isExpanded, setIsExpanded] = useState(false);
   const hasChildren = category.children && category.children.length > 0;
   const isSelected = selectedId === category.id;
 
@@ -21,7 +21,7 @@ export const CategoryTreeItem = ({
         onClick={() => onSelect(category.id)}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          {hasChildren && (
+          {/* {hasChildren && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -36,7 +36,7 @@ export const CategoryTreeItem = ({
               )}
             </button>
           )}
-          {!hasChildren && <div className="w-5 flex-shrink-0" />}
+          {!hasChildren && <div className="w-5 flex-shrink-0" />} */}
 
           {/* Category Image */}
           {category.imageUrl ? (
@@ -56,8 +56,8 @@ export const CategoryTreeItem = ({
           <div className="flex flex-col items-start flex-1 min-w-0 overflow-hidden">
             <span
               className={`block text-sm transition-colors overflow-hidden text-ellipsis whitespace-nowrap w-full text-left ${
-                isSelected 
-                  ? "text-[hsl(var(--tree-item-text-selected))] font-medium" 
+                isSelected
+                  ? "text-[hsl(var(--tree-item-text-selected))] font-medium"
                   : "text-[hsl(var(--tree-item-text))]"
               } hover:text-primary`}
               title={category.name}
@@ -85,7 +85,8 @@ export const CategoryTreeItem = ({
       </div>
 
       {/* Render children recursively */}
-      {hasChildren && isExpanded && (
+      {hasChildren && (
+        // && isExpanded
         <div className="ml-2">
           {category.children.map((child) => (
             <CategoryTreeItem

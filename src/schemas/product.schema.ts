@@ -38,6 +38,7 @@ export const ProductDetailSchema = z.object({
     fullName: z.string().optional(),
     description: z.string().optional(),
     price: z.number().optional(),
+    displayOrder: z.number().optional(),
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number(),
     getProductImagesResponse: z.array(ProductImageSchema),
@@ -63,6 +64,8 @@ export const CreateProductSchema = z.object({
     description: z.string()
         .max(500, { message: "Mô tả không vượt quá 500 ký tự" }),
     price: z.number({ invalid_type_error: "Sai định dạng" })
+        .optional(),
+    displayOrder: z.number({ invalid_type_error: "Sai định dạng" })
         .optional(),
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number({ invalid_type_error: "Sai định dạng" })
@@ -92,7 +95,9 @@ export const UpdateProductSchema = z.object({
     description: z.string()
         .max(500, { message: "Mô tả không vượt quá 500 ký tự" })
         .optional(),
-    price: z.number().optional(),
+    price: z.number({ invalid_type_error: "Sai định dạng" }).optional(),
+    displayOrder: z.number({ invalid_type_error: "Sai định dạng" })
+        .optional(),
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number()
         .min(0, { message: "Số lượng tồn kho phải >= 0" }),

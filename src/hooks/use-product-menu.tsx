@@ -1,48 +1,39 @@
 import { menuProductApi } from "@/apis/menu-product.api";
 import envConfig from "@/schemas/config.schema";
-import {
-  useInfiniteQuery,
-  useSuspenseQuery,
-  keepPreviousData,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
-interface UseProductMenuParams {
+interface UsePublicProductMenuParams {
+  page?: number;
+  size?: number;
   categoryId?: string;
-  pageSize?: number;
+  productsSortBy?: string;
+  productsIsAsc?: boolean;
+  productName?: string;
 }
 
-export const usePublicProductMenu = (params: UseProductMenuParams = {}) => {
-  const { categoryId, pageSize = 20 } = params;
-
-  return useInfiniteQuery({
-    queryKey: ["public-product-menu", categoryId ?? null, pageSize],
-    queryFn: async ({ pageParam }) => {
-      const apiParams: any = { pageSize };
-      if (categoryId) apiParams.categoryId = categoryId;
-      if (pageParam) apiParams.cursor = pageParam;
-      return menuProductApi.getPublicMenuProducts(envConfig.BRAND_CODE, apiParams);
-    },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => {
-      const products = lastPage?.data?.data?.products;
-      return products?.hasMore ? products.nextCursor : undefined;
-    },
-    staleTime: 2 * 60 * 1000,
-  });
-};
-
 export const useProductMenu = () => {
-  const getProductMenu = (params: UseProductMenuParams = {}) => {
-    const { categoryId } = params;
-    return useSuspenseQuery({
-      queryKey: ["product-menu", categoryId],
-      queryFn: async () => menuProductApi.getMenuProducts({ categoryId }),
-      ...keepPreviousData,
+  const getPublicProductMenu = (
+    params: Omit<UsePublicProductMenuParams, "page"> = {},
+  ) => {
+    return useInfiniteQuery({
+      queryKey: ["public-product-menu", params],
+      queryFn: ({ pageParam }) =>
+        menuProductApi.getPublicMenuProducts({
+          ...params,
+          page: pageParam,
+        }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => {
+        const pagination = lastPage.data?.data?.products;
+        if (!pagination) return undefined;
+        const { page, totalPages } = pagination;
+        return page < totalPages ? page + 1 : undefined;
+      },
+      staleTime: 2 * 60 * 1000,
     });
   };
 
-
   return {
-    getProductMenu,
+    getPublicProductMenu,
   };
 };

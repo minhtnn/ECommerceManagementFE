@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,10 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOrder } from "@/hooks/use-order";
+import { useQueryParams } from "@/hooks/use-query-params";
 import { EndCustomerAccountLayout } from "@/layouts/EndCustomerAccountLayout";
-import { cn, formatPrice } from "@/lib/utils";
-import { PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
+import { PATH_GUEST } from "@/routes/path";
 import {
   EOrderStatus,
   getOrderStatusConfig,
@@ -27,54 +25,64 @@ import {
   EPaymentStatus,
   getPaymentStatusConfig,
 } from "@/types/enums/payment-status.enum";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { Eye, Loader2, Package, Search, ShoppingBag } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Loader2, Package, Search, ShoppingBag } from "lucide-react";
+import { useDebounce } from "use-debounce"
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { OrderCard } from "./components/OrderCard";
-
-// Helper functions (same as before)
+import { useOrder } from "@/hooks/use-order";
 
 const EndCustomerOrdersListPage = () => {
   const navigate = useNavigate();
   const { getCustomerOrders } = useOrder();
-  // Filters
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [orderStatus, setOrderStatus] = useState<EOrderStatus | undefined>();
-  const [paymentStatus, setPaymentStatus] = useState<
-    EPaymentStatus | undefined
-  >();
+  const { pageSize, sortBy, isAsc, filter, setFilter } = useQueryParams({
+    defaultSortBy: "createdDate",
+    defaultIsAsc: false,
+    defaultChosenValue: null,
+    defaultFilter: [
+      { id: "orderStatus", value: null },
+      { id: "paymentStatus", value: null },
+      { id: "searchKeyword", value: null },
+    ],
+  });
 
-  // Debounced search
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchKeyword);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchKeyword]);
+  // Đọc filter values từ URL
+  const searchKeyword = String(
+    filter.find((f) => f.id === "searchKeyword")?.value ?? "",
+  );
+  const orderStatusRaw = filter.find((f) => f.id === "orderStatus")?.value;
+  const paymentStatusRaw = filter.find((f) => f.id === "paymentStatus")?.value;
 
-  // Infinite query
+  const orderStatusValue =
+    orderStatusRaw === "" || orderStatusRaw === null
+      ? null
+      : Number(orderStatusRaw);
+  const paymentStatusValue =
+    paymentStatusRaw === "" || paymentStatusRaw === null
+      ? null
+      : Number(paymentStatusRaw);
+
+  const [debouncedSearch] = useDebounce(searchKeyword, 400);
+
   const {
     data,
+    isFetching,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
     isError,
   } = getCustomerOrders({
-    pageSize: 20,
+    size: pageSize,
+    sortBy,
+    isAsc,
     searchKeyword: debouncedSearch,
-    orderStatus,
-    paymentStatus,
+    orderStatus: orderStatusValue,
+    paymentStatus: paymentStatusValue,
   });
 
-  // Flatten all pages
-  const allOrders =
-    data?.pages?.flatMap((page) => page?.data?.data?.items || []) || [];
-  // Infinite scroll observer
   const observerTarget = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -84,23 +92,45 @@ const EndCustomerOrdersListPage = () => {
       },
       { threshold: 0.1 },
     );
-
-    console.log(allOrders);
     const currentTarget = observerTarget.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
-
+    if (currentTarget) observer.observe(currentTarget);
     return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
+      if (currentTarget) observer.unobserve(currentTarget);
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const allOrders =
+    data?.pages?.flatMap((page) => page?.data?.data?.items ?? []) ?? [];
+
+  // Helpers để update filter lên URL
+  const handleSearchChange = (value: string) => {
+    setFilter(
+      filter.map((f) => (f.id === "searchKeyword" ? { ...f, value } : f)),
+    );
+  };
+
+  const handleOrderStatusChange = (value: string) => {
+    setFilter(
+      filter.map((f) =>
+        f.id === "orderStatus"
+          ? { ...f, value: value === "all" ? null : value }
+          : f,
+      ),
+    );
+  };
+
+  const handlePaymentStatusChange = (value: string) => {
+    setFilter(
+      filter.map((f) =>
+        f.id === "paymentStatus"
+          ? { ...f, value: value === "all" ? null : value }
+          : f,
+      ),
+    );
+  };
+
   return (
     <EndCustomerAccountLayout breadcrumbs={[{ label: "Đơn hàng của bạn" }]}>
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <ShoppingBag className="w-7 h-7" />
@@ -118,23 +148,19 @@ const EndCustomerOrdersListPage = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm theo mã đơn hàng..."
                 value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
               />
             </div>
 
-            {/* Order Status Filter */}
             <Select
-              value={orderStatus?.toString() || "all"}
-              onValueChange={(value) =>
-                setOrderStatus(value === "all" ? undefined : Number(value))
-              }
+              value={orderStatusValue?.toString() ?? "all"}
+              onValueChange={handleOrderStatusChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Trạng thái đơn hàng" />
@@ -142,32 +168,29 @@ const EndCustomerOrdersListPage = () => {
               <SelectContent>
                 <SelectItem value="all">Tất cả đơn hàng</SelectItem>
                 <SelectItem value={EOrderStatus.WaitingPayment.toString()}>
-                  Chờ thanh toán
+                  {getOrderStatusConfig(EOrderStatus.WaitingPayment).label}
                 </SelectItem>
                 <SelectItem value={EOrderStatus.Pending.toString()}>
-                  Chờ xác nhận
+                  {getOrderStatusConfig(EOrderStatus.Pending).label}
                 </SelectItem>
                 <SelectItem value={EOrderStatus.Processing.toString()}>
-                  Đang xử lý
+                  {getOrderStatusConfig(EOrderStatus.Processing).label}
                 </SelectItem>
                 <SelectItem value={EOrderStatus.Shipped.toString()}>
-                  Đang giao hàng
+                  {getOrderStatusConfig(EOrderStatus.Shipped).label}
                 </SelectItem>
                 <SelectItem value={EOrderStatus.Delivered.toString()}>
-                  Đã giao hàng
+                  {getOrderStatusConfig(EOrderStatus.Delivered).label}
                 </SelectItem>
                 <SelectItem value={EOrderStatus.Cancelled.toString()}>
-                  Đã hủy
+                  {getOrderStatusConfig(EOrderStatus.Cancelled).label}
                 </SelectItem>
               </SelectContent>
             </Select>
 
-            {/* Payment Status Filter */}
             <Select
-              value={paymentStatus?.toString() || "all"}
-              onValueChange={(value) =>
-                setPaymentStatus(value === "all" ? undefined : Number(value))
-              }
+              value={paymentStatusValue?.toString() ?? "all"}
+              onValueChange={handlePaymentStatusChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Trạng thái thanh toán" />
@@ -175,19 +198,19 @@ const EndCustomerOrdersListPage = () => {
               <SelectContent>
                 <SelectItem value="all">Tất cả thanh toán</SelectItem>
                 <SelectItem value={EPaymentStatus.Pending.toString()}>
-                  Chờ thanh toán
+                  {getPaymentStatusConfig(EPaymentStatus.Pending).label}
                 </SelectItem>
                 <SelectItem value={EPaymentStatus.Processing.toString()}>
-                  Đang xử lý
+                  {getPaymentStatusConfig(EPaymentStatus.Processing).label}
                 </SelectItem>
                 <SelectItem value={EPaymentStatus.Completed.toString()}>
-                  Thành công
+                  {getPaymentStatusConfig(EPaymentStatus.Completed).label}
                 </SelectItem>
                 <SelectItem value={EPaymentStatus.Failed.toString()}>
-                  Thất bại
+                  {getPaymentStatusConfig(EPaymentStatus.Failed).label}
                 </SelectItem>
                 <SelectItem value={EPaymentStatus.Expired.toString()}>
-                  Hết hạn
+                  {getPaymentStatusConfig(EPaymentStatus.Expired).label}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -230,12 +253,18 @@ const EndCustomerOrdersListPage = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {allOrders.map((order) => {
-            return <OrderCard order={order} />;
-          })}
+        <div className="space-y-4 relative">
+          {/* Overlay khi refetch */}
+          {isFetching && !isFetchingNextPage && (
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-start justify-center pt-16 rounded-lg">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          )}
 
-          {/* Loading more indicator */}
+          {allOrders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+
           <div ref={observerTarget} className="py-4">
             {isFetchingNextPage && (
               <div className="flex justify-center">

@@ -1,4 +1,5 @@
 import { orderApi } from "@/apis/order.api";
+import envConfig from "@/schemas/config.schema";
 import {
   TCreateOrderRequest,
   TUpdateOrderRequest,
@@ -27,7 +28,10 @@ interface UseBrandOrderParams {
 }
 
 interface UseCustomerOrderParams {
-  pageSize?: number;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  isAsc?: boolean;
   searchKeyword?: string;
   orderStatus?: EOrderStatus;
   paymentStatus?: EPaymentStatus;
@@ -43,21 +47,22 @@ export const useOrder = () => {
     });
   };
 
-  const getCustomerOrders = (params: UseCustomerOrderParams = {}) => {
+  const getCustomerOrders = (
+    params: Omit<UseCustomerOrderParams, "page"> = {},
+  ) => {
     return useInfiniteQuery({
-      queryKey: ["customer-orders", params],
+      queryKey: ["public-posts", envConfig.BRAND_CODE, params],
       queryFn: ({ pageParam }) =>
-        orderApi.getCustomerOrders({
-          pageSize: params.pageSize || 20,
-          cursor: pageParam,
-          searchKeyword: params.searchKeyword,
-          orderStatus: params.orderStatus,
-          paymentStatus: params.paymentStatus,
+        orderApi.getInfiniteCustomerOrders({
+          ...params,
+          page: pageParam,
         }),
-      initialPageParam: undefined as string | undefined,
+      initialPageParam: 1,
       getNextPageParam: (lastPage) => {
-        const data = lastPage?.data?.data;
-        return data?.hasMore ? data.nextCursor : undefined;
+        const pagination = lastPage.data?.data;
+        if (!pagination) return undefined;
+        const { page, totalPages } = pagination;
+        return page < totalPages ? page + 1 : undefined;
       },
       staleTime: 2 * 60 * 1000,
     });
@@ -112,15 +117,15 @@ export const useOrder = () => {
         queryClient.invalidateQueries({
           queryKey: ["brand-order", variables.id],
         });
-        
+
         // Invalidate list queries
-        queryClient.invalidateQueries({ 
+        queryClient.invalidateQueries({
           queryKey: ["customer-orders"],
-          exact: false
+          exact: false,
         });
-        queryClient.invalidateQueries({ 
+        queryClient.invalidateQueries({
           queryKey: ["brand-orders"],
-          exact: false
+          exact: false,
         });
       },
       onError: (error: any) => {
@@ -134,24 +139,24 @@ export const useOrder = () => {
   };
 
   const getPaymentLink = () => {
-  return useMutation({
-    mutationFn: (orderId: string) => orderApi.getPaymentLink(orderId),
-    onSuccess: (response) => {
-      const data = response.data.data;
-      if (data.paymentUrl) {
-        // Redirect to payment gateway
-        window.location.href = data.paymentUrl;
-      }
-    },
-    onError: (error: any) => {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Không thể lấy link thanh toán";
-      toast.error(errorMessage);
-    },
-  });
-};
+    return useMutation({
+      mutationFn: (orderId: string) => orderApi.getPaymentLink(orderId),
+      onSuccess: (response) => {
+        const data = response.data.data;
+        if (data.paymentUrl) {
+          // Redirect to payment gateway
+          window.location.href = data.paymentUrl;
+        }
+      },
+      onError: (error: any) => {
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Không thể lấy link thanh toán";
+        toast.error(errorMessage);
+      },
+    });
+  };
 
   return {
     getBrandOrders,

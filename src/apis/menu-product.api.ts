@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/http";
+import envConfig from "@/schemas/config.schema";
 import { TMenuProductResponse } from "@/schemas/menu-product.schema";
 import { BaseResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
@@ -9,9 +10,9 @@ const getMenuProducts = async (params?: any) =>
     { params: params }
   );
 
-const getPublicMenuProducts = async (brandCode: string, params?: any) =>
+const getPublicMenuProducts = async ( params?: any) =>
   await apiRequest.ecommerceCoffee.get<BaseResponse<TMenuProductResponse>>(
-    `${API_SUFFIX.MENU_API}/public/${brandCode}`,
+    `${API_SUFFIX.MENU_API}/public/${envConfig.BRAND_CODE}`,
     {
       params: {
         ...params

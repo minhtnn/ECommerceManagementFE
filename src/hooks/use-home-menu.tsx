@@ -7,10 +7,7 @@ export const useHomeMenu = () => {
     return useSuspenseQuery({
       queryKey: ["home-menu-data"],
       queryFn: async () => {
-        return menuProductApi.getPublicMenuProducts(
-          envConfig.BRAND_CODE,
-          {}
-        );
+        return menuProductApi.getPublicMenuProducts();
       },
     });
   };

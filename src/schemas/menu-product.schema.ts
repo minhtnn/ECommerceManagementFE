@@ -1,15 +1,17 @@
 import z from "zod";
 
-export const InfiniteScrollResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+const PaginationResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   z.object({
+    size: z.number(),
+    page: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
     items: z.array(itemSchema),
-    hasMore: z.boolean(),
-    nextCursor: z.string().nullable(),
   });
 
 export const MenuProductCategorySchema = z.object({
   id: z.string().uuid(),
-  parentId: z.string().uuid().optional(),
+  parentProductCategoryId: z.string().uuid().optional(),
   imageUrl: z.string().nullable(),
   name: z.string().nonempty({ message: "Tên danh mục menu sản phẩm không được bỏ trống" }),
   isSelected: z.boolean(),
@@ -26,7 +28,6 @@ export const MenuProductListSchema = z.object({
   description: z.string().nullable(),
   price: z.number(),
   stockQuantity: z.number(),
-  displayOrder: z.number(),
   productCategoryId: z.string().uuid(),
   images: z.array(z.lazy(() => MenuProductListImageSchema)),
 });
@@ -41,12 +42,9 @@ export const MenuProductListImageSchema = z.object({
 export const MenuProductSchema = z.object({
   selectedCategory: MenuProductCategorySchema.nullable(),
   productCategoriesTree: z.array(MenuProductCategorySchema),
-  products: z.object({
-    items: z.array(MenuProductListSchema),
-    hasMore: z.boolean(),
-    nextCursor: z.string().nullable(),
-  }),
+  products: PaginationResponseSchema(MenuProductListSchema).nullable(),
 });
+
 
 export type TMenuProductResponse = z.infer<typeof MenuProductSchema>;
 export type TMenuProductCategoryResponse = z.infer<typeof MenuProductCategorySchema>;

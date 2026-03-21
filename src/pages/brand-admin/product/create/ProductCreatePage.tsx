@@ -46,7 +46,7 @@ import {
   PlusIcon,
   TrashIcon,
   Upload,
-  X
+  X,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -101,6 +101,7 @@ const ProductCreatePage = () => {
       fullName: "",
       description: "",
       price: 0,
+      displayOrder: 1,
       status: EProductStatus.Active,
       stockQuantity: 0,
       images: [],
@@ -188,8 +189,6 @@ const ProductCreatePage = () => {
   const onSubmit = async (data: TCreateProduct) => {
     if (createProductMutation.isPending) return;
 
-
-
     const formData = new FormData();
 
     // Basic fields
@@ -207,6 +206,10 @@ const ProductCreatePage = () => {
 
     if (data.price !== undefined) {
       formData.append("Price", data.price.toString());
+    }
+
+    if (data.displayOrder !== undefined) {
+      formData.append("DisplayOrder", data.displayOrder.toString());
     }
 
     formData.append("Status", data.status.toString());
@@ -483,27 +486,59 @@ const ProductCreatePage = () => {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="name">
-                      Tên sản phẩm<span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Nhập tên sản phẩm"
-                        {...field}
-                        disabled={createProductMutation.isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor="name">
+                        Tên sản phẩm<span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Nhập tên sản phẩm"
+                          {...field}
+                          disabled={createProductMutation.isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="displayOrder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor="displayOrder">
+                        Thứ tự hiển thị
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="Nhập thứ tự hiển thị"
+                          {...field}
+                          onChange={(e) => {
+                            const value =
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value);
+                            field.onChange(value);
+                          }}
+                          disabled={createProductMutation.isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <FormField

@@ -145,10 +145,7 @@ export const usePayment = () => {
   const getBrandPublicPaymentMethods = () => {
     return useQuery({
       queryKey: ["brand-public-payment-methods", envConfig.BRAND_CODE],
-      queryFn: () =>
-        paymentApi.getBrandPublicPaymentMethods({
-          brandCode: envConfig.BRAND_CODE,
-        }),
+      queryFn: () => paymentApi.getBrandPublicPaymentMethods(),
       staleTime: 5 * 60 * 1000,
       retry: 1,
     });

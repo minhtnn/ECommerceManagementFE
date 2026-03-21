@@ -1,14 +1,14 @@
 import { apiRequest } from "@/lib/http";
 import { TBrandOrderByIdResponse, TBrandOrdersResponse, TCreateOrderRequest, TCreateOrderResponse, TCustomerOrderByIdResponse, TCustomerOrdersResponse, TGetPaymentLinkResponse, TUpdateOrderRequest } from "@/schemas/order.schema";
-import { BaseResponse, InfiniteScrollResponse, PaginationResponse } from "@/types/response.type";
+import { BaseResponse, PaginationResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
 
 const getBrandOrders = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TBrandOrdersResponse>>>(`${API_SUFFIX.ORDER_API}/brand`, { params: params });
 
 
-const getCustomerOrders = async (params?: any) =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<InfiniteScrollResponse<TCustomerOrdersResponse>>
+const getInfiniteCustomerOrders = async (params?: any) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TCustomerOrdersResponse>>
     >(`${API_SUFFIX.ORDER_API}/customer`, { params: params });
 
 const getBrandOrderById = async (id: string) =>
@@ -38,7 +38,7 @@ const getPaymentLink = async (orderId: string) =>
     );
 export const orderApi = {
     getBrandOrders,
-    getCustomerOrders,
+    getInfiniteCustomerOrders,
     getBrandOrderById,
     getCustomerOrderById,
 

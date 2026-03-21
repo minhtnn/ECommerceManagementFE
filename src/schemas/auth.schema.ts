@@ -29,7 +29,6 @@ export const BELoginSchema = z
 //#region Register
 export const FERegisterSchema = z
   .object({
-    brandCode: z.string(),
     phoneNumber: z.string()
       .refine(
         (val) => val === "" || /^(0[0-9]{9})$/.test(val),
