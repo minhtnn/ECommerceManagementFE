@@ -13,10 +13,19 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import EditAccountDialog from "./components/EditAccountDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { OTPVerificationModal } from "./components/OTPVerificationModal";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
-const Account = () => {
+const EndUserAccountPage = () => {
   const navigate = useNavigate();
   const { getAccountDetail, logout, logoutAllDevices } = useAuth();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isShowOTPModal, setIsShowOTPModal] = useState(false);
+  const { registerEmail } = useSelector((state: RootState) => state.modal);
 
   const {
     data: userData,
@@ -46,13 +55,13 @@ const Account = () => {
       id: "password",
       label: "Đổi mật khẩu",
       icon: Lock,
-      path: PATH_END_CUSTOMER.changePassword, 
+      path: PATH_END_CUSTOMER.changePassword,
     },
     {
       id: "addresses",
       label: "Sổ địa chỉ",
       icon: MapPin,
-      path: PATH_END_CUSTOMER.addresses, 
+      path: PATH_END_CUSTOMER.addresses,
     },
   ];
 
@@ -92,7 +101,6 @@ const Account = () => {
   }
 
   const account = userData?.data?.data;
-
   return (
     <EndUserLayout>
       {/* Breadcrumb */}
@@ -120,7 +128,7 @@ const Account = () => {
               <p className="text-sm text-muted-foreground mb-6">
                 Xin chào,{" "}
                 <span className="font-medium text-foreground">
-                  {account?.name || "Khách hàng"}
+                  {account?.fullName || "Khách hàng"}
                 </span>
                 !
               </p>
@@ -166,7 +174,7 @@ const Account = () => {
             </div>
           </div>
 
-          {/* Right Content - Account Info */}
+          {/* Right Content - EndUserAccountPage Info */}
           <div className="md:col-span-2">
             <div className="bg-background rounded-lg border p-6">
               <div className="flex items-center justify-between mb-6">
@@ -174,19 +182,27 @@ const Account = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    // TODO: Open edit dialog or navigate to edit page
-                  }}
+                  onClick={() => setIsEditDialogOpen(true)}
                 >
                   Chỉnh sửa
                 </Button>
               </div>
-
+              <div className="flex flex-col items-center gap-2 mb-6">
+                <Avatar className="w-24 h-24 ring-2 ring-primary/20">
+                  <AvatarImage src={account?.imageUrl ?? undefined} />
+                  <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
+                    {account?.fullName?.charAt(0)?.toUpperCase() ?? "K"}
+                  </AvatarFallback>
+                </Avatar>
+                <p className="text-sm font-medium text-foreground">
+                  {account?.fullName || "Khách hàng"}
+                </p>
+              </div>
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4 py-3 border-b">
                   <span className="font-medium text-foreground">Họ tên:</span>
                   <span className="col-span-2 text-muted-foreground">
-                    {account?.name || "Chưa cập nhật"}
+                    {account?.fullName || "Chưa cập nhật"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-4 py-3 border-b">
@@ -195,7 +211,7 @@ const Account = () => {
                     {account?.email || "Chưa cập nhật"}
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-4 py-3 border-b">
+                <div className="grid grid-cols-3 gap-4 py-3">
                   <span className="font-medium text-foreground">
                     Điện thoại:
                   </span>
@@ -203,19 +219,27 @@ const Account = () => {
                     {account?.phoneNumber || "Chưa cập nhật"}
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-4 py-3">
-                  <span className="font-medium text-foreground">Địa chỉ:</span>
-                  <span className="col-span-2 text-muted-foreground">
-                    {account?.address || "Chưa cập nhật"}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <EditAccountDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onUpdateEmailSuccess={(open) => {
+          setIsShowOTPModal(open);
+        }}
+        account={account}
+      />
+      <OTPVerificationModal
+        open={isShowOTPModal}
+        onOpenChange={(open) => {}}
+        email={registerEmail || ""}
+        onVerifySuccess={(open) => setIsShowOTPModal(open)}
+      />
     </EndUserLayout>
   );
 };
 
-export default Account;
+export default EndUserAccountPage;

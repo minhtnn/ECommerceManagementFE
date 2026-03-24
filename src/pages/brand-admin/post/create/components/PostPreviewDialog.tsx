@@ -1,12 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-    EPostStatus,
-    POST_STATUS_COLOR,
-    POST_STATUS_LABEL,
+  EPostStatus,
+  POST_STATUS_COLOR,
+  POST_STATUS_LABEL,
 } from "@/types/enums/post-status.enum";
-import { BookOpen, Calendar, Clock, Eye, Tag, X } from "lucide-react";
+import { BookOpen, Calendar, Clock, Eye, Tag, User, X } from "lucide-react";
+import DOMPurify from "dompurify";
+import { cn } from "@/lib/utils";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 interface PostPreviewDialogProps {
   open: boolean;
@@ -46,6 +49,12 @@ const PostPreviewDialog = ({
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden rounded-2xl gap-0 border-0 shadow-2xl">
         {/* ── Toolbar ── */}
         <DialogHeader className="flex flex-row items-center justify-between px-5 py-3 border-b border-border/50 bg-background shrink-0">
+          <VisuallyHidden.Root>
+            <DialogTitle>Xem trước bài đăng</DialogTitle>
+            <DialogDescription>
+              Xem trước nội dung bài đăng trước khi lưu
+            </DialogDescription>
+          </VisuallyHidden.Root>
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <Eye className="w-3.5 h-3.5 text-primary" />
@@ -146,9 +155,61 @@ const PostPreviewDialog = ({
 
             {/* Content */}
             {data.content ? (
-              <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap text-sm">
-                {data.content}
-              </div>
+              <div
+                className={cn(
+                  "prose prose-lg max-w-none text-foreground rich-content",
+                  "prose prose-sm max-w-none text-foreground/90 leading-relaxed rich-content",
+                  "prose prose-sm max-w-none text-foreground/90 leading-relaxed",
+                  "[&_img]:rounded-lg [&_img]:max-w-full [&_img]:h-auto [&_img]:my-4 [&_img]:block",
+                  "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-3",
+                  "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-5 [&_h2]:mb-2",
+                  "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2",
+                  "[&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6",
+                  "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic",
+                  "[&_a]:text-primary [&_a]:underline",
+                  "[&_pre]:bg-muted [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:my-4",
+                  "[&_code]:text-sm [&_code]:font-mono",
+                  "[&_hr]:border-border [&_hr]:my-6",
+                )}
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(data.content, {
+                    ALLOWED_TAGS: [
+                      "p",
+                      "br",
+                      "strong",
+                      "em",
+                      "s",
+                      "u",
+                      "h1",
+                      "h2",
+                      "h3",
+                      "ul",
+                      "ol",
+                      "li",
+                      "blockquote",
+                      "hr",
+                      "img",
+                      "a",
+                      "pre",
+                      "code",
+                      "span",
+                    ],
+                    ALLOWED_ATTR: [
+                      "src",
+                      "alt",
+                      "href",
+                      "target",
+                      "class",
+                      "style",
+                      "data-alignment",
+                      "width",
+                      "height",
+                    ],
+                    // Cho phép base64 để preview ảnh chưa upload
+                    ADD_DATA_URI_TAGS: ["img"],
+                  }),
+                }}
+              />
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">

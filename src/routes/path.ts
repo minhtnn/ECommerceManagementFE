@@ -15,6 +15,8 @@ export const PATH_AUTH = {
     login: path(ROOTS_AUTH, '/login'),
     account: path(ROOTS_AUTH, '/account'),
     logout: path(ROOTS_AUTH, '/logout'),
+    forgotPassword: path(ROOTS_AUTH, '/forgot-password'),
+    resetPassword: path(ROOTS_AUTH, '/reset-password'),
 };
 
 export const PATH_SYSTEM_ADMIN_DASHBOARD = {

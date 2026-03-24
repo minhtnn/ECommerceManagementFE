@@ -70,6 +70,14 @@ export const AppRoutes = () =>
           path: "logout",
           element: <Logout />,
         },
+        {
+          path: "forgot-password",
+          element: <ForgotPasswordPage />,
+        },
+        {
+          path: "reset-password",
+          element: <ResetPasswordPage />,
+        },
       ],
     },
     //#endregion
@@ -372,6 +380,12 @@ const EndUserChangePasswordPage = Loadable(
 );
 const DashboardAccountPage = Loadable(
   lazy(() => import("@/pages/auth/dashboard-account")),
+);
+const ForgotPasswordPage = Loadable(
+  lazy(() => import("@/pages/auth/forgot-password")),
+);
+const ResetPasswordPage = Loadable(
+  lazy(() => import("@/pages/auth/reset-password")),
 );
 //#endregion
 

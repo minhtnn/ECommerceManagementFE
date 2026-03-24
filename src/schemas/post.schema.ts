@@ -43,7 +43,6 @@ export const CreatePostSchema = z.object({
         .optional()
         .or(z.literal("")),
     content: z.string()
-        .max(50000, { message: "Nội dung không được vượt quá 50000 ký tự" })
         .optional()
         .or(z.literal("")),
 });

@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { handleApiError } from "@/lib/error";
 import { auth, googleProvider } from "@/lib/firebase";
 import { setUser } from "@/redux/user/user-slice";
+import { PATH_AUTH } from "@/routes/path";
 import {
   FELoginSchema,
   TBELoginRequest,
@@ -194,7 +195,7 @@ export function LoginForm({
           />
           <div className="text-right">
             <Link
-              to="/forgot-password"
+              to={PATH_AUTH.forgotPassword}
               className="text-sm text-primary hover:underline"
             >
               Quên mật khẩu?

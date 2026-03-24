@@ -148,7 +148,7 @@ export function RegisterForm({
         toast.info(result.data.message);
         dispatch(handleSetRegisterEmail(data.email));
         dispatch(handleToggleOTPModal(true));
-      }else{
+      } else {
         toast.error(result.data.message || "Đăng ký thất bại");
       }
     } catch (error) {
@@ -167,7 +167,6 @@ export function RegisterForm({
         IdToken: idToken,
       });
 
-
       if (response?.data?.status === 200 || response?.data?.status === 201) {
         const accessToken = response.data.data.accessToken;
         const role = (jwtDecode(accessToken) as any).role;
@@ -179,11 +178,10 @@ export function RegisterForm({
 
         dispatch(setUser({ ...response.data.data, role: ERole[role] }));
         toast.success("Đăng ký thành công với Google!");
-      }else{
+      } else {
         toast.error(response?.data?.message || "Đăng ký Google thất bại");
       }
     } catch (error: any) {
-
       // Firebase errors
       if (error.code && error.code.startsWith("auth/")) {
         const firebaseErrors: Record<string, string> = {
@@ -501,7 +499,9 @@ export function RegisterForm({
       </Form>
       <OTPVerificationModal
         open={showOTPModal}
-        onOpenChange={(open) => dispatch(handleToggleOTPModal(open))}
+        onOpenChange={(open) => {
+          //  dispatch(handleToggleOTPModal(open))
+        }}
         email={registerEmail || ""}
         onVerifySuccess={handleVerifySuccess}
       />

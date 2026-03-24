@@ -44,39 +44,80 @@ export const copyToClipboard = async (text: string, label: string) => {
   }
 };
 
-export const getOptimizedImageUrl = (
-  url: string | null,
-  options: {
-    width?: number;
-    height?: number;
-    quality?: number;
-    format?: "webp" | "avif" | "auto";
-  } = {}
-): string => {
-  if (!url) return "";
+export interface ExtractedInlineImage {
+    index: number;
+    base64: string;
+    mimeType: string;
+}
 
-  const { width, height, quality = 75, format = "auto" } = options;
+export interface ExtractResult {
+    cleanHtml: string;
+    images: ExtractedInlineImage[];
+}
+export const extractBase64Images = (html: string): ExtractResult => {
+    const images: ExtractedInlineImage[] = [];
+    let index = 0;
 
-  // Cloudinary
-  if (url.includes("cloudinary.com")) {
-    const transforms = [
-      "f_auto",           // tự chọn format tốt nhất (webp/avif)
-      `q_${quality}`,     // quality
-      width ? `w_${width}` : "",
-      height ? `h_${height}` : "",
-      "c_fill",
-    ]
-      .filter(Boolean)
-      .join(",");
+    const cleanHtml = html.replace(
+        /src="(data:(image\/[^;]+);base64,([^"]+))"/g,
+        (_, fullBase64, mimeType) => {
+            images.push({ index, base64: fullBase64, mimeType });
+            const placeholder = `__inline_${index}__`;
+            index++;
+            return `src="${placeholder}"`;
+        }
+    );
 
-    return url.replace("/upload/", `/upload/${transforms}/`);
-  }
+    return { cleanHtml, images };
+};
 
-  if (url.includes("imagekit.io")) {
-    const params = new URLSearchParams();
-    if (width) params.set("tr", `w-${width},h-${height || width},q-${quality},f-auto`);
-    return `${url}?${params.toString()}`;
-  }
+export const base64ToFile = (
+    base64: string,
+    mimeType: string,
+    index: number
+): File => {
+    const base64Data = base64.split(",")[1];
+    const byteCharacters = atob(base64Data);
+    const byteArray = new Uint8Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++)
+        byteArray[i] = byteCharacters.charCodeAt(i);
 
-  return url;
+    const extension = mimeType.split("/")[1];
+    return new File([byteArray], `inline_${index}.${extension}`, {
+        type: mimeType,
+    });
+};
+
+export const buildPostFormData = (params: {
+    fields: Record<string, string | number | undefined | null>;
+    image?: File | null;
+    htmlContent?: string | null;
+}): FormData => {
+    const { fields, image, htmlContent } = params;
+    const formData = new FormData();
+
+    // 1. Append fields thông thường
+    Object.entries(fields).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "")
+            formData.append(key, String(value));
+    });
+
+    // 2. Append featured image
+    if (image)
+        formData.append("Image", image);
+
+    // 3. Extract base64 → placeholder, append inline images
+    if (htmlContent) {
+        const { cleanHtml, images } = extractBase64Images(htmlContent);
+        formData.append("Content", cleanHtml);
+
+        images.forEach(({ base64, mimeType, index }) => {
+            const file = base64ToFile(base64, mimeType, index);
+            formData.append(`InlineImages[${index}]`, file);
+        });
+    } else {
+        formData.append("Content", "");
+    }
+
+    return formData;
 };

@@ -1,6 +1,8 @@
 import { usePost } from "@/hooks/use-post";
-import { formatDateTimeInShort } from "@/lib/utils";
+import { useQueryParams } from "@/hooks/use-query-params";
+import { cn, formatDateTimeInShort } from "@/lib/utils";
 import { PATH_GUEST } from "@/routes/path";
+import DOMPurify from "dompurify";
 import { Calendar, ChevronLeft, Clock, ImageOff, User } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
@@ -54,15 +56,31 @@ const SidebarCard = ({ id, title, imageUrl }: SidebarCardProps) => (
 
 const PublicPostDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-
-  const { getPublicPostById, getInfinitePosts } = usePost();
+  const { getPublicPostById, getInfinitePublicPosts } = usePost();
+  const { pageSize, sortBy, isAsc } = useQueryParams({
+    defaultPageSize: 6,
+    defaultSortBy: "createdDate",
+  });
   const {
     data: postData,
     isLoading,
     isError,
     error,
   } = getPublicPostById(id ?? "");
-  const { data: listData, isLoading: isSidebarLoading } = getInfinitePosts(6);
+  const {
+    data: listData,
+    isLoading: isSidebarLoading,
+    isFetching,
+    isError: isSidebarError,
+    error: sidebarError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = getInfinitePublicPosts({
+    size: pageSize,
+    sortBy,
+    isAsc,
+  });
 
   const post = postData?.data?.data;
   const sidebarPosts =
@@ -70,7 +88,6 @@ const PublicPostDetailPage = () => {
       .flatMap((p) => p?.data?.data?.items ?? [])
       .filter((p) => p.id !== id)
       .slice(0, 4) ?? [];
-
 
   return (
     <>
@@ -175,16 +192,62 @@ const PublicPostDetailPage = () => {
                 {/* Content */}
                 {post.content ? (
                   <article
-                    className="prose prose-lg max-w-none text-foreground
-                                            prose-headings:text-foreground prose-headings:font-bold
-                                            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4
-                                            prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-4
-                                            prose-strong:text-foreground
-                                            prose-em:text-primary
-                                            prose-ul:text-muted-foreground prose-ul:my-4
-                                            prose-li:my-1
-                                            whitespace-pre-line"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
+                    className={cn(
+                      "prose prose-lg max-w-none text-foreground rich-content", // ← thêm rich-content
+                      "prose-headings:text-foreground prose-headings:font-bold",
+                      "prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4",
+                      "prose-h2:text-2xl prose-h2:mt-7 prose-h2:mb-3",
+                      "prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3",
+                      "prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-2",
+                      "prose-strong:text-foreground",
+                      "prose-em:text-primary",
+                      "prose-ul:text-muted-foreground prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6",
+                      "prose-ol:text-muted-foreground prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-6",
+                      "prose-li:my-1",
+                      "prose-blockquote:border-l-4 prose-blockquote:border-primary/40",
+                      "prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted-foreground",
+                      "prose-a:text-primary prose-a:underline prose-a:underline-offset-2",
+                      "prose-code:text-sm prose-code:font-mono prose-code:bg-muted prose-code:px-1 prose-code:rounded",
+                      "prose-pre:bg-muted prose-pre:rounded-lg prose-pre:p-4 prose-pre:my-4 prose-pre:overflow-x-auto",
+                      "prose-hr:border-border prose-hr:my-8",
+                      // Bỏ prose-img vì đã handle bằng .rich-content img trong CSS
+                    )}
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(post.content, {
+                        ALLOWED_TAGS: [
+                          "p",
+                          "br",
+                          "strong",
+                          "em",
+                          "s",
+                          "u",
+                          "h1",
+                          "h2",
+                          "h3",
+                          "ul",
+                          "ol",
+                          "li",
+                          "blockquote",
+                          "hr",
+                          "img",
+                          "a",
+                          "pre",
+                          "code",
+                          "span",
+                        ],
+                        ALLOWED_ATTR: [
+                          "src",
+                          "alt",
+                          "href",
+                          "target",
+                          "class",
+                          "style",
+                          "data-alignment",
+                          "width",
+                          "height",
+                        ],
+                      }),
+                    }}
                   />
                 ) : (
                   <p className="text-muted-foreground italic">

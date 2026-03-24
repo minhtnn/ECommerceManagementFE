@@ -1,7 +1,16 @@
 import { authApi } from "@/apis/auth.api";
 import { logout, setUser } from "@/redux/user/user-slice";
 import { PATH_AUTH } from "@/routes/path";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  TForgotPasswordRequest,
+  TResetPasswordRequest,
+  TValidateResetTokenRequest,
+} from "@/schemas/auth.schema";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -11,16 +20,22 @@ interface UseAccountDetailParams {}
 export const useAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const login = () =>
     useMutation({
       mutationFn: authApi.login,
     });
-
   const loginGoogle = () =>
     useMutation({
       mutationFn: authApi.loginGoogle,
     });
-
+  const updateAccount = () =>
+    useMutation({
+      mutationFn: (data: FormData) => authApi.updateAccount(data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["account-detail"] });
+      },
+    });
   const customerNormalRegister = () =>
     useMutation({
       mutationFn: authApi.endCustomerNormalRegister,
@@ -30,7 +45,6 @@ export const useAuth = () => {
     useMutation({
       mutationFn: authApi.endCustomerGoogleRegister,
     });
-
   const verifyEmail = () =>
     useMutation({
       mutationFn: authApi.verifyEmail,
@@ -39,14 +53,14 @@ export const useAuth = () => {
     useMutation({
       mutationFn: authApi.resendOTPVerifyEmail,
     });
-
   const getAccountDetail = (params: UseAccountDetailParams = {}) => {
     return useSuspenseQuery({
       queryKey: ["account-detail"],
       queryFn: async () => authApi.getAccountDetail(params),
+      retry: 0,
+      refetchOnWindowFocus: false,
     });
   };
-
   const handleLogout = async () => {
     try {
       var result = await authApi.logout();
@@ -62,7 +76,6 @@ export const useAuth = () => {
       toast.error("Đã xảy ra lỗi khi đăng xuất");
     }
   };
-
   const handleLogoutAllDevices = async () => {
     try {
       const response = await authApi.logoutAllDevices();
@@ -88,7 +101,6 @@ export const useAuth = () => {
       }
     }
   };
-
   const changePassword = () =>
     useMutation({
       mutationFn: authApi.changePassword,
@@ -104,7 +116,21 @@ export const useAuth = () => {
         }, 2000);
       },
     });
-
+  const forgotPassword = () =>
+    useMutation({
+      mutationFn: async (data: TForgotPasswordRequest) =>
+        authApi.forgotPassword(data),
+    });
+  const validateResetToken = () =>
+    useMutation({
+      mutationFn: async (data: TValidateResetTokenRequest) =>
+        authApi.validateResetToken(data),
+    });
+  const resetPassword = () =>
+    useMutation({
+      mutationFn: async (data: TResetPasswordRequest) =>
+        authApi.resetPassword(data),
+    });
   return {
     login,
     loginGoogle,
@@ -116,5 +142,9 @@ export const useAuth = () => {
     logout: handleLogout,
     logoutAllDevices: handleLogoutAllDevices,
     changePassword,
+    updateAccount,
+    forgotPassword,
+    validateResetToken,
+    resetPassword,
   };
 };

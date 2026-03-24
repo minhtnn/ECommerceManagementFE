@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/http";
-import { TAccountDetailResponse, TAuthResponse, TChangePasswordRequest } from "@/schemas/auth.schema";
+import { TAccountDetailResponse, TAuthResponse, TChangePasswordRequest, TForgotPasswordRequest, TForgotPasswordResponse, TResetPasswordRequest, TValidateResetTokenRequest } from "@/schemas/auth.schema";
 import { BaseResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
 import envConfig from "@/schemas/config.schema";
@@ -70,6 +70,46 @@ const changePassword = async (data: TChangePasswordRequest) => {
     );
 }
 
+const updateAccount = async (data: FormData) => {
+    data.append("brandCode", envConfig.BRAND_CODE);
+    return apiRequest.ecommerceCoffee.post<BaseResponse<string>>(
+        `${API_SUFFIX.AUTH_API}/update-information`,
+        data
+    );
+};
+
+const forgotPassword = async (data: TForgotPasswordRequest) => {
+    return apiRequest.ecommerceCoffee.post<BaseResponse<TForgotPasswordResponse>>(
+        `${API_SUFFIX.AUTH_API}/forgot-password`,
+        {
+            email: data.email,
+            brandCode: envConfig.BRAND_CODE,
+        }
+    );
+};
+
+const validateResetToken = async (data: TValidateResetTokenRequest) => {
+    return apiRequest.ecommerceCoffee.post<BaseResponse<void>>(
+        `${API_SUFFIX.AUTH_API}/validate-reset-token`,
+        {
+            email: data.email,
+            token: data.token,
+        }
+    );
+};
+
+const resetPassword = async (data: TResetPasswordRequest) => {
+    return apiRequest.ecommerceCoffee.post<BaseResponse<void>>(
+        `${API_SUFFIX.AUTH_API}/reset-password`,
+        {
+            email: data.email,
+            token: data.token,
+            newPassword: data.newPassword,
+            confirmNewPassword: data.confirmNewPassword,
+        }
+    );
+};
+
 export const authApi = {
     getAccountDetail,
     login,
@@ -81,6 +121,10 @@ export const authApi = {
     refresh,
     logout,
     logoutAllDevices,
-    changePassword
+    changePassword,
+    updateAccount,
+    forgotPassword,
+    validateResetToken,
+    resetPassword,
 }
 

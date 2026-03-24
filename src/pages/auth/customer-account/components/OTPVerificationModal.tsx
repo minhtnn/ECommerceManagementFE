@@ -21,7 +21,7 @@ interface OTPVerificationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   email: string;
-  onVerifySuccess: () => void;
+  onVerifySuccess: (open: boolean) => void;
 }
 
 export function OTPVerificationModal({
@@ -48,6 +48,7 @@ export function OTPVerificationModal({
       const result = await verifyEmailMutation.mutateAsync(data);
 
       if (result.data.status >= 200 && result.data.status < 300) {
+        setOtp("");
         toast.success("Xác thực thành công!");
         const accessToken = result.data.data.accessToken;
         const role = (jwtDecode(accessToken) as any).role;
@@ -56,7 +57,7 @@ export function OTPVerificationModal({
           return;
         }
         dispatch(setUser({ ...result.data.data, role: ERole[role] }));
-        onVerifySuccess();
+        onVerifySuccess(false);
         onOpenChange(false);
       } else {
         toast.error(result.data.message || "Mã OTP không hợp lệ");
