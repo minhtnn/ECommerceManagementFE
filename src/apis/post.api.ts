@@ -9,9 +9,9 @@ const getPosts = async (params?: any) =>
         `${API_SUFFIX.POST_API}`, { params }
     );
 
-const getPostById = async (id: string) =>
+const getPostById = async (id: string, timeZone: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TPostDetail>>(
-        `${API_SUFFIX.POST_API}/${id}`
+        `${API_SUFFIX.POST_API}/${id}?timeZone=${timeZone}`
     );
 
 const createPost = async (data: FormData) =>
@@ -30,9 +30,9 @@ const getPublicPosts = async (params?: any) =>
         { params }
     );
 
-const getPublicPostById = async (brandCode: string, id: string) =>
+const getPublicPostById = async (brandCode: string, id: string, timeZone: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TPublicPostDetail>>(
-        `${API_SUFFIX.POST_API}/public/${brandCode}/${id}`
+        `${API_SUFFIX.POST_API}/public/${brandCode}/${id}?timeZone=${timeZone}`
     );
 
 export const postApi = {

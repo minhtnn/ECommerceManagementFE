@@ -35,6 +35,9 @@ export const PATH_SYSTEM_ADMIN_DASHBOARD = {
         create: path(ROOTS_SYSTEM_ADMIN_DASHBOARD, '/payment-methods/create'),
         edit: (id: string) => path(ROOTS_SYSTEM_ADMIN_DASHBOARD, `/payment-methods/${id}/edit`),
     },
+    systemConfigurations:{
+        root: path(ROOTS_SYSTEM_ADMIN_DASHBOARD, '/system-configurations'),
+    }
 }
 
 export const PATH_BRAND_DASHBOARD = {

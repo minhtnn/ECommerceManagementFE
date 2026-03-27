@@ -1,17 +1,3 @@
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -31,10 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { usePromotionRule } from "@/hooks/use-promotion-rule";
-import { useProduct } from "@/hooks/use-product";
-import { useProductCategory } from "@/hooks/use-product-category";
 import { handleApiError } from "@/lib/error";
-import { cn } from "@/lib/utils";
 import { PATH_BRAND_DASHBOARD } from "@/routes/path";
 import {
   CreatePromotionRuleSchema,
@@ -42,173 +25,26 @@ import {
 } from "@/schemas/promotion-rule.schema";
 import { EActionTargetRole } from "@/types/enums/action-target-role.enum";
 import { EActionTargetType } from "@/types/enums/action-target-type.enum";
+import { EPromotionType } from "@/types/enums/promotion-type.enum";
 import { ERuleActionType } from "@/types/enums/rule-action-type.enum";
 import { ERuleConditionOperator } from "@/types/enums/rule-condition-operator.enum";
 import { ERuleConditionType } from "@/types/enums/rule-condition-type.enum";
-import { EPromotionType } from "@/types/enums/promotion-type.enum";
-import { EProductStatus } from "@/types/enums/product-status.enum";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Check,
-  ChevronsUpDown,
-  Info,
-  LoaderCircle,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
-import { useState } from "react";
+import { Info, LoaderCircle, Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
-// ─── Static options ───────────────────────────────────────────────────────────
-
-const LOAI_KHUYEN_MAI = [
-  { value: EPromotionType.OrderDiscount, label: "Giảm giá đơn hàng" },
-  { value: EPromotionType.LineItemDiscount, label: "Giảm sản phẩm cụ thể" },
-  { value: EPromotionType.BuyXGetY, label: "Mua X tặng Y" },
-  // { value: EPromotionType.QuantityTier, label: "Theo số lượng" },
-  { value: EPromotionType.FreeGift, label: "Tặng quà cố định" },
-  { value: EPromotionType.FreeShipping, label: "Miễn phí vận chuyển" },
-];
-
-const TAT_CA_LOAI_DIEU_KIEN = [
-  { value: ERuleConditionType.CartSubtotal, label: "Tổng giá trị giỏ hàng" },
-  {
-    value: ERuleConditionType.CartContainsProduct,
-    label: "Giỏ hàng có sản phẩm",
-  },
-  {
-    value: ERuleConditionType.CartContainsCategory,
-    label: "Giỏ hàng có danh mục",
-  },
-  {
-    value: ERuleConditionType.MinQuantityOfProduct,
-    label: "Số lượng sản phẩm tối thiểu",
-  },
-  {
-    value: ERuleConditionType.MinQuantityInCategory,
-    label: "Số lượng trong danh mục",
-  },
-  {
-    value: ERuleConditionType.TotalCartQuantity,
-    label: "Tổng số lượng giỏ hàng",
-  },
-];
-
-const TAT_CA_TOAN_TU = [
-  {
-    value: ERuleConditionOperator.GreaterThanOrEqual,
-    label: ">= (Lớn hơn hoặc bằng)",
-  },
-  { value: ERuleConditionOperator.GreaterThan, label: "> (Lớn hơn)" },
-  { value: ERuleConditionOperator.Equals, label: "= (Bằng)" },
-  { value: ERuleConditionOperator.ContainsAny, label: "Chứa ít nhất 1" },
-  { value: ERuleConditionOperator.ContainsAll, label: "Chứa tất cả" },
-];
-
-const TAT_CA_LOAI_HANH_DONG = [
-  {
-    value: ERuleActionType.CartPercentageDiscount,
-    label: "Giảm toàn đơn theo phần trăm",
-  },
-  {
-    value: ERuleActionType.CartFixedDiscount,
-    label: "Giảm tiền cố định toàn đơn",
-  },
-  {
-    value: ERuleActionType.ItemPercentageDiscount,
-    label: "Giảm sản phẩm theo phần trăm",
-  },
-  {
-    value: ERuleActionType.ItemFixedDiscount,
-    label: "Giảm tiền cố định sản phẩm",
-  },
-  {
-    value: ERuleActionType.BuyXGetYFreeProducts,
-    label: "Mua X tặng Y sản phẩm",
-  },
-  { value: ERuleActionType.FreeGiftProduct, label: "Tặng quà cố định" },
-  { value: ERuleActionType.FreeShipping, label: "Miễn phí vận chuyển" },
-];
-
-const LOAI_DOI_TUONG = [
-  { value: EActionTargetType.Product, label: "Sản phẩm" },
-  { value: EActionTargetType.Category, label: "Danh mục" },
-];
-
-// BuyProduct đã bị bỏ khỏi hệ thống.
-// Vai trò "sản phẩm cần mua" nằm trong condition MinQuantityOfProduct.
-const TAT_CA_VAI_TRO = [
-  { value: EActionTargetRole.DiscountTarget, label: "Áp giảm giá" },
-  { value: EActionTargetRole.GetProduct, label: "Sản phẩm được tặng (Get)" },
-  { value: EActionTargetRole.GiftProduct, label: "Quà tặng cố định" },
-];
-
-// ─── conditionType → operators được phép ─────────────────────────────────────
-
-const CONDITION_TYPE_OPERATORS: Record<
-  ERuleConditionType,
-  ERuleConditionOperator[]
-> = {
-  [ERuleConditionType.CartSubtotal]: [
-    ERuleConditionOperator.GreaterThanOrEqual,
-    ERuleConditionOperator.GreaterThan,
-    ERuleConditionOperator.Equals,
-  ],
-  [ERuleConditionType.TotalCartQuantity]: [
-    ERuleConditionOperator.GreaterThanOrEqual,
-    ERuleConditionOperator.GreaterThan,
-    ERuleConditionOperator.Equals,
-  ],
-  [ERuleConditionType.MinQuantityOfProduct]: [
-    ERuleConditionOperator.GreaterThanOrEqual,
-    ERuleConditionOperator.GreaterThan,
-  ],
-  [ERuleConditionType.MinQuantityInCategory]: [
-    ERuleConditionOperator.GreaterThanOrEqual,
-    ERuleConditionOperator.GreaterThan,
-  ],
-  [ERuleConditionType.CartContainsProduct]: [
-    ERuleConditionOperator.ContainsAny,
-    ERuleConditionOperator.ContainsAll,
-  ],
-  [ERuleConditionType.CartContainsCategory]: [
-    ERuleConditionOperator.ContainsAny,
-    ERuleConditionOperator.ContainsAll,
-  ],
-};
-
-// ─── conditionType nào cần combobox ──────────────────────────────────────────
-
-type ConditionValueType =
-  | "number"
-  | "product-multi"
-  | "category-multi"
-  | "product-single-qty";
-
-const CONDITION_VALUE_TYPE: Record<ERuleConditionType, ConditionValueType> = {
-  [ERuleConditionType.CartSubtotal]: "number",
-  [ERuleConditionType.TotalCartQuantity]: "number",
-  [ERuleConditionType.MinQuantityInCategory]: "number",
-  [ERuleConditionType.CartContainsProduct]: "product-multi",
-  [ERuleConditionType.CartContainsCategory]: "category-multi",
-  // MinQuantityOfProduct = ProductCombobox (single) + InputNumber → ghép "uuid:qty"
-  [ERuleConditionType.MinQuantityOfProduct]: "product-single-qty",
-};
-
-const CONDITION_VALUE_PLACEHOLDER: Record<ERuleConditionType, string> = {
-  [ERuleConditionType.CartSubtotal]: "VD: 100000 (đơn từ 100k)",
-  [ERuleConditionType.TotalCartQuantity]: "VD: 5 (từ 5 sản phẩm)",
-  [ERuleConditionType.MinQuantityInCategory]:
-    "VD: 2 (ít nhất 2 sp trong danh mục)",
-  [ERuleConditionType.CartContainsProduct]: "",
-  [ERuleConditionType.CartContainsCategory]: "",
-  [ERuleConditionType.MinQuantityOfProduct]: "Số lượng tối thiểu",
-};
-
-// ─── Promotion config ─────────────────────────────────────────────────────────
+import { ConditionValueInput } from "./components/ConditionValueInput";
+import {
+  CONDITION_TYPE_OPERATORS,
+  LOAI_DOI_TUONG,
+  PROMOTION_TYPE_LABEL,
+  TAT_CA_LOAI_DIEU_KIEN,
+  TAT_CA_LOAI_HANH_DONG,
+  TAT_CA_TOAN_TU,
+  TAT_CA_VAI_TRO,
+} from "./components/PromotionRuleShared";
+import { TargetIdInput } from "./components/TargetIdInput";
 
 type PromotionConfig = {
   moTa: string;
@@ -243,6 +79,7 @@ const PROMOTION_CONFIG: Record<EPromotionType, PromotionConfig> = {
       ERuleConditionType.TotalCartQuantity,
       ERuleConditionType.CartContainsProduct,
       ERuleConditionType.CartContainsCategory,
+      ERuleConditionType.FirstOrder,
     ],
     hanhDongChoPhep: [
       ERuleActionType.CartPercentageDiscount,
@@ -268,6 +105,7 @@ const PROMOTION_CONFIG: Record<EPromotionType, PromotionConfig> = {
       ERuleConditionType.CartContainsCategory,
       ERuleConditionType.CartSubtotal,
       ERuleConditionType.MinQuantityOfProduct,
+      ERuleConditionType.FirstOrder,
     ],
     hanhDongChoPhep: [
       ERuleActionType.ItemPercentageDiscount,
@@ -335,6 +173,7 @@ const PROMOTION_CONFIG: Record<EPromotionType, PromotionConfig> = {
   //     ERuleConditionType.TotalCartQuantity,
   //     ERuleConditionType.MinQuantityOfProduct,
   //     ERuleConditionType.CartSubtotal,
+  //     ERuleConditionType.FirstOrder,
   //   ],
   //   hanhDongChoPhep: [
   //     ERuleActionType.CartPercentageDiscount,
@@ -360,6 +199,7 @@ const PROMOTION_CONFIG: Record<EPromotionType, PromotionConfig> = {
     dieuKienChoPhep: [
       ERuleConditionType.CartSubtotal,
       ERuleConditionType.TotalCartQuantity,
+      ERuleConditionType.FirstOrder,
     ],
     hanhDongChoPhep: [ERuleActionType.FreeGiftProduct],
     vaiTroChoPhep: [EActionTargetRole.GiftProduct],
@@ -387,6 +227,7 @@ const PROMOTION_CONFIG: Record<EPromotionType, PromotionConfig> = {
     dieuKienChoPhep: [
       ERuleConditionType.CartSubtotal,
       ERuleConditionType.TotalCartQuantity,
+      ERuleConditionType.FirstOrder,
     ],
     hanhDongChoPhep: [ERuleActionType.FreeShipping],
     vaiTroChoPhep: [],
@@ -417,8 +258,6 @@ const ACTION_KHONG_CAN_TARGET = [
   ERuleActionType.FreeShipping,
 ];
 
-// ─── Helper functions ─────────────────────────────────────────────────────────
-
 const getDieuKienOptions = (type: EPromotionType) =>
   TAT_CA_LOAI_DIEU_KIEN.filter((o) =>
     PROMOTION_CONFIG[type].dieuKienChoPhep.includes(o.value),
@@ -445,449 +284,6 @@ const getVaiTroOptions = (type: EPromotionType) =>
   TAT_CA_VAI_TRO.filter((o) =>
     PROMOTION_CONFIG[type].vaiTroChoPhep.includes(o.value),
   );
-
-// ─── ProductCombobox (single) ─────────────────────────────────────────────────
-
-const ProductCombobox = ({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string;
-  onChange: (id: string) => void;
-  disabled?: boolean;
-}) => {
-  const [open, setOpen] = useState(false);
-  const { getProducts } = useProduct();
-
-  const { data, isLoading } = getProducts({ size: 100, allowFetch: open });
-  const products = data?.data?.data?.items ?? [];
-  const selected = products.find((p: any) => p.id === value);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          disabled={disabled}
-          className="w-full justify-between h-8 text-xs font-normal truncate"
-        >
-          <span className="truncate">
-            {selected ? selected.name : "Chọn sản phẩm..."}
-          </span>
-          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Tìm sản phẩm..." className="text-xs" />
-          <CommandList>
-            {isLoading ? (
-              <div className="flex items-center justify-center p-4">
-                <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <>
-                <CommandEmpty>Không tìm thấy</CommandEmpty>
-                <CommandGroup>
-                  {products.map((p: any) => (
-                    <CommandItem
-                      key={p.id}
-                      value={p.id}
-                      onSelect={() => {
-                        onChange(p.id);
-                        setOpen(false);
-                      }}
-                      className="text-xs"
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-3 w-3",
-                          value === p.id ? "opacity-100" : "opacity-0",
-                        )}
-                      />
-                      {p.code} — {p.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-// ─── ProductMultiCombobox ─────────────────────────────────────────────────────
-
-const ProductMultiCombobox = ({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  disabled?: boolean;
-}) => {
-  const [open, setOpen] = useState(false);
-  const { getProducts } = useProduct();
-
-  const { data, isLoading } = getProducts({ size: 100, allowFetch: open });
-  const products = data?.data?.data?.items ?? [];
-  const selectedIds = value ? value.split(",").filter(Boolean) : [];
-
-  const toggle = (id: string) => {
-    const next = selectedIds.includes(id)
-      ? selectedIds.filter((x) => x !== id)
-      : [...selectedIds, id];
-    onChange(next.join(","));
-  };
-
-  const getNameById = (id: string) =>
-    products.find((p: any) => p.id === id)?.name ?? id.slice(0, 8) + "...";
-
-  return (
-    <div className="space-y-1.5">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            disabled={disabled}
-            className="w-full justify-between h-8 text-xs font-normal"
-          >
-            {selectedIds.length > 0
-              ? `Đã chọn ${selectedIds.length} sản phẩm`
-              : "Chọn sản phẩm..."}
-            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0">
-          <Command>
-            <CommandInput placeholder="Tìm sản phẩm..." className="text-xs" />
-            <CommandList>
-              {isLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <>
-                  <CommandEmpty>Không tìm thấy</CommandEmpty>
-                  <CommandGroup>
-                    {products.map((p: any) => (
-                      <CommandItem
-                        key={p.id}
-                        value={p.id}
-                        onSelect={() => toggle(p.id)}
-                        className="text-xs"
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-3 w-3",
-                            selectedIds.includes(p.id)
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                        {p.code} — {p.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      {selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {selectedIds.map((id) => (
-            <Badge key={id} variant="secondary" className="text-xs gap-1 pr-1">
-              <span className="max-w-[100px] truncate">{getNameById(id)}</span>
-              <button
-                type="button"
-                onClick={() => toggle(id)}
-                disabled={disabled}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ─── CategoryCombobox (single) ────────────────────────────────────────────────
-
-const CategoryCombobox = ({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string;
-  onChange: (id: string) => void;
-  disabled?: boolean;
-}) => {
-  const [open, setOpen] = useState(false);
-  const { getProductCategories } = useProductCategory();
-
-  const { data, isLoading } = getProductCategories({
-    size: 100,
-    isLeafOnly: true,
-    status: EProductStatus.Active,
-    allowFetch: open,
-  });
-  const categories = data?.data?.data?.items ?? [];
-  const selected = categories.find((c: any) => c.id === value);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          disabled={disabled}
-          className="w-full justify-between h-8 text-xs font-normal truncate"
-        >
-          <span className="truncate">
-            {selected ? selected.name : "Chọn danh mục..."}
-          </span>
-          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Tìm danh mục..." className="text-xs" />
-          <CommandList>
-            {isLoading ? (
-              <div className="flex items-center justify-center p-4">
-                <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <>
-                <CommandEmpty>Không tìm thấy</CommandEmpty>
-                <CommandGroup>
-                  {categories.map((c: any) => (
-                    <CommandItem
-                      key={c.id}
-                      value={c.id}
-                      onSelect={() => {
-                        onChange(c.id);
-                        setOpen(false);
-                      }}
-                      className="text-xs"
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-3 w-3",
-                          value === c.id ? "opacity-100" : "opacity-0",
-                        )}
-                      />
-                      {c.code} — {c.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-// ─── CategoryMultiCombobox ────────────────────────────────────────────────────
-
-const CategoryMultiCombobox = ({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  disabled?: boolean;
-}) => {
-  const [open, setOpen] = useState(false);
-  const { getProductCategories } = useProductCategory();
-
-  const { data, isLoading } = getProductCategories({
-    size: 100,
-    isLeafOnly: true,
-    status: EProductStatus.Active,
-    allowFetch: open,
-  });
-  const categories = data?.data?.data?.items ?? [];
-  const selectedIds = value ? value.split(",").filter(Boolean) : [];
-
-  const toggle = (id: string) => {
-    const next = selectedIds.includes(id)
-      ? selectedIds.filter((x) => x !== id)
-      : [...selectedIds, id];
-    onChange(next.join(","));
-  };
-
-  const getNameById = (id: string) =>
-    categories.find((c: any) => c.id === id)?.name ?? id.slice(0, 8) + "...";
-
-  return (
-    <div className="space-y-1.5">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            disabled={disabled}
-            className="w-full justify-between h-8 text-xs font-normal"
-          >
-            {selectedIds.length > 0
-              ? `Đã chọn ${selectedIds.length} danh mục`
-              : "Chọn danh mục..."}
-            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0">
-          <Command>
-            <CommandInput placeholder="Tìm danh mục..." className="text-xs" />
-            <CommandList>
-              {isLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <>
-                  <CommandEmpty>Không tìm thấy</CommandEmpty>
-                  <CommandGroup>
-                    {categories.map((c: any) => (
-                      <CommandItem
-                        key={c.id}
-                        value={c.id}
-                        onSelect={() => toggle(c.id)}
-                        className="text-xs"
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-3 w-3",
-                            selectedIds.includes(c.id)
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                        {c.code} — {c.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      {selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {selectedIds.map((id) => (
-            <Badge key={id} variant="secondary" className="text-xs gap-1 pr-1">
-              <span className="max-w-[100px] truncate">{getNameById(id)}</span>
-              <button
-                type="button"
-                onClick={() => toggle(id)}
-                disabled={disabled}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ─── ConditionValueInput ──────────────────────────────────────────────────────
-// MinQuantityOfProduct → ProductCombobox (single) + InputNumber
-//   → ghép thành "uuid:qty" khi lưu (format BE yêu cầu)
-// CartContainsProduct  → ProductMultiCombobox  → "uuid1,uuid2"
-// CartContainsCategory → CategoryMultiCombobox → "uuid1,uuid2"
-// Còn lại             → InputNumber thường
-
-const ConditionValueInput = ({
-  conditionType,
-  value,
-  onChange,
-  disabled,
-}: {
-  conditionType: ERuleConditionType;
-  value: string;
-  onChange: (v: string) => void;
-  disabled?: boolean;
-}) => {
-  const valueType = CONDITION_VALUE_TYPE[conditionType];
-
-  if (valueType === "product-multi") {
-    return (
-      <ProductMultiCombobox
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-      />
-    );
-  }
-
-  if (valueType === "category-multi") {
-    return (
-      <CategoryMultiCombobox
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-      />
-    );
-  }
-
-  if (valueType === "product-single-qty") {
-    // value = "uuid:qty" — tách ra để hiển thị 2 control
-    const parts = value.split(":");
-    const productId = parts[0] ?? "";
-    const qty = parts[1] ?? "1";
-
-    const handleProductChange = (id: string) => onChange(`${id}:${qty}`);
-    const handleQtyChange = (q: string) => onChange(`${productId}:${q}`);
-
-    return (
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <ProductCombobox
-            value={productId}
-            onChange={handleProductChange}
-            disabled={disabled}
-          />
-        </div>
-        <Input
-          type="number"
-          min={1}
-          className="h-8 text-xs w-20 shrink-0"
-          placeholder="SL"
-          value={qty}
-          onChange={(e) => handleQtyChange(e.target.value)}
-          disabled={disabled}
-        />
-      </div>
-    );
-  }
-
-  // number
-  return (
-    <Input
-      className="h-8 text-xs"
-      placeholder={CONDITION_VALUE_PLACEHOLDER[conditionType]}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      disabled={disabled}
-    />
-  );
-};
 
 // ─── HangDieuKien ─────────────────────────────────────────────────────────────
 
@@ -955,35 +351,37 @@ const HangDieuKien = ({
           )}
         />
 
-        {/* Toán tử */}
-        <FormField
-          control={form.control}
-          name={`ruleConditions.${index}.operator`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs">Toán tử</FormLabel>
-              <Select
-                value={String(field.value)}
-                onValueChange={(v) => field.onChange(Number(v))}
-                disabled={dangGui}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {toanTuOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={String(opt.value)}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Toán tử — ẩn với FirstOrder vì không cần operator */}
+        {conditionType !== ERuleConditionType.FirstOrder && (
+          <FormField
+            control={form.control}
+            name={`ruleConditions.${index}.operator`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Toán tử</FormLabel>
+                <Select
+                  value={String(field.value)}
+                  onValueChange={(v) => field.onChange(Number(v))}
+                  disabled={dangGui}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {toanTuOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={String(opt.value)}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* Giá trị */}
         <FormField
@@ -992,7 +390,9 @@ const HangDieuKien = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-xs">
-                Giá trị
+                {conditionType === ERuleConditionType.FirstOrder
+                  ? "Điều kiện"
+                  : "Giá trị"}
                 {conditionType === ERuleConditionType.MinQuantityOfProduct && (
                   <span className="ml-1 text-muted-foreground font-normal">
                     (sản phẩm + số lượng)
@@ -1027,29 +427,6 @@ const HangDieuKien = ({
         </div>
       </div>
     </div>
-  );
-};
-
-// ─── TargetIdInput ────────────────────────────────────────────────────────────
-
-const TargetIdInput = ({
-  targetType,
-  value,
-  onChange,
-  disabled,
-}: {
-  targetType: EActionTargetType;
-  value: string;
-  onChange: (id: string) => void;
-  disabled?: boolean;
-}) => {
-  if (targetType === EActionTargetType.Product) {
-    return (
-      <ProductCombobox value={value} onChange={onChange} disabled={disabled} />
-    );
-  }
-  return (
-    <CategoryCombobox value={value} onChange={onChange} disabled={disabled} />
   );
 };
 
@@ -1109,6 +486,7 @@ const DoiTuongRow = ({
                 ))}
               </SelectContent>
             </Select>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -1154,6 +532,7 @@ const DoiTuongRow = ({
                   <SelectValue />
                 </SelectTrigger>
               </FormControl>
+              <FormMessage />
               <SelectContent>
                 {vaiTroOptions.map((opt) => (
                   <SelectItem key={opt.value} value={String(opt.value)}>
@@ -1183,6 +562,7 @@ const DoiTuongRow = ({
                 disabled={disabled}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -1357,8 +737,8 @@ const KhoiHanhDong = ({
               {/* Ghi chú cho BuyXGetY: không có BuyProduct, chỉ GetProduct */}
               {promotionType === EPromotionType.BuyXGetY && (
                 <span className="ml-2 text-xs text-amber-600 font-normal">
-                  — chỉ khai báo sản phẩm được tặng (GetProduct).
-                  Sản phẩm cần mua đã khai báo ở điều kiện MinQuantityOfProduct.
+                  — chỉ khai báo sản phẩm được tặng (GetProduct). Sản phẩm cần
+                  mua đã khai báo ở điều kiện MinQuantityOfProduct.
                 </span>
               )}
             </p>
@@ -1371,8 +751,7 @@ const KhoiHanhDong = ({
                   targetType: EActionTargetType.Product,
                   targetId: "",
                   quantity: 1,
-                  role:
-                    vaiTroOptions[0]?.value ?? EActionTargetRole.GetProduct,
+                  role: vaiTroOptions[0]?.value ?? EActionTargetRole.GetProduct,
                 })
               }
               disabled={dangGui}
@@ -1425,6 +804,7 @@ const PromotionRuleCreatePage = () => {
   const form = useForm<TCreatePromotionRule>({
     resolver: zodResolver(CreatePromotionRuleSchema),
     defaultValues: {
+      code: "",
       name: "",
       shortDescription: "",
       description: "",
@@ -1472,6 +852,8 @@ const PromotionRuleCreatePage = () => {
   };
 
   const onSubmit = async (data: TCreatePromotionRule) => {
+    const errors = form.formState.errors;
+    console.log("Current errors:", errors);
     if (createMutation.isPending) return;
     try {
       const result = await createMutation.mutateAsync(data);
@@ -1536,7 +918,7 @@ const PromotionRuleCreatePage = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {LOAI_KHUYEN_MAI.map((opt) => (
+                        {PROMOTION_TYPE_LABEL.map((opt) => (
                           <SelectItem key={opt.value} value={String(opt.value)}>
                             {opt.label}
                           </SelectItem>
@@ -1706,9 +1088,12 @@ const PromotionRuleCreatePage = () => {
               <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-700">
                 <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                 <span>
-                  <strong>BuyXGetY yêu cầu điều kiện "Số lượng sản phẩm tối thiểu"</strong> —
-                  khai báo sản phẩm cần mua và số lượng tối thiểu (format: chọn sản phẩm + nhập số lượng).
-                  Ví dụ: "Mua 3 Cà Phê A" → chọn Cà Phê A, nhập số lượng 3.
+                  <strong>
+                    BuyXGetY yêu cầu điều kiện "Số lượng sản phẩm tối thiểu"
+                  </strong>{" "}
+                  — khai báo sản phẩm cần mua và số lượng tối thiểu (format:
+                  chọn sản phẩm + nhập số lượng). Ví dụ: "Mua 3 Cà Phê A" → chọn
+                  Cà Phê A, nhập số lượng 3.
                 </span>
               </div>
             )}

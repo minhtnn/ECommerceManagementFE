@@ -11,14 +11,14 @@ const getInfiniteCustomerOrders = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TCustomerOrdersResponse>>
     >(`${API_SUFFIX.ORDER_API}/customer`, { params: params });
 
-const getBrandOrderById = async (id: string) =>
+const getBrandOrderById = async (id: string, timeZone: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandOrderByIdResponse>>(
-        `${API_SUFFIX.ORDER_API}/${id}`
+        `${API_SUFFIX.ORDER_API}/${id}?timeZone=${timeZone}`
     );
 
-const getCustomerOrderById = async (id: string) =>
+const getCustomerOrderById = async (id: string, timeZone: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TCustomerOrderByIdResponse>>(
-        `${API_SUFFIX.ORDER_API}/${id}`
+        `${API_SUFFIX.ORDER_API}/${id}?timeZone=${timeZone}`
     );
 
 const createOrder = async (data: TCreateOrderRequest) =>

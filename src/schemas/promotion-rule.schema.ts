@@ -5,7 +5,6 @@ import { EPromotionType } from "@/types/enums/promotion-type.enum";
 import { ERuleActionType } from "@/types/enums/rule-action-type.enum";
 import { ERuleConditionOperator } from "@/types/enums/rule-condition-operator.enum";
 import { ERuleConditionType } from "@/types/enums/rule-condition-type.enum";
-import { time } from "console";
 
 import z from "zod";
 
@@ -27,7 +26,7 @@ export const RuleActionSchema = z.object({
 export const RuleConditionSchema = z.object({
     conditionType: z.nativeEnum(ERuleConditionType),
     operator: z.nativeEnum(ERuleConditionOperator),
-    value: z.string().nonempty({ message: "Giá trị điều kiện không được trống" }),
+    value: z.string({invalid_type_error: "hihi"}).optional(),
 });
 
 
@@ -42,6 +41,13 @@ export const PromotionRuleListSchema = z.object({
     status: z.nativeEnum(EPromotionStatus),
 });
 
+export const ApplicablePromotionRuleListSchema = z.object({
+    id: z.string().uuid(),
+    code: z.string(),
+    name: z.string(),
+    shortDescription: z.string().optional(),
+    description: z.string().optional(),
+});
 
 export const PromotionRuleDetailSchema = z.object({
     id: z.string().uuid(),
@@ -128,10 +134,12 @@ export const UpdatePromotionRuleSchema = z.object({
     status: z.nativeEnum(EPromotionStatus).optional(),
     ruleConditions: z.array(RuleConditionSchema).min(1).optional(),
     ruleActions: z.array(RuleActionSchema).min(1).optional(),
+    timeZone: z.string({required_error: "Múi giờ không được để trống"}).nonempty({ message: "Múi giờ không được để trống" }),
 });
 
 
 export type TPromotionRuleList = z.infer<typeof PromotionRuleListSchema>;
+export type TApplicablePromotionRuleList = z.infer<typeof ApplicablePromotionRuleListSchema>;
 export type TPromotionRuleDetail = z.infer<typeof PromotionRuleDetailSchema>;
 export type TCreatePromotionRule = z.infer<typeof CreatePromotionRuleSchema>;
 export type TUpdatePromotionRule = z.infer<typeof UpdatePromotionRuleSchema>;

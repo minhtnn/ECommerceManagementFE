@@ -58,17 +58,17 @@ export const useBrand = () => {
     });
   };
 
-  const getBrandById = (id: string) => {
+  const getBrandById = (id: string, timeZone: string) => {
     return useSuspenseQuery({
       queryKey: ["brand", id],
-      queryFn: () => brandApi.getBrandById(id),
+      queryFn: () => brandApi.getBrandById(id, timeZone),
     });
   };
 
-  const getBrandDetails = (isAllowQuery: boolean) => {
+  const getBrandDetails = (isAllowQuery: boolean, timeZone: string) => {
     return useQuery({
       queryKey: ["brand-details"],
-      queryFn: () => brandApi.getBrandDetails(),
+      queryFn: () => brandApi.getBrandDetails(timeZone),
       enabled: isAllowQuery,
     });
   };

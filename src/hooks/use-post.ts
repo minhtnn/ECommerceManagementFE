@@ -21,6 +21,7 @@ interface UsePublicPostParams {
     size?: number;
     sortBy?: string;
     isAsc?: boolean;
+    timeZone?: string;
 }
 
 export const usePost = () => {
@@ -41,18 +42,18 @@ export const usePost = () => {
         });
     };
 
-    const getPostById = (id: string, allowFetch?: boolean) => {
+    const getPostById = (id: string, timeZone: string, allowFetch?: boolean,) => {
         return useQuery({
             queryKey: ["post", id],
-            queryFn: () => postApi.getPostById(id),
+            queryFn: () => postApi.getPostById(id, timeZone),
             enabled: allowFetch ?? true,
         });
     };
 
-    const getSuspendPostById = (id: string) => {
+    const getSuspendPostById = (id: string, timeZone: string) => {
         return useSuspenseQuery({
             queryKey: ["post", id],
-            queryFn: () => postApi.getPostById(id),
+            queryFn: () => postApi.getPostById(id, timeZone),
         });
     };
 
@@ -94,10 +95,10 @@ export const usePost = () => {
         });
     };
 
-    const getPublicPostById = (id: string) =>
+    const getPublicPostById = (id: string, timeZone: string) =>
         useQuery({
             queryKey: ["public-post", envConfig.BRAND_CODE, id],
-            queryFn: () => postApi.getPublicPostById(envConfig.BRAND_CODE, id),
+            queryFn: () => postApi.getPublicPostById(envConfig.BRAND_CODE, id, timeZone),
             enabled: !!id && !!envConfig.BRAND_CODE,
         });
     return {

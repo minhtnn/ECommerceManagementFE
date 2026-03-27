@@ -56,7 +56,12 @@ const PostEditPage = () => {
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
 
   const { getSuspendPostById, updatePost } = usePost();
-  const { data: postData, isError, error, isLoading } = getSuspendPostById(id!);
+  const {
+    data: postData,
+    isError,
+    error,
+    isLoading,
+  } = getSuspendPostById(id!, Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   if (isLoading) return <PageLoader />;
   if (isError && error) handleApiError(error);
@@ -483,13 +488,13 @@ const PostEditPage = () => {
           </div>
           <div className="flex justify-end items-center gap-4 lg:col-span-2 flex justify-end h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear sticky bottom-0 bg-transparent z-10">
             <div className="flex justify-between items-center pt-2 space-x-4">
-                <Button
-                  type="submit"
-                  className="bg-primary hover:bg-primary/90"
-                  disabled={updatePostMutation.isPending}
-                >
-                  Xem trước & Lưu
-                </Button>
+              <Button
+                type="submit"
+                className="bg-primary hover:bg-primary/90"
+                disabled={updatePostMutation.isPending}
+              >
+                Xem trước & Lưu
+              </Button>
             </div>
           </div>
         </form>

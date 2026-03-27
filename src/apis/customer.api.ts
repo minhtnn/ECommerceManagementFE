@@ -9,8 +9,8 @@ const getCustomers = async (params?: any) =>
 const getCustomerAddresses = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TCustomerAddressListResponse[]>>(`${API_SUFFIX.CUSTOMER_API}/addresses`, { params: params });
 
-const getCustomerAddressById = async (id: string) =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<TCustomerAddressDetailResponse>>(`${API_SUFFIX.CUSTOMER_API}/addresses/${id}`);
+const getCustomerAddressById = async (id: string, timeZone: string) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TCustomerAddressDetailResponse>>(`${API_SUFFIX.CUSTOMER_API}/addresses/${id}?timeZone=${timeZone}`);
 
 const createCustomerAddress = async (data: TCreateCustomerAddress) =>
     await apiRequest.ecommerceCoffee.post<BaseResponse<string>>(

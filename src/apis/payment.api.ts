@@ -26,9 +26,8 @@ const updatePaymentMethod = async (id: string, data: FormData) =>
 
 const getBrandPaymentMethods = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TBrandPaymentMethodListResponse>>>(`${API_SUFFIX.PAYMENT_METHOD_API}/brand`, { params: params });
-
-const getBrandPaymentMethodById = async (id: string) =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandPaymentMethodDetailResponse>>(`${API_SUFFIX.PAYMENT_METHOD_API}/brand/${id}`);
+const getBrandPaymentMethodById = async (id: string, timeZone: string) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandPaymentMethodDetailResponse>>(`${API_SUFFIX.PAYMENT_METHOD_API}/brand/${id}?timeZone=${timeZone}`);
 const createBrandPaymentMethod = async (data: FormData) =>
     await apiRequest.ecommerceCoffee.post<BaseResponse<string>>(
         `${API_SUFFIX.PAYMENT_METHOD_API}/brand`,
@@ -41,13 +40,13 @@ const updateBrandPaymentMethod = async (id: string, data: FormData) =>
     );
 const getBrandPublicPaymentMethods = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandPublicPaymentMethodListResponse[]>>(
-        `${API_SUFFIX.PAYMENT_METHOD_API}/brand/public`,
-        { brandCode: envConfig.BRAND_CODE, ...params }
+        `${API_SUFFIX.PAYMENT_METHOD_API}/brand/public/${envConfig.BRAND_CODE}`,
+        { ...params }
     );
 
-const getPaymentStatus = async (orderId: string) =>
+const getPaymentStatus = async (orderId: string, timeZone: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TGetPaymentStatusResponse>>(
-        `${API_SUFFIX.PAYMENT_API}/status/${orderId}`
+        `${API_SUFFIX.PAYMENT_API}/status/${orderId}?timeZone=${timeZone}`
     );
 
 const cancelPayment = async (orderId: string, data?: TCancelPaymentRequest) =>

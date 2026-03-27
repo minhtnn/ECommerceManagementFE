@@ -1,5 +1,12 @@
 //#region IMPORTS
 import { PageLoader } from "@/components/LoadingScreen";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -33,6 +40,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { EProductSellType } from "@/types/enums/product-sell-type.enum";
 interface ImagePreview {
   id: string;
   file?: File;
@@ -371,7 +379,6 @@ const BasicInfoSection = memo(
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Mã sản phẩm</Label>
@@ -463,8 +470,7 @@ const BasicInfoSection = memo(
             )}
           />
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <FormField
               control={form.control}
@@ -511,6 +517,39 @@ const BasicInfoSection = memo(
                       disabled={isPending}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="productSellType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Loại bán<span className="text-destructive">*</span>
+                  </FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={String(field.value)}
+                    disabled={isPending}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn loại bán" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={String(EProductSellType.ProductSell)}>
+                        Bán hàng
+                      </SelectItem>
+                      <SelectItem value={String(EProductSellType.ProductGift)}>
+                        Quà tặng
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -591,7 +630,11 @@ const ProductEditPage = () => {
   const [hasAttributeChanges, setHasAttributeChanges] = useState(false);
 
   const { getProductById, updateProduct } = useProduct();
-  const { data: productData, isLoading, refetch } = getProductById(id!);
+  const {
+    data: productData,
+    isLoading,
+    refetch,
+  } = getProductById(id!, Intl.DateTimeFormat().resolvedOptions().timeZone);
   const updateProductMutation = updateProduct();
 
   const product = productData?.data.data;
@@ -624,6 +667,7 @@ const ProductEditPage = () => {
       description: product.description || "",
       price: product.price || 0,
       status: product.status,
+      productSellType: product.productSellType,
       stockQuantity: product.stockQuantity || 0,
       displayOrder: product.displayOrder || 0,
       existingImageIds: [],
@@ -817,6 +861,7 @@ const ProductEditPage = () => {
       formData.append("Price", data.price.toString());
       formData.append("DisplayOrder", data.displayOrder.toString());
       formData.append("Status", data.status.toString());
+      formData.append("ProductSellType", data.productSellType.toString());
       formData.append("StockQuantity", data.stockQuantity.toString());
 
       // Existing Images + their metadata

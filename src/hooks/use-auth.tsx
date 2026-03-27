@@ -25,9 +25,9 @@ export const useAuth = () => {
     useMutation({
       mutationFn: authApi.login,
     });
-  const loginGoogle = () =>
+  const endCustomerGoogleLoginAndRegister = () =>
     useMutation({
-      mutationFn: authApi.loginGoogle,
+      mutationFn: authApi.endCustomerGoogleLoginAndRegister,
     });
   const updateAccount = () =>
     useMutation({
@@ -41,10 +41,10 @@ export const useAuth = () => {
       mutationFn: authApi.endCustomerNormalRegister,
     });
 
-  const customerGoogleRegister = () =>
-    useMutation({
-      mutationFn: authApi.endCustomerGoogleRegister,
-    });
+  // const customerGoogleRegister = () =>
+  //   useMutation({
+  //     mutationFn: authApi.endCustomerGoogleRegister,
+  //   });
   const verifyEmail = () =>
     useMutation({
       mutationFn: authApi.verifyEmail,
@@ -133,9 +133,9 @@ export const useAuth = () => {
     });
   return {
     login,
-    loginGoogle,
+    endCustomerGoogleLoginAndRegister,
     customerNormalRegister,
-    customerGoogleRegister,
+    // customerGoogleRegister,
     getAccountDetail,
     verifyEmail,
     resendOtpVerifyEmail,

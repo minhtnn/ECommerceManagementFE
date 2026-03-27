@@ -60,10 +60,10 @@ export const useCustomer = () => {
       staleTime: 5 * 1000,
     });
   };
-  const getCustomerAddressById = (id: string) => {
+  const getCustomerAddressById = (id: string, timeZone: string) => {
     return useSuspenseQuery({
       queryKey: ["customerAddresses", id],
-      queryFn: async () => await customerApi.getCustomerAddressById(id),
+      queryFn: async () => await customerApi.getCustomerAddressById(id, timeZone),
       staleTime: 5 * 1000,
     });
   };

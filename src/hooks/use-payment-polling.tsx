@@ -10,7 +10,7 @@ import { paymentApi } from "@/apis/payment.api";
 export const usePaymentPolling = () => {
   const dispatch = useDispatch();
   const { currentOrderId, isPolling, pollInterval } = useSelector(
-    (state: RootState) => state.payment
+    (state: RootState) => state.payment,
   );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -33,8 +33,11 @@ export const usePaymentPolling = () => {
     const poll = async () => {
       try {
         console.log("📡 Polling payment status...");
-        
-        const response = await paymentApi.getPaymentStatus(currentOrderId);
+
+        const response = await paymentApi.getPaymentStatus(
+          currentOrderId,
+          Intl.DateTimeFormat().resolvedOptions().timeZone,
+        );
         const paymentData = response?.data?.data;
 
         console.log("✅ Payment status response:", paymentData);
@@ -44,7 +47,7 @@ export const usePaymentPolling = () => {
             handleUpdatePaymentStatus({
               paymentStatus: paymentData.paymentStatus,
               orderStatus: paymentData.orderStatus,
-            })
+            }),
           );
 
           // Log status for debugging

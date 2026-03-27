@@ -66,7 +66,10 @@ const PublicPostDetailPage = () => {
     isLoading,
     isError,
     error,
-  } = getPublicPostById(id ?? "");
+  } = getPublicPostById(
+    id ?? "",
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
   const {
     data: listData,
     isLoading: isSidebarLoading,

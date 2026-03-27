@@ -28,7 +28,8 @@ const PromotionRuleTable = () => {
   const { getPromotionRules } = usePromotionRule();
 
   const nameFilter = String(filter.find((f) => f.id === "name")?.value ?? "");
-  const codeFilter = (filter.find((f) => f.id === "code")?.value as string) || null;
+  const codeFilter =
+    (filter.find((f) => f.id === "code")?.value as string) || null;
   const statusFilter = filter.find((f) => f.id === "status")?.value;
   const statusValue =
     statusFilter === "" || statusFilter === null ? null : Number(statusFilter);
@@ -41,6 +42,7 @@ const PromotionRuleTable = () => {
     code: codeFilter ?? undefined,
     name: nameFilter,
     status: statusValue ?? undefined,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
   if (isError && error) {
@@ -65,7 +67,10 @@ const PromotionRuleTable = () => {
             { label: "Tất cả", value: null },
             { label: "Nháp", value: EPromotionStatus.Draft.toString() },
             { label: "Đang chờ", value: EPromotionStatus.Pending.toString() },
-            { label: "Đang hoạt động", value: EPromotionStatus.Active.toString() },
+            {
+              label: "Đang hoạt động",
+              value: EPromotionStatus.Active.toString(),
+            },
             { label: "Đã tắt", value: EPromotionStatus.Inactive.toString() },
             { label: "Hết hạn", value: EPromotionStatus.Expired.toString() },
           ]

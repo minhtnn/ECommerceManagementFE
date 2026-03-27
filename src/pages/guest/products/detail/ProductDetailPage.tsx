@@ -36,7 +36,7 @@ const ProductDetailPage = () => {
     error: productError,
     isError: isProductError,
     isLoading,
-  } = getPublicProductById(productId as string);
+  } = getPublicProductById(productId as string, Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   if (isProductError && productError) {
     handleApiError(productError);

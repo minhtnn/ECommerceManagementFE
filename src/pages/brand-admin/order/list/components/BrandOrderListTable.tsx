@@ -50,10 +50,14 @@ export const BrandOrderListTable = () => {
       : (Number(paymentStatusFilter) as EPaymentStatus);
 
   const fromDateFilter = filter.find((f) => f.id === "fromDate")?.value;
-  const fromDateValue = fromDateFilter ? new Date(fromDateFilter as string) : undefined;
+  const fromDateValue = fromDateFilter
+    ? new Date(fromDateFilter as string)
+    : undefined;
 
   const toDateFilter = filter.find((f) => f.id === "toDate")?.value;
-  const toDateValue = toDateFilter ? new Date(toDateFilter as string) : undefined;
+  const toDateValue = toDateFilter
+    ? new Date(toDateFilter as string)
+    : undefined;
 
   const { data, isLoading, isError, error } = getBrandOrders({
     page: currentPage,
@@ -65,6 +69,7 @@ export const BrandOrderListTable = () => {
     paymentStatus: paymentStatusValue,
     fromDate: fromDateValue,
     toDate: toDateValue,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
   if (isError && error) {
@@ -96,9 +101,9 @@ export const BrandOrderListTable = () => {
               label: "Chờ thanh toán",
               value: EOrderStatus.WaitingPayment.toString(),
             },
-            { 
-              label: "Chờ xác nhận", 
-              value: EOrderStatus.Pending.toString() 
+            {
+              label: "Chờ xác nhận",
+              value: EOrderStatus.Pending.toString(),
             },
             {
               label: "Đang xử lý",
@@ -108,13 +113,13 @@ export const BrandOrderListTable = () => {
               label: "Đang giao hàng",
               value: EOrderStatus.Shipped.toString(),
             },
-            { 
-              label: "Đã giao hàng", 
-              value: EOrderStatus.Delivered.toString() 
+            {
+              label: "Đã giao hàng",
+              value: EOrderStatus.Delivered.toString(),
             },
-            { 
-              label: "Đã hủy", 
-              value: EOrderStatus.Cancelled.toString() 
+            {
+              label: "Đã hủy",
+              value: EOrderStatus.Cancelled.toString(),
             },
           ]
         : f.id === "paymentStatus"

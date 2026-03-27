@@ -43,7 +43,7 @@ const ProductCategoryEditPage = () => {
     isError,
     error,
     isLoading,
-  } = getProductCategorySuspendById(id);
+  } = getProductCategorySuspendById(id, Intl.DateTimeFormat().resolvedOptions().timeZone);
   if (isLoading) {
     return <PageLoader />;
   }

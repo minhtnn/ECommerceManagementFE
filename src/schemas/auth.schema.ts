@@ -21,6 +21,7 @@ export const BELoginSchema = z
     username: z.string().max(50).optional(),
     email: z.string().email().optional(),
     password: z.string(),
+    timeZone: z.string(),
   })
 export const FERegisterSchema = z
   .object({

@@ -154,7 +154,10 @@ const BrandOrderDetailPage = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [updateStatusDialogOpen, setUpdateStatusDialogOpen] = useState(false);
 
-  const { data, isLoading, isError } = getBrandOrderById(id!);
+  const { data, isLoading, isError } = getBrandOrderById(
+    id!,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
 
   // Cancel order handler
   const handleCancelOrder = async (reason: string) => {
@@ -253,7 +256,7 @@ const BrandOrderDetailPage = () => {
           <Badge
             className={cn(
               orderStatusConfig.className,
-              "border text-base px-4 py-1"
+              "border text-base px-4 py-1",
             )}
           >
             {orderStatusConfig.label}
@@ -261,7 +264,7 @@ const BrandOrderDetailPage = () => {
           <Badge
             className={cn(
               paymentStatusConfig.className,
-              "border text-base px-4 py-1"
+              "border text-base px-4 py-1",
             )}
           >
             {paymentStatusConfig.label}
@@ -376,9 +379,7 @@ const BrandOrderDetailPage = () => {
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                Cập nhật lần cuối
-              </p>
+              <p className="text-sm text-muted-foreground">Cập nhật lần cuối</p>
               <p className="font-medium text-sm">
                 {format(new Date(order.lastModifiedDate), "dd/MM/yyyy HH:mm", {
                   locale: vi,
@@ -448,9 +449,7 @@ const BrandOrderDetailPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>Sản phẩm trong đơn hàng</CardTitle>
-          <CardDescription>
-            Tổng {order.items.length} sản phẩm
-          </CardDescription>
+          <CardDescription>Tổng {order.items.length} sản phẩm</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -533,13 +532,9 @@ const BrandOrderDetailPage = () => {
                       </TableCell>
                       <TableCell className="text-right text-sm">
                         {payment.paidAt &&
-                          format(
-                            new Date(payment.paidAt),
-                            "dd/MM/yyyy HH:mm",
-                            {
-                              locale: vi,
-                            }
-                          )}
+                          format(new Date(payment.paidAt), "dd/MM/yyyy HH:mm", {
+                            locale: vi,
+                          })}
                       </TableCell>
                     </TableRow>
                   );
@@ -588,9 +583,7 @@ const BrandOrderDetailPage = () => {
             )}
 
             {order.orderStatus === EOrderStatus.Cancelled && (
-              <p className="text-sm text-red-600 py-2">
-                Đơn hàng đã bị hủy.
-              </p>
+              <p className="text-sm text-red-600 py-2">Đơn hàng đã bị hủy.</p>
             )}
           </div>
         </CardContent>

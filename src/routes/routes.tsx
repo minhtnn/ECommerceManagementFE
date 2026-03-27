@@ -240,6 +240,10 @@ export const AppRoutes = () =>
           path: "account",
           element: <DashboardAccountPage />,
         },
+        {
+          path:"system-configurations",
+          element: <SystemConfigPage/>
+        },
       ],
     },
     //#endregion
@@ -452,7 +456,9 @@ const PaymentMethodCreatePage = Loadable(
 const PaymentMethodEditPage = Loadable(
   lazy(() => import("@/pages/system-admin/payment-method/edit")),
 );
-
+const SystemConfigPage = Loadable(
+  lazy(() => import("@/pages/system-admin/system-config")),
+);
 //#endregion
 
 //#region Brand admin

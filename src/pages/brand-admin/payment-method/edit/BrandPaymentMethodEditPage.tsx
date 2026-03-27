@@ -69,7 +69,10 @@ const BrandPaymentMethodEditPage = () => {
     isLoading,
     isError,
     error,
-  } = getBrandPaymentMethodById(id!);
+  } = getBrandPaymentMethodById(
+    id!,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
 
   if (isLoading) {
     return <PageLoader />;
@@ -99,7 +102,9 @@ const BrandPaymentMethodEditPage = () => {
       systemKeys.map((key) => [key, existingBrandValues[key] ?? ""]),
     );
 
-  const [configurationValues, setConfigurationValues] = useState<Record<string, string>>(buildInitialConfigValues);
+  const [configurationValues, setConfigurationValues] = useState<
+    Record<string, string>
+  >(buildInitialConfigValues);
 
   const form = useForm<TBrandPaymentMethodUpdate>({
     resolver: zodResolver(BrandPaymentMethodUpdateSchema),

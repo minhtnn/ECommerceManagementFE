@@ -6,11 +6,11 @@ import { API_SUFFIX } from "./util.api";
 const getBrands = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TBrandListResponse>>>(`${API_SUFFIX.BRAND_API}`, { params: params });
 
-const getBrandById = async (id: string) =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandDetailResponse>>(`${API_SUFFIX.BRAND_API}/${id}`);
+const getBrandById = async (id: string, timeZone: string) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandDetailResponse>>(`${API_SUFFIX.BRAND_API}/${id}?timeZone=${timeZone}`);
 
-const getBrandDetails = async () =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandDetailResponse>>(`${API_SUFFIX.BRAND_API}/details`);
+const getBrandDetails = async (timeZone: string) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TBrandDetailResponse>>(`${API_SUFFIX.BRAND_API}/details?timeZone=${timeZone}`);
 
 const createBrand = async (data: FormData) =>
     await apiRequest.ecommerceCoffee.post<BaseResponse<string>>(

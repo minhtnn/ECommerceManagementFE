@@ -79,6 +79,7 @@ const EndCustomerOrdersListPage = () => {
     searchKeyword: debouncedSearch,
     orderStatus: orderStatusValue,
     paymentStatus: paymentStatusValue,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
   });
 
   const observerTarget = useRef<HTMLDivElement>(null);

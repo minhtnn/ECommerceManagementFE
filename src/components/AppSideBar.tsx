@@ -11,6 +11,7 @@ import {
   ImageOff,
   PackageIcon,
   PackageSearchIcon,
+  SeparatorVerticalIcon,
   SlackIcon,
   SquareStackIcon,
   WalletIcon,
@@ -56,6 +57,16 @@ const systemAdminRoutes = {
         title: "Danh sách phương thức",
         url: PATH_SYSTEM_ADMIN_DASHBOARD.paymentMethod.root,
         icon: PackageSearchIcon,
+      },
+    ],
+  },
+  systemConfigurations: {
+    mainTitle: "Quản lý cấu hình hệ thống",
+    items: [
+      {
+        title: "Danh sách cấu hình",
+        url: PATH_SYSTEM_ADMIN_DASHBOARD.systemConfigurations.root,
+        icon: SeparatorVerticalIcon,
       },
     ],
   },
@@ -143,7 +154,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     isError: isFetchBrandError,
     error: fetchBrandError,
     isLoading: isFetchBrandLoading,
-  } = getBrandDetails(role === ERole.BrandAdmin);
+  } = getBrandDetails(
+    role === ERole.BrandAdmin,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
 
   if (isFetchBrandLoading) {
     return <PageLoader />;
@@ -199,6 +213,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavMain content={systemAdminRoutes.dashboard} />
                 <NavMain content={systemAdminRoutes.brand} />
                 <NavMain content={systemAdminRoutes.paymentMethod} />
+                <NavMain content={systemAdminRoutes.systemConfigurations} />
               </SidebarContent>
             );
           case ERole.BrandAdmin:

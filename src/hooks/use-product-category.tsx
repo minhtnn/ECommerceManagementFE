@@ -59,17 +59,17 @@ export const useProductCategory = () => {
     });
   };
 
-  const getProductCategoryById = (id: string, isAllowFetch?: boolean) => {
+  const getProductCategoryById = (id: string, timeZone: string, isAllowFetch?: boolean) => {
     return useQuery({
       queryKey: ["product-category", id],
-      queryFn: () => productCategoryApi.getProductCategoryById(id),
+      queryFn: () => productCategoryApi.getProductCategoryById(id, timeZone),
       enabled: isAllowFetch ?? true,
     });
   };
-  const getProductCategorySuspendById = (id: string) => {
+  const getProductCategorySuspendById = (id: string, timeZone: string) => {
     return useSuspenseQuery({
       queryKey: ["product-category", id],
-      queryFn: () => productCategoryApi.getProductCategoryById(id),
+      queryFn: () => productCategoryApi.getProductCategoryById(id, timeZone),
     });
   };
 

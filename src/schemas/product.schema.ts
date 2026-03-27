@@ -1,3 +1,4 @@
+import { EProductSellType } from "@/types/enums/product-sell-type.enum";
 import { EProductStatus } from "@/types/enums/product-status.enum";
 import z from "zod";
 
@@ -11,6 +12,7 @@ export const ProductListSchema = z.object({
     fullName: z.string().max(200, { message: "Tên đầy đủ không vượt quá 200 ký tự" }).optional(),
     description: z.string().max(500, { message: "Mô tả không vượt quá 500 ký tự" }).optional(),
     price: z.number().optional(),
+    productSellType: z.nativeEnum(EProductSellType),
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number().optional(),
     mainImageUrl: z.string().optional(),
@@ -39,6 +41,7 @@ export const ProductDetailSchema = z.object({
     description: z.string().optional(),
     price: z.number().optional(),
     displayOrder: z.number().optional(),
+    productSellType: z.nativeEnum(EProductSellType),
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number(),
     getProductImagesResponse: z.array(ProductImageSchema),
@@ -67,6 +70,7 @@ export const CreateProductSchema = z.object({
         .optional(),
     displayOrder: z.number({ invalid_type_error: "Sai định dạng" })
         .optional(),
+    productSellType: z.nativeEnum(EProductSellType),
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number({ invalid_type_error: "Sai định dạng" })
         .optional(),
@@ -98,6 +102,7 @@ export const UpdateProductSchema = z.object({
     price: z.number({ invalid_type_error: "Sai định dạng" }).optional(),
     displayOrder: z.number({ invalid_type_error: "Sai định dạng" })
         .optional(),
+    productSellType: z.nativeEnum(EProductSellType),
     status: z.nativeEnum(EProductStatus),
     stockQuantity: z.number()
         .min(0, { message: "Số lượng tồn kho phải >= 0" }),

@@ -106,7 +106,7 @@ const request = (apiUrl: string, withAuth: boolean = true): AxiosInstance => {
                     isRefreshing = true;
 
                     try {
-                        const response = await authApi.refresh();
+                        const response = await authApi.refresh({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 
                         if (response.data.status !== 200) {
                             throw new Error(response.data.message || 'Refresh failed');

@@ -70,7 +70,7 @@ const CustomerOrdersDetailPage = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [editShippingDialogOpen, setEditShippingDialogOpen] = useState(false);
 
-  const { data, isLoading, isError } = getCustomerOrderById(id!);
+  const { data, isLoading, isError } = getCustomerOrderById(id!, Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   const handleCancelOrder = async (reason: string) => {
     try {

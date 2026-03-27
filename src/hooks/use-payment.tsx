@@ -116,10 +116,10 @@ export const usePayment = () => {
       retry: false,
     });
   };
-  const getBrandPaymentMethodById = (id: string) => {
+  const getBrandPaymentMethodById = (id: string, timeZone: string) => {
     return useSuspenseQuery({
       queryKey: ["brandPaymentMethods", id],
-      queryFn: async () => await paymentApi.getBrandPaymentMethodById(id),
+      queryFn: async () => await paymentApi.getBrandPaymentMethodById(id, timeZone),
       staleTime: 5 * 1000,
     });
   };
@@ -152,7 +152,10 @@ export const usePayment = () => {
   };
 
   const getPaymentStatus = async (orderId: string) => {
-    return await paymentApi.getPaymentStatus(orderId);
+    return await paymentApi.getPaymentStatus(
+      orderId,
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+    );
   };
 
   const cancelPayment = () => {

@@ -57,7 +57,7 @@ const PaymentPage = () => {
     isLoading: isOrderLoading,
     isError: isOrderError,
     error: orderError,
-  } = getCustomerOrderById(id!!);
+  } = getCustomerOrderById(id!!, Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   const cancelMutation = cancelPaymentMutation();
 

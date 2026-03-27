@@ -35,114 +35,24 @@ import { ERuleActionType } from "@/types/enums/rule-action-type.enum";
 import { ERuleConditionOperator } from "@/types/enums/rule-condition-operator.enum";
 import { ERuleConditionType } from "@/types/enums/rule-condition-type.enum";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Plus, Trash2 } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Info, LoaderCircle, Plus, Trash2 } from "lucide-react";
+import { useEffect } from "react";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  ACTION_TYPE_OPTIONS,
+  CONDITION_OPERATOR_OPTIONS,
+  CONDITION_TYPE_OPTIONS,
+  PROMOTION_TYPE_LABEL,
+  STATUS_CONFIG,
+  TARGET_ROLE_OPTIONS,
+  TARGET_TYPE_OPTIONS,
+} from "./components/PromotionRuleShared";
+import { ConditionValueInput } from "./components/ConditionValueInput";
+import { TargetIdInput } from "./components/TargetIdInput";
 
-// ─── Re-use label maps từ CreatePage ─────────────────────────────────────────
-
-const PROMOTION_TYPE_LABEL: Record<number, string> = {
-  [EPromotionType.OrderDiscount]: "Giảm đơn hàng",
-  [EPromotionType.LineItemDiscount]: "Giảm sản phẩm",
-  [EPromotionType.BuyXGetY]: "Mua X tặng Y",
-  // [EPromotionType.QuantityTier]: "Theo số lượng",
-  [EPromotionType.FreeGift]: "Tặng quà",
-  [EPromotionType.FreeShipping]: "Miễn phí ship",
-};
-
-const STATUS_CONFIG: Record<
-  EPromotionStatus,
-  { label: string; className: string }
-> = {
-  [EPromotionStatus.Draft]: {
-    label: "Nháp",
-    className: "bg-gray-100 text-gray-600",
-  },
-  [EPromotionStatus.Active]: {
-    label: "Đang chạy",
-    className: "bg-green-100 text-green-700",
-  },
-  [EPromotionStatus.Inactive]: {
-    label: "Đã tắt",
-    className: "bg-red-100 text-red-600",
-  },
-  [EPromotionStatus.Expired]: {
-    label: "Hết hạn",
-    className: "bg-slate-100 text-slate-500",
-  },
-};
-
-const CONDITION_TYPE_OPTIONS = [
-  { value: ERuleConditionType.CartSubtotal, label: "Tổng giá trị giỏ hàng" },
-  {
-    value: ERuleConditionType.CartContainsProduct,
-    label: "Giỏ hàng có sản phẩm",
-  },
-  {
-    value: ERuleConditionType.CartContainsCategory,
-    label: "Giỏ hàng có danh mục",
-  },
-  {
-    value: ERuleConditionType.MinQuantityOfProduct,
-    label: "Số lượng sản phẩm tối thiểu",
-  },
-  {
-    value: ERuleConditionType.MinQuantityInCategory,
-    label: "Số lượng trong danh mục",
-  },
-  {
-    value: ERuleConditionType.TotalCartQuantity,
-    label: "Tổng số lượng giỏ hàng",
-  },
-];
-
-const CONDITION_OPERATOR_OPTIONS = [
-  { value: ERuleConditionOperator.GreaterThanOrEqual, label: ">=" },
-  { value: ERuleConditionOperator.GreaterThan, label: ">" },
-  { value: ERuleConditionOperator.Equals, label: "=" },
-  { value: ERuleConditionOperator.ContainsAny, label: "Chứa ít nhất 1" },
-  { value: ERuleConditionOperator.ContainsAll, label: "Chứa tất cả" },
-];
-
-const ACTION_TYPE_OPTIONS = [
-  { value: ERuleActionType.CartPercentageDiscount, label: "Giảm % toàn đơn" },
-  {
-    value: ERuleActionType.CartFixedDiscount,
-    label: "Giảm tiền cố định toàn đơn",
-  },
-  { value: ERuleActionType.ItemPercentageDiscount, label: "Giảm % sản phẩm" },
-  {
-    value: ERuleActionType.ItemFixedDiscount,
-    label: "Giảm tiền cố định / sản phẩm",
-  },
-  {
-    value: ERuleActionType.BuyXGetYFreeProducts,
-    label: "Mua X tặng Y sản phẩm",
-  },
-  { value: ERuleActionType.FreeGiftProduct, label: "Tặng quà cố định" },
-  { value: ERuleActionType.FreeShipping, label: "Miễn phí vận chuyển" },
-];
-
-const TARGET_TYPE_OPTIONS = [
-  { value: EActionTargetType.Product, label: "Sản phẩm" },
-  { value: EActionTargetType.Category, label: "Danh mục" },
-];
-
-const TARGET_ROLE_OPTIONS = [
-  { value: EActionTargetRole.DiscountTarget, label: "Áp giảm giá" },
-  { value: EActionTargetRole.BuyProduct, label: "Sản phẩm cần mua (Buy)" },
-  { value: EActionTargetRole.GetProduct, label: "Sản phẩm được tặng (Get)" },
-  { value: EActionTargetRole.GiftProduct, label: "Quà tặng cố định" },
-];
-
-const toDatetimeLocal = (dateStr?: string | null) => {
-  if (!dateStr) return "";
-  // "2025-06-01T00:00:00" → "2025-06-01T00:00"
-  return dateStr.slice(0, 16);
-};
-
-// ─── Determine edit permission theo lifecycle ─────────────────────────────────
+// ─── Lifecycle helpers ────────────────────────────────────────────────────────
 
 type LifecycleState = "NotStarted" | "Running" | "Expired" | "Inactive";
 
@@ -168,7 +78,10 @@ const PromotionRuleEditPage = () => {
   const { getPromotionRuleById, updatePromotionRule, deactivatePromotionRule } =
     usePromotionRule();
 
-  const { data: promotionData, isLoading } = getPromotionRuleById(id!);
+  const { data: promotionData, isLoading } = getPromotionRuleById(
+    id!,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
   const updateMutation = updatePromotionRule();
   const deactivateMutation = deactivatePromotionRule();
 
@@ -182,14 +95,19 @@ const PromotionRuleEditPage = () => {
       )
     : "NotStarted";
 
-  const isReadOnly =
-    lifecycleState === "Expired" || lifecycleState === "Inactive";
-  const isRunning = lifecycleState === "Running";
+  const isReadOnly = lifecycleState === "Expired";
+  const isRunning =
+    lifecycleState === "Running" || lifecycleState === "Inactive";
   const isPending = updateMutation.isPending || deactivateMutation.isPending;
 
   const form = useForm<TUpdatePromotionRule>({
     resolver: zodResolver(UpdatePromotionRuleSchema),
-    defaultValues: {
+    defaultValues: { id: id! },
+  });
+
+  useEffect(() => {
+    if (!promotion) return;
+    form.reset({
       id: promotion.id,
       name: promotion.name,
       shortDescription: promotion.shortDescription ?? "",
@@ -197,8 +115,8 @@ const PromotionRuleEditPage = () => {
       promotionType: promotion.promotionType,
       globalDiscountCap: promotion.globalDiscountCap ?? undefined,
       priority: promotion.priority,
-      startDate: toDatetimeLocal(promotion.startDate),
-      endDate: toDatetimeLocal(promotion.endDate),
+      startDate: promotion.startDate,
+      endDate: promotion.endDate,
       status: promotion.status,
       ruleConditions: promotion.ruleConditions.map((c) => ({
         conditionType: c.conditionType,
@@ -208,8 +126,12 @@ const PromotionRuleEditPage = () => {
       ruleActions: promotion.ruleActions.map((a) => ({
         actionType: a.actionType,
         value: a.value ?? "",
-        maxDiscountAmountForPercentage:
-          a.maxDiscountAmountForPercentage ?? undefined,
+        maxDiscountAmountForPercentage: [
+          ERuleActionType.CartPercentageDiscount,
+          ERuleActionType.ItemPercentageDiscount,
+        ].includes(a.actionType)
+          ? (a.maxDiscountAmountForPercentage ?? undefined)
+          : undefined,
         ruleActionTargets: a.ruleActionTargets.map((t) => ({
           targetType: t.targetType,
           targetId: t.targetId,
@@ -217,8 +139,9 @@ const PromotionRuleEditPage = () => {
           role: t.role,
         })),
       })),
-    },
-  });
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+  }, [promotion]);
 
   const {
     fields: conditionFields,
@@ -235,7 +158,6 @@ const PromotionRuleEditPage = () => {
   const onSubmit = async (data: TUpdatePromotionRule) => {
     if (isPending) return;
     const { id: _id, ...payload } = data;
-
     const body = isRunning
       ? {
           id: id!,
@@ -245,6 +167,7 @@ const PromotionRuleEditPage = () => {
           endDate: payload.endDate,
           globalDiscountCap: payload.globalDiscountCap,
           status: payload.status,
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }
       : payload;
 
@@ -253,6 +176,8 @@ const PromotionRuleEditPage = () => {
       if (result?.data?.status >= 200 && result?.data?.status < 300) {
         toast.success("Cập nhật khuyến mãi thành công");
         navigate(PATH_BRAND_DASHBOARD.promotionRule.root);
+      }else{
+        toast.error(result.data.message || "Cập nhật thất bại!");
       }
     } catch (err) {
       handleApiError(err);
@@ -276,7 +201,7 @@ const PromotionRuleEditPage = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+      {/* ── Header ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold">Chi tiết khuyến mãi</h1>
@@ -292,15 +217,15 @@ const PromotionRuleEditPage = () => {
             onClick={handleDeactivate}
             disabled={isPending}
           >
-            {deactivateMutation.isPending ? (
+            {deactivateMutation.isPending && (
               <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
-            ) : null}
+            )}
             Tắt khẩn cấp
           </Button>
         )}
       </div>
 
-      {/* Read-only warning */}
+      {/* ── Banners ───────────────────────────────────────────── */}
       {isReadOnly && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           Khuyến mãi này đã{" "}
@@ -308,8 +233,6 @@ const PromotionRuleEditPage = () => {
           chỉnh sửa. Sử dụng chức năng Duplicate để tạo bản sao mới.
         </div>
       )}
-
-      {/* Running warning */}
       {isRunning && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
           Khuyến mãi đang chạy. Chỉ có thể chỉnh sửa: Tên, Mô tả, Ngày kết thúc
@@ -320,11 +243,11 @@ const PromotionRuleEditPage = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* ── THÔNG TIN CƠ BẢN ─────────────────────────────────── */}
+          {/* ── THÔNG TIN CƠ BẢN ────────────────────────────────── */}
           <div className="bg-background rounded-lg border p-6 space-y-4">
             <h2 className="text-lg font-semibold">Thông tin cơ bản</h2>
 
-            {/* Code + Type: chỉ đọc */}
+            {/* Code + Type: luôn read-only */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <p className="text-sm font-medium">Mã khuyến mãi</p>
@@ -354,7 +277,6 @@ const PromotionRuleEditPage = () => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="shortDescription"
@@ -399,7 +321,6 @@ const PromotionRuleEditPage = () => {
                       <Input
                         type="datetime-local"
                         {...field}
-                        // Khi đang chạy: không cho sửa startDate
                         disabled={isPending || isReadOnly || isRunning}
                       />
                     </FormControl>
@@ -407,13 +328,19 @@ const PromotionRuleEditPage = () => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="endDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ngày kết thúc</FormLabel>
+                    <FormLabel>
+                      Ngày kết thúc
+                      {isRunning && (
+                        <span className="ml-1 text-xs text-muted-foreground font-normal">
+                          (chỉ được kéo dài)
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="datetime-local"
@@ -425,13 +352,19 @@ const PromotionRuleEditPage = () => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="globalDiscountCap"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cap tối đa</FormLabel>
+                    <FormLabel>
+                      Cap tối đa
+                      {isRunning && (
+                        <span className="ml-1 text-xs text-muted-foreground font-normal">
+                          (chỉ được tăng)
+                        </span>
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -444,16 +377,27 @@ const PromotionRuleEditPage = () => {
                               : Number(e.target.value),
                           )
                         }
-                        disabled={isPending || isReadOnly}
+                        disabled={
+                          isPending ||
+                          isReadOnly ||
+                          promotion.promotionType ===
+                            EPromotionType.FreeShipping
+                        }
                       />
                     </FormControl>
+                    {promotion.promotionType ===
+                      EPromotionType.FreeShipping && (
+                      <p className="text-xs text-muted-foreground">
+                        FreeShipping không dùng GlobalDiscountCap
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            {/* Status toggle — chỉ hiện khi đang chạy để tắt khẩn cấp */}
+            {/* Status toggle — chỉ khi đang chạy */}
             {isRunning && (
               <FormField
                 control={form.control}
@@ -479,13 +423,14 @@ const PromotionRuleEditPage = () => {
                         ? "Đang hoạt động"
                         : "Sẽ tắt sau khi lưu"}
                     </span>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             )}
           </div>
 
-          {/* ── CONDITIONS (chỉ đọc khi đang chạy / hết hạn / inactive) ── */}
+          {/* ── CONDITIONS ───────────────────────────────────────── */}
           <div className="bg-background rounded-lg border p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Điều kiện kích hoạt</h2>
@@ -509,108 +454,36 @@ const PromotionRuleEditPage = () => {
               )}
             </div>
 
-            {conditionFields.map((field, index) => (
-              <div
-                key={field.id}
-                className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 border rounded-lg bg-muted/30"
-              >
-                <FormField
-                  control={form.control}
-                  name={`ruleConditions.${index}.conditionType`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">Loại điều kiện</FormLabel>
-                      <Select
-                        value={String(field.value)}
-                        onValueChange={(v) => field.onChange(Number(v))}
-                        disabled={isPending || isReadOnly || isRunning}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {CONDITION_TYPE_OPTIONS.map((opt) => (
-                            <SelectItem
-                              key={opt.value}
-                              value={String(opt.value)}
-                            >
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name={`ruleConditions.${index}.operator`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">Toán tử</FormLabel>
-                      <Select
-                        value={String(field.value)}
-                        onValueChange={(v) => field.onChange(Number(v))}
-                        disabled={isPending || isReadOnly || isRunning}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {CONDITION_OPERATOR_OPTIONS.map((opt) => (
-                            <SelectItem
-                              key={opt.value}
-                              value={String(opt.value)}
-                            >
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name={`ruleConditions.${index}.value`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">Giá trị</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending || isReadOnly || isRunning}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex items-end">
-                  {!isReadOnly && !isRunning && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => removeCondition(index)}
-                      disabled={isPending || conditionFields.length <= 1}
-                      className="mb-0.5"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+            {/* Ghi chú BuyXGetY */}
+            {promotion.promotionType === EPromotionType.BuyXGetY && (
+              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-700">
+                <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                <span>
+                  <strong>
+                    BuyXGetY yêu cầu điều kiện "Số lượng sản phẩm tối thiểu"
+                  </strong>{" "}
+                  — xác định sản phẩm cần mua và số lượng tối thiểu (format:
+                  chọn sản phẩm + nhập số lượng).
+                </span>
               </div>
+            )}
+
+            {conditionFields.map((field, index) => (
+              <EditConditionRow
+                key={field.id}
+                form={form}
+                index={index}
+                onRemove={() => removeCondition(index)}
+                isPending={isPending}
+                canRemove={
+                  !isReadOnly && !isRunning && conditionFields.length > 1
+                }
+                isReadOnly={isReadOnly || isRunning}
+              />
             ))}
           </div>
 
-          {/* ── ACTIONS (chỉ đọc khi đang chạy / hết hạn / inactive) ─── */}
+          {/* ── ACTIONS ──────────────────────────────────────────── */}
           <div className="bg-background rounded-lg border p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Hành động áp dụng</h2>
@@ -640,6 +513,7 @@ const PromotionRuleEditPage = () => {
                 key={actionField.id}
                 form={form}
                 actionIndex={actionIndex}
+                promotionType={promotion.promotionType}
                 onRemove={() => removeAction(actionIndex)}
                 isPending={isPending}
                 canRemove={!isReadOnly && !isRunning && actionFields.length > 1}
@@ -687,11 +561,180 @@ const PromotionRuleEditPage = () => {
   );
 };
 
+// ─── EditConditionRow ─────────────────────────────────────────────────────────
+
+const EditConditionRow = ({
+  form,
+  index,
+  onRemove,
+  isPending,
+  canRemove,
+  isReadOnly,
+}: {
+  form: any;
+  index: number;
+  onRemove: () => void;
+  isPending: boolean;
+  canRemove: boolean;
+  isReadOnly: boolean;
+}) => {
+  const conditionType: ERuleConditionType = useWatch({
+    control: form.control,
+    name: `ruleConditions.${index}.conditionType`,
+  });
+
+  // FirstOrder không có operator — map về default khi đổi sang loại khác
+  const defaultOperatorByType: Record<
+    ERuleConditionType,
+    ERuleConditionOperator
+  > = {
+    [ERuleConditionType.CartSubtotal]:
+      ERuleConditionOperator.GreaterThanOrEqual,
+    [ERuleConditionType.TotalCartQuantity]:
+      ERuleConditionOperator.GreaterThanOrEqual,
+    [ERuleConditionType.MinQuantityOfProduct]:
+      ERuleConditionOperator.GreaterThanOrEqual,
+    [ERuleConditionType.MinQuantityInCategory]:
+      ERuleConditionOperator.GreaterThanOrEqual,
+    [ERuleConditionType.CartContainsProduct]:
+      ERuleConditionOperator.ContainsAny,
+    [ERuleConditionType.CartContainsCategory]:
+      ERuleConditionOperator.ContainsAny,
+    [ERuleConditionType.FirstOrder]: ERuleConditionOperator.Equals, // không dùng nhưng cần có giá trị
+  };
+
+  const handleDoiConditionType = (v: string) => {
+    const newType = Number(v) as ERuleConditionType;
+    form.setValue(`ruleConditions.${index}.conditionType`, newType);
+    form.setValue(
+      `ruleConditions.${index}.operator`,
+      defaultOperatorByType[newType] ??
+        ERuleConditionOperator.GreaterThanOrEqual,
+    );
+    form.setValue(`ruleConditions.${index}.value`, "");
+  };
+
+  const isFirstOrder = conditionType === ERuleConditionType.FirstOrder;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 border rounded-lg bg-muted/30">
+      {/* Loại điều kiện */}
+      <FormField
+        control={form.control}
+        name={`ruleConditions.${index}.conditionType`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs">Loại điều kiện</FormLabel>
+            <Select
+              value={String(field.value)}
+              onValueChange={handleDoiConditionType}
+              disabled={isPending || isReadOnly}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {CONDITION_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={String(opt.value)}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+              <FormMessage />
+            </Select>
+          </FormItem>
+        )}
+      />
+
+      {/* Toán tử — ẩn khi FirstOrder */}
+      {!isFirstOrder ? (
+        <FormField
+          control={form.control}
+          name={`ruleConditions.${index}.operator`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Toán tử</FormLabel>
+              <Select
+                value={String(field.value)}
+                onValueChange={(v) => field.onChange(Number(v))}
+                disabled={isPending || isReadOnly}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {CONDITION_OPERATOR_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={String(opt.value)}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+                <FormMessage />
+              </Select>
+            </FormItem>
+          )}
+        />
+      ) : (
+        // Placeholder giữ layout khi FirstOrder
+        <div />
+      )}
+
+      {/* Giá trị — dùng ConditionValueInput (smart) */}
+      <FormField
+        control={form.control}
+        name={`ruleConditions.${index}.value`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs">
+              {isFirstOrder ? "Điều kiện" : "Giá trị"}
+              {conditionType === ERuleConditionType.MinQuantityOfProduct && (
+                <span className="ml-1 text-muted-foreground font-normal">
+                  (sản phẩm + số lượng)
+                </span>
+              )}
+            </FormLabel>
+            <FormControl>
+              <ConditionValueInput
+                conditionType={conditionType}
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                disabled={isPending || isReadOnly}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Xóa */}
+      <div className="flex items-end">
+        {canRemove && (
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            onClick={onRemove}
+            disabled={isPending}
+            className="mb-0.5"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ─── EditActionBlock ──────────────────────────────────────────────────────────
 
 const EditActionBlock = ({
   form,
   actionIndex,
+  promotionType,
   onRemove,
   isPending,
   canRemove,
@@ -699,6 +742,7 @@ const EditActionBlock = ({
 }: {
   form: any;
   actionIndex: number;
+  promotionType: EPromotionType;
   onRemove: () => void;
   isPending: boolean;
   canRemove: boolean;
@@ -713,9 +757,41 @@ const EditActionBlock = ({
     name: `ruleActions.${actionIndex}.ruleActionTargets`,
   });
 
+  const actionType: ERuleActionType = useWatch({
+    control: form.control,
+    name: `ruleActions.${actionIndex}.actionType`,
+  });
+
+  const hienThiValue = ![
+    ERuleActionType.BuyXGetYFreeProducts,
+    ERuleActionType.FreeGiftProduct,
+    ERuleActionType.FreeShipping,
+  ].includes(actionType);
+
+  const hienThiCap = [
+    ERuleActionType.CartPercentageDiscount,
+    ERuleActionType.ItemPercentageDiscount,
+  ].includes(actionType);
+
+  const hienThiTarget = ![
+    ERuleActionType.CartPercentageDiscount,
+    ERuleActionType.CartFixedDiscount,
+    ERuleActionType.FreeShipping,
+  ].includes(actionType);
+
+  // Default role khi thêm target mới — tự động theo actionType
+  const defaultRoleForAction = (): EActionTargetRole => {
+    if (actionType === ERuleActionType.BuyXGetYFreeProducts)
+      return EActionTargetRole.GetProduct;
+    if (actionType === ERuleActionType.FreeGiftProduct)
+      return EActionTargetRole.GiftProduct;
+    return EActionTargetRole.DiscountTarget;
+  };
+
   return (
     <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Loại action */}
         <FormField
           control={form.control}
           name={`ruleActions.${actionIndex}.actionType`}
@@ -724,7 +800,21 @@ const EditActionBlock = ({
               <FormLabel className="text-xs">Loại action</FormLabel>
               <Select
                 value={String(field.value)}
-                onValueChange={(v) => field.onChange(Number(v))}
+                onValueChange={(v) => {
+                  field.onChange(Number(v));
+                  const newType = Number(v) as ERuleActionType;
+                  if (
+                    ![
+                      ERuleActionType.CartPercentageDiscount,
+                      ERuleActionType.ItemPercentageDiscount,
+                    ].includes(newType)
+                  ) {
+                    form.setValue(
+                      `ruleActions.${actionIndex}.maxDiscountAmountForPercentage`,
+                      undefined,
+                    );
+                  }
+                }}
                 disabled={isPending || isReadOnly}
               >
                 <FormControl>
@@ -739,33 +829,45 @@ const EditActionBlock = ({
                     </SelectItem>
                   ))}
                 </SelectContent>
+                <FormMessage />
               </Select>
             </FormItem>
           )}
         />
 
-        <FormField
-          control={form.control}
-          name={`ruleActions.${actionIndex}.value`}
-          render={({ field }: any) => (
-            <FormItem>
-              <FormLabel className="text-xs">Giá trị</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isPending || isReadOnly} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        {/* Giá trị */}
+        {hienThiValue && (
+          <FormField
+            control={form.control}
+            name={`ruleActions.${actionIndex}.value`}
+            render={({ field }: any) => (
+              <FormItem>
+                <FormLabel className="text-xs">
+                  {actionType === ERuleActionType.CartPercentageDiscount ||
+                  actionType === ERuleActionType.ItemPercentageDiscount
+                    ? "Phần trăm giảm (%)"
+                    : "Số tiền giảm (đ)"}
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} disabled={isPending || isReadOnly} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
-        <FormField
+        {/* Cap của action */}
+        {/* <FormField
           control={form.control}
           name={`ruleActions.${actionIndex}.maxDiscountAmountForPercentage`}
           render={({ field }: any) => (
             <FormItem>
-              <FormLabel className="text-xs">Cap của action</FormLabel>
+              <FormLabel className="text-xs">Cap của action (đ)</FormLabel>
               <FormControl>
                 <Input
                   type="number"
+                  placeholder="Để trống = không giới hạn"
                   value={field.value ?? ""}
                   onChange={(e) =>
                     field.onChange(
@@ -777,153 +879,87 @@ const EditActionBlock = ({
                   disabled={isPending || isReadOnly}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
+        {hienThiCap && (
+          <FormField
+            control={form.control}
+            name={`ruleActions.${actionIndex}.maxDiscountAmountForPercentage`}
+            render={({ field }: any) => (
+              <FormItem>
+                <FormLabel className="text-xs">Giảm tối đa (đ)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Để trống = không giới hạn"
+                    value={field.value ?? ""}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === ""
+                          ? undefined
+                          : Number(e.target.value),
+                      )
+                    }
+                    disabled={isPending || isReadOnly}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
       </div>
 
       {/* Targets */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-muted-foreground">
-            Targets ({targetFields.length})
-          </p>
-          {!isReadOnly && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                appendTarget({
-                  targetType: EActionTargetType.Product,
-                  targetId: "",
-                  quantity: 1,
-                  role: EActionTargetRole.DiscountTarget,
-                })
-              }
-              disabled={isPending}
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Thêm target
-            </Button>
-          )}
-        </div>
-
-        {targetFields.map((targetField, targetIndex) => (
-          <div
-            key={targetField.id}
-            className="grid grid-cols-2 md:grid-cols-5 gap-2 p-3 bg-background border rounded-md"
-          >
-            <FormField
-              control={form.control}
-              name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.targetType`}
-              render={({ field }: any) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Loại</FormLabel>
-                  <Select
-                    value={String(field.value)}
-                    onValueChange={(v) => field.onChange(Number(v))}
-                    disabled={isPending || isReadOnly}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {TARGET_TYPE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={String(opt.value)}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
+      {hienThiTarget && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">
+              Targets ({targetFields.length})
+              {actionType === ERuleActionType.BuyXGetYFreeProducts && (
+                <span className="ml-2 text-xs text-amber-600 font-normal">
+                  — chỉ khai báo sản phẩm được tặng (GetProduct). Sản phẩm cần
+                  mua đã khai báo ở điều kiện MinQuantityOfProduct.
+                </span>
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.targetId`}
-              render={({ field }: any) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Target ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="h-8 text-xs font-mono"
-                      {...field}
-                      disabled={isPending || isReadOnly}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.role`}
-              render={({ field }: any) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Role</FormLabel>
-                  <Select
-                    value={String(field.value)}
-                    onValueChange={(v) => field.onChange(Number(v))}
-                    disabled={isPending || isReadOnly}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {TARGET_ROLE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={String(opt.value)}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.quantity`}
-              render={({ field }: any) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Số lượng</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="h-8 text-xs"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      disabled={isPending || isReadOnly}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <div className="flex items-end">
-              {!isReadOnly && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => removeTarget(targetIndex)}
-                  disabled={isPending}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
+            </p>
+            {!isReadOnly && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  appendTarget({
+                    targetType: EActionTargetType.Product,
+                    targetId: "",
+                    quantity: 1,
+                    role: defaultRoleForAction(),
+                  })
+                }
+                disabled={isPending}
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Thêm target
+              </Button>
+            )}
           </div>
-        ))}
-      </div>
+
+          {targetFields.map((targetField, targetIndex) => (
+            <EditTargetRow
+              key={targetField.id}
+              form={form}
+              actionIndex={actionIndex}
+              targetIndex={targetIndex}
+              actionType={actionType}
+              onRemove={() => removeTarget(targetIndex)}
+              isPending={isPending}
+              isReadOnly={isReadOnly}
+            />
+          ))}
+        </div>
+      )}
 
       {canRemove && (
         <div className="flex justify-end">
@@ -940,6 +976,179 @@ const EditActionBlock = ({
           </Button>
         </div>
       )}
+    </div>
+  );
+};
+
+// ─── EditTargetRow ────────────────────────────────────────────────────────────
+
+const EditTargetRow = ({
+  form,
+  actionIndex,
+  targetIndex,
+  actionType,
+  onRemove,
+  isPending,
+  isReadOnly,
+}: {
+  form: any;
+  actionIndex: number;
+  targetIndex: number;
+  actionType: ERuleActionType;
+  onRemove: () => void;
+  isPending: boolean;
+  isReadOnly: boolean;
+}) => {
+  const targetType: EActionTargetType = useWatch({
+    control: form.control,
+    name: `ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.targetType`,
+  });
+
+  // Lọc vai trò theo actionType — không có BuyProduct
+  const availableRoles = (() => {
+    if (actionType === ERuleActionType.BuyXGetYFreeProducts)
+      return TARGET_ROLE_OPTIONS.filter(
+        (r) => r.value === EActionTargetRole.GetProduct,
+      );
+    if (actionType === ERuleActionType.FreeGiftProduct)
+      return TARGET_ROLE_OPTIONS.filter(
+        (r) => r.value === EActionTargetRole.GiftProduct,
+      );
+    return TARGET_ROLE_OPTIONS.filter(
+      (r) => r.value === EActionTargetRole.DiscountTarget,
+    );
+  })();
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 p-3 bg-background border rounded-md">
+      {/* Loại đối tượng */}
+      <FormField
+        control={form.control}
+        name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.targetType`}
+        render={({ field }: any) => (
+          <FormItem>
+            <FormLabel className="text-xs">Loại</FormLabel>
+            <Select
+              value={String(field.value)}
+              onValueChange={(v) => {
+                field.onChange(Number(v));
+                // Reset targetId khi đổi loại
+                form.setValue(
+                  `ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.targetId`,
+                  "",
+                );
+              }}
+              disabled={isPending || isReadOnly}
+            >
+              <FormControl>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {TARGET_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={String(opt.value)}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+              <FormMessage />
+            </Select>
+          </FormItem>
+        )}
+      />
+
+      {/* targetId — combobox theo targetType */}
+      <FormField
+        control={form.control}
+        name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.targetId`}
+        render={({ field }: any) => (
+          <FormItem>
+            <FormLabel className="text-xs">
+              {targetType === EActionTargetType.Product
+                ? "Sản phẩm"
+                : "Danh mục"}
+            </FormLabel>
+            <FormControl>
+              <TargetIdInput
+                targetType={targetType}
+                value={field.value}
+                onChange={field.onChange}
+                disabled={isPending || isReadOnly}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Vai trò — tự động filter theo actionType */}
+      <FormField
+        control={form.control}
+        name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.role`}
+        render={({ field }: any) => (
+          <FormItem>
+            <FormLabel className="text-xs">Vai trò</FormLabel>
+            <Select
+              value={String(field.value)}
+              onValueChange={(v) => field.onChange(Number(v))}
+              disabled={isPending || isReadOnly || availableRoles.length <= 1}
+            >
+              <FormControl>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {availableRoles.map((opt) => (
+                  <SelectItem key={opt.value} value={String(opt.value)}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+              <FormMessage />
+            </Select>
+          </FormItem>
+        )}
+      />
+
+      {/* Số lượng */}
+      <FormField
+        control={form.control}
+        name={`ruleActions.${actionIndex}.ruleActionTargets.${targetIndex}.quantity`}
+        render={({ field }: any) => (
+          <FormItem>
+            <FormLabel className="text-xs">Số lượng</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min={1}
+                className="h-8 text-xs"
+                {...field}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+                disabled={isPending || isReadOnly}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Xóa */}
+      <div className="flex items-end">
+        {!isReadOnly && (
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            className="h-8 w-8"
+            onClick={onRemove}
+            disabled={isPending}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

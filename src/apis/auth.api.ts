@@ -16,9 +16,9 @@ const login = async (params?: any) => {
     );
 }
 
-const loginGoogle = async (params?: any) => {
+const endCustomerGoogleLoginAndRegister = async (params?: any) => {
     return apiRequest.ecommerceCoffee.post<BaseResponse<TAuthResponse>>(
-        `${API_SUFFIX.AUTH_API}/customer/google/login`,
+        `${API_SUFFIX.AUTH_API}/customer/google/login-and-register`,
         { brandCode: envConfig.BRAND_CODE, ...params }
     );
 }
@@ -26,12 +26,6 @@ const endCustomerNormalRegister = async (data: FormData) => {
     return apiRequest.ecommerceCoffee.post<BaseResponse<string>>(
         `${API_SUFFIX.AUTH_API}/customer-normal-register`,
         data
-    );
-}
-const endCustomerGoogleRegister = async (data: any) => {
-    return apiRequest.ecommerceCoffee.post<BaseResponse<TAuthResponse>>(
-        `${API_SUFFIX.AUTH_API}/customer-google-register`,
-        { brandCode: envConfig.BRAND_CODE, ...data }
     );
 }
 const verifyEmail = async (params?: any) => {
@@ -46,9 +40,9 @@ const resendOTPVerifyEmail = async (params?: any) => {
         { brandCode: envConfig.BRAND_CODE, ...params }
     );
 }
-const refresh = async () => {
+const refresh = async (params?: any) => {
     return apiRequest.ecommerceCoffee.post<BaseResponse<TAuthResponse>>(
-        `${API_SUFFIX.AUTH_API}/refresh`, {}
+        `${API_SUFFIX.AUTH_API}/refresh`, params
     );
 }
 const logout = async () => {
@@ -113,9 +107,8 @@ const resetPassword = async (data: TResetPasswordRequest) => {
 export const authApi = {
     getAccountDetail,
     login,
-    loginGoogle,
+    endCustomerGoogleLoginAndRegister,
     endCustomerNormalRegister,
-    endCustomerGoogleRegister,
     verifyEmail,
     resendOTPVerifyEmail,
     refresh,

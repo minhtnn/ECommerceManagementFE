@@ -9,6 +9,7 @@ import {
 import { cn, copyToClipboard, formatNumber, formatPrice } from "@/lib/utils";
 import { PATH_BRAND_DASHBOARD } from "@/routes/path";
 import { TProductList } from "@/schemas/product.schema";
+import { EProductSellType } from "@/types/enums/product-sell-type.enum";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Copy, Eye, ImageOff } from "lucide-react";
 import { PhotoProvider, PhotoView } from "react-photo-view";
@@ -127,6 +128,30 @@ export const columns: ColumnDef<TProductList>[] = [
             )}
           >
             {formatNumber(stockQuantity)}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "productSellType",
+    colSpan: 1,
+    header: () => (
+      <div className="text-center font-semibold text-base">Loại bán</div>
+    ),
+    cell: (info) => {
+      const productSellType = info.getValue() as number;
+      return (
+        <div className="flex justify-center min-w-0">
+          <Badge
+            className={cn(
+              productSellType == EProductSellType.ProductSell
+                ? "bg-green-100 text-green-800"
+                : "bg-gray-100 text-gray-600",
+              "text-base truncate max-w-full whitespace-nowrap"
+            )}
+          >
+            {productSellType == EProductSellType.ProductSell ? "Hàng bán" : "Hàng tặng"}
           </Badge>
         </div>
       );

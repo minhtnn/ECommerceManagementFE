@@ -28,6 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useProduct } from "@/hooks/use-product";
@@ -36,6 +37,7 @@ import { useQueryParams } from "@/hooks/use-query-params";
 import { handleApiError } from "@/lib/error";
 import { cn } from "@/lib/utils";
 import { CreateProductSchema, TCreateProduct } from "@/schemas/product.schema";
+import { EProductSellType } from "@/types/enums/product-sell-type.enum";
 import { EProductStatus } from "@/types/enums/product-status.enum";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -102,6 +104,7 @@ const ProductCreatePage = () => {
       description: "",
       price: 0,
       displayOrder: 1,
+      productSellType: EProductSellType.ProductSell,
       status: EProductStatus.Active,
       stockQuantity: 0,
       images: [],
@@ -212,6 +215,7 @@ const ProductCreatePage = () => {
       formData.append("DisplayOrder", data.displayOrder.toString());
     }
 
+    formData.append("ProductSellType", data.productSellType.toString());
     formData.append("Status", data.status.toString());
     formData.append("StockQuantity", data.stockQuantity.toString());
 
@@ -640,7 +644,45 @@ const ProductCreatePage = () => {
                 />
               </div>
             </div>
-
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="productSellType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Loại bán<span className="text-destructive">*</span>
+                      </FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        defaultValue={String(field.value)}
+                        disabled={createProductMutation.isPending}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn loại bán" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem
+                            value={String(EProductSellType.ProductSell)}
+                          >
+                            Bán hàng
+                          </SelectItem>
+                          <SelectItem
+                            value={String(EProductSellType.ProductGift)}
+                          >
+                            Quà tặng
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             {/* Side Attributes */}
             <div className="bg-background rounded-lg border p-6 space-y-4">
               <div className="flex items-center justify-between">

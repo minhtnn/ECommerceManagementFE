@@ -24,6 +24,7 @@ interface UseBrandOrderParams {
   paymentStatus?: EPaymentStatus;
   fromDate?: Date;
   toDate?: Date;
+  timeZone?: string;
   allowFetch?: boolean;
 }
 
@@ -35,6 +36,7 @@ interface UseCustomerOrderParams {
   searchKeyword?: string;
   orderStatus?: EOrderStatus;
   paymentStatus?: EPaymentStatus;
+  timeZone?: string;
 }
 
 export const useOrder = () => {
@@ -83,20 +85,20 @@ export const useOrder = () => {
     });
   };
 
-  const getBrandOrderById = (orderId: string) => {
+  const getBrandOrderById = (orderId: string, timeZone: string) => {
     return useQuery({
       queryKey: ["brand-order", orderId],
-      queryFn: () => orderApi.getBrandOrderById(orderId),
+      queryFn: () => orderApi.getBrandOrderById(orderId, timeZone),
       enabled: !!orderId,
       staleTime: 30 * 1000,
       retry: 1,
     });
   };
 
-  const getCustomerOrderById = (orderId: string) => {
+  const getCustomerOrderById = (orderId: string, timeZone: string) => {
     return useQuery({
       queryKey: ["customer-order", orderId],
-      queryFn: () => orderApi.getCustomerOrderById(orderId),
+      queryFn: () => orderApi.getCustomerOrderById(orderId, timeZone),
       enabled: !!orderId,
       staleTime: 30 * 1000,
       retry: 1,

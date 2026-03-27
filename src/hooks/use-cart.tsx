@@ -24,6 +24,7 @@ export const useCart = () => {
       staleTime: 5 * 1000,
       retry: false,
       enabled: isAllowFetch,
+      refetchOnWindowFocus: false,
     });
   };
 

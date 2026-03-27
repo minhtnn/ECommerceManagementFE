@@ -57,7 +57,10 @@ const HeaderMain = () => {
     isError: isFetchBrandError,
     error: fetchBrandError,
     isLoading: isFetchBrandLoading,
-  } = getBrandDetails(role === ERole.BrandAdmin);
+  } = getBrandDetails(
+    role === ERole.BrandAdmin,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
 
   const shouldShowBack = () => {
     const segments = pathname.split("/").filter(Boolean);

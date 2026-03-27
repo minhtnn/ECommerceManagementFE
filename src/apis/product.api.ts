@@ -6,10 +6,10 @@ import envConfig from "@/schemas/config.schema";
 
 const getProducts = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TProductList>>>(`${API_SUFFIX.PRODUCT_API}`, { params: params });
-const getProductById = async (id: string) =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<TProductDetail>>(`${API_SUFFIX.PRODUCT_API}/${id}`);
-const getPublicProductById = async ( id: string) =>
-    await apiRequest.ecommerceCoffee.get<BaseResponse<TProductDetail>>(`${API_SUFFIX.PRODUCT_API}/public/${envConfig.BRAND_CODE}/${id}`);
+const getProductById = async (id: string, timeZone: string) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TProductDetail>>(`${API_SUFFIX.PRODUCT_API}/${id}?timeZone=${timeZone}`);
+const getPublicProductById = async (id: string, timeZone: string) =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TProductDetail>>(`${API_SUFFIX.PRODUCT_API}/public/${envConfig.BRAND_CODE}/${id}?timeZone=${timeZone}`);
 const createProduct = async (data: FormData) =>
     await apiRequest.ecommerceCoffee.post<BaseResponse<TProductDetail>>(
         `${API_SUFFIX.PRODUCT_API}`,

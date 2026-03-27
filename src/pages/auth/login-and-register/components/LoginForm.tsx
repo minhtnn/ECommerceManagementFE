@@ -34,9 +34,9 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { login, loginGoogle } = useAuth();
+  const { login, endCustomerGoogleLoginAndRegister } = useAuth();
   const loginMutation = login();
-  const loginGoogleMutation = loginGoogle();
+  const loginGoogleMutation = endCustomerGoogleLoginAndRegister();
   const dispatch = useDispatch();
   const form = useForm<TFELoginRequest>({
     resolver: zodResolver(FELoginSchema),
@@ -54,6 +54,7 @@ export function LoginForm({
         ...(data.usernameOrEmail?.includes("@")
           ? { email: data.usernameOrEmail }
           : { username: data.usernameOrEmail }),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
       const result = await loginMutation.mutateAsync(loginData);
       if (result?.data?.status >= 200 && result?.data?.status < 300) {
@@ -84,6 +85,7 @@ export function LoginForm({
       // 3. Gửi lên BE
       const response = await loginGoogleMutation.mutateAsync({
         IdToken: idToken,
+        TimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
 
       if (response?.data?.status >= 200 && response?.data?.status < 300) {

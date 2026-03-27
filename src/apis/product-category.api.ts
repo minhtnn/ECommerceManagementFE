@@ -5,8 +5,8 @@
 
     const getProductCategories = async (params?: any) =>
         await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TProductCategoryList>>>(`${API_SUFFIX.PRODUCT_CATEGORY_API}`, { params: params });
-    const getProductCategoryById = async (id: string) =>
-        await apiRequest.ecommerceCoffee.get<BaseResponse<TProductCategoryDetail>>(`${API_SUFFIX.PRODUCT_CATEGORY_API}/${id}`);
+    const getProductCategoryById = async (id: string, timeZone: string) =>
+        await apiRequest.ecommerceCoffee.get<BaseResponse<TProductCategoryDetail>>(`${API_SUFFIX.PRODUCT_CATEGORY_API}/${id}?timeZone=${timeZone}`);
     const createProductCategory = async (data: FormData) =>
         await apiRequest.ecommerceCoffee.post<BaseResponse<TProductCategoryDetail>>(`${API_SUFFIX.PRODUCT_CATEGORY_API}`, data);
     const updateProductCategory = async (id: string, data: FormData) =>

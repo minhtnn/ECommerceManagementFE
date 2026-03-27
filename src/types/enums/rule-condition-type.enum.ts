@@ -5,4 +5,5 @@ export enum ERuleConditionType {
     MinQuantityOfProduct,
     MinQuantityInCategory,
     TotalCartQuantity,
+    FirstOrder,
 }

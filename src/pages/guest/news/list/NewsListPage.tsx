@@ -10,7 +10,7 @@ const PublicPostListPage = () => {
     defaultSortBy: "createdDate",
   });
 
-  const {getInfinitePublicPosts} = usePost()
+  const { getInfinitePublicPosts } = usePost();
   const {
     data,
     isLoading,
@@ -24,6 +24,7 @@ const PublicPostListPage = () => {
     size: pageSize,
     sortBy,
     isAsc,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
   const observerTarget = useRef<HTMLDivElement>(null);

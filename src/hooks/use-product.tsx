@@ -82,17 +82,17 @@ export const useProduct = () => {
     });
   };
 
-  const getProductById = (id: string) => {
+  const getProductById = (id: string, timeZone: string) => {
     return useSuspenseQuery({
       queryKey: ["product", id],
-      queryFn: () => productApi.getProductById(id),
+      queryFn: () => productApi.getProductById(id, timeZone),
     });
   };
 
-  const getPublicProductById = (id: string) => {
+  const getPublicProductById = (id: string, timeZone: string) => {
     return useQuery({
       queryKey: ["productPublic", id],
-      queryFn: async () => productApi.getPublicProductById(id),
+      queryFn: async () => productApi.getPublicProductById(id, timeZone),
       enabled: !!id,
       staleTime: 0,
     });

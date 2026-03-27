@@ -28,6 +28,7 @@ export const API_SUFFIX = {
     ORDER_API: '/orders',
     PROMOTION_RULE_API: '/promotion-rules',
     POST_API: '/posts',
+    SYSTEM_CONFIG_API: '/system-configurations',
 }
 
 export const MAP_API_SUFFIX = {

@@ -1,31 +1,39 @@
-import {
-  ShoppingCart,
-  Trash2,
-  Minus,
-  Plus,
-  ArrowRight,
-  ImageOff,
-  Tag,
-  X,
-  Loader2,
-  Gift,
-} from "lucide-react";
+import { PageLoader } from "@/components/LoadingScreen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatPrice } from "@/lib/utils";
-import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/use-cart";
+import { usePromotionRule } from "@/hooks/use-promotion-rule";
 import { handleApiError } from "@/lib/error";
-import { toast } from "sonner";
+import { formatPrice } from "@/lib/utils";
 import { PATH_END_CUSTOMER, PATH_GUEST } from "@/routes/path";
-import { PageLoader } from "@/components/LoadingScreen";
-import { useState } from "react";
 import { TGetCustomerCartItemsResponse } from "@/schemas/cart.schema";
+import {
+  ArrowRight,
+  Gift,
+  ImageOff,
+  Loader2,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Tag,
+  Trash2,
+  X
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import { ApplicablePromotionsSheet } from "./components/ApplicablePromotionsSheet";
+
+
 
 const EndCustomerCartPage = () => {
   const { getEndCustomerCart, updateEndCustomerCart } = useCart();
+  const { getApplicablePromotionRules } = usePromotionRule();
+
   const [promoCode, setPromoCode] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [applyingId, setApplyingId] = useState<string | null>(null);
 
   const {
     data: cartData,
@@ -35,6 +43,13 @@ const EndCustomerCartPage = () => {
   } = getEndCustomerCart();
 
   const updateCartMutation = updateEndCustomerCart();
+  const { data: applicableData, isLoading: isApplicableLoading } =
+    getApplicablePromotionRules({
+      isAllowFetch: sheetOpen && cartData?.data?.data != null,
+    });
+  const applicablePromotions = applicableData?.data?.data ?? [];
+
+  // Chỉ fetch applicable promotions khi sheet mở
 
   if (isCartLoading) return <PageLoader />;
   if (isCartError && cartError) handleApiError(cartError);
@@ -65,12 +80,13 @@ const EndCustomerCartPage = () => {
     items: buildCurrentItems(),
   });
 
-  // Gift items theo promotionId (để group dưới từng sản phẩm mua)
-  // Vì BuyXGetY có thể tặng sản phẩm khác, ta hiển thị gift items
-  // dưới sản phẩm BuyProduct đầu tiên của promotion đó
   const giftItems = cart?.items.filter((i) => i.isGiftItem) ?? [];
+  const nonGiftItems = cart?.items.filter((i) => !i.isGiftItem) ?? [];
+  const totalNonGiftItems = nonGiftItems.reduce(
+    (sum, i) => sum + i.quantity,
+    0,
+  );
 
-  // Map: promotionId → gift items
   const giftByPromotion = giftItems.reduce<
     Record<string, TGetCustomerCartItemsResponse[]>
   >((acc, item) => {
@@ -80,14 +96,12 @@ const EndCustomerCartPage = () => {
     return acc;
   }, {});
 
-  // Map: productId → promotionIds (để biết sản phẩm nào trigger gift nào)
-  // Ta tìm sản phẩm thật nào "gần nhất" với promotion đó
-  // Đơn giản: hiển thị gift dưới sản phẩm thật đầu tiên (non-gift)
-  // Nếu muốn đúng hơn: cần BE trả về buyProductId trong gift item
-  const nonGiftItems = cart?.items.filter((i) => !i.isGiftItem) ?? [];
-
-  // promotionIds đã được assign cho item nào rồi
   const assignedPromotions = new Set<string>();
+
+  // Promotions đã apply (để hiện dấu check trong sheet)
+  const appliedPromotionIds = new Set(
+    cart?.appliedPromotions.map((p) => p.promotionId) ?? [],
+  );
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const removeItem = async (productId: string) => {
@@ -127,21 +141,45 @@ const EndCustomerCartPage = () => {
     if (!promoCode.trim() || !cart) return;
     setIsApplyingPromo(true);
     try {
-      var result = await updateCartMutation.mutateAsync({
+      const result = await updateCartMutation.mutateAsync({
         ...buildBasePayload(),
         promotionCodeToApply: promoCode.trim(),
       });
       if (result.data.status >= 200 && result.data.status < 300) {
         toast.success("Áp dụng mã khuyến mãi thành công!");
-      }else{
+        setPromoCode("");
+      } else {
         toast.error(result.data.message || "Áp dụng mã khuyến mãi thất bại");
       }
-      // toast.success("Áp dụng mã khuyến mãi thành công!");
-      setPromoCode("");
     } catch (error) {
       handleApiError(error);
     } finally {
       setIsApplyingPromo(false);
+    }
+  };
+
+  // Áp dụng promotion được chọn từ sheet (dùng Code)
+  const handleApplyFromSheet = async (
+    promotionCode: string,
+    promotionId: string,
+  ) => {
+    if (!cart) return;
+    setApplyingId(promotionId);
+    try {
+      const result = await updateCartMutation.mutateAsync({
+        ...buildBasePayload(),
+        promotionCodeToApply: promotionCode,
+      });
+      if (result.data.status >= 200 && result.data.status < 300) {
+        toast.success("Áp dụng khuyến mãi thành công!");
+        setSheetOpen(false);
+      } else {
+        toast.error(result.data.message || "Không thể áp dụng khuyến mãi này");
+      }
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setApplyingId(null);
     }
   };
 
@@ -160,7 +198,7 @@ const EndCustomerCartPage = () => {
     }
   };
 
-  // ── Gift items sub-card component ──────────────────────────────────────────
+  // ── Sub-components ─────────────────────────────────────────────────────────
   const GiftItemCard = ({ item }: { item: TGetCustomerCartItemsResponse }) => (
     <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-md px-3 py-2 mt-2">
       <Gift size={14} className="text-green-600 shrink-0" />
@@ -186,19 +224,14 @@ const EndCustomerCartPage = () => {
   );
 
   // ── Render ─────────────────────────────────────────────────────────────────
-  const totalNonGiftItems = nonGiftItems.reduce(
-    (sum, i) => sum + i.quantity,
-    0,
-  );
-
   return (
     <>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
-          <ShoppingCart size={28} />
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-4 sm:mb-8 flex items-center gap-2 sm:gap-3">
+          <ShoppingCart size={24} className="sm:w-7 sm:h-7" />
           Giỏ hàng của bạn
           {totalNonGiftItems > 0 && (
-            <span className="text-base font-normal text-muted-foreground">
+            <span className="text-sm sm:text-base font-normal text-muted-foreground">
               ({totalNonGiftItems} sản phẩm)
             </span>
           )}
@@ -218,8 +251,8 @@ const EndCustomerCartPage = () => {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* ── Cart Items ─────────────────────────────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            {/* Cart Items */}
             <div className="lg:col-span-2 space-y-3">
               {nonGiftItems.map((item, index) => {
                 const giftsForThisItem: TGetCustomerCartItemsResponse[] = [];
@@ -231,70 +264,78 @@ const EndCustomerCartPage = () => {
                     assignedPromotions.add(promoId);
                   }
                 }
-
                 return (
                   <div key={item.productId}>
-                    {/* Main item card */}
                     <div
-                      className="bg-card rounded-lg p-4 flex gap-4 shadow-sm"
+                      className="bg-card rounded-lg p-3 sm:p-4 flex gap-3 sm:gap-4 shadow-sm"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       {item.productImageUrlSnapshot ? (
                         <img
                           src={item.productImageUrlSnapshot}
                           alt={item.productNameSnapshot}
-                          className="w-24 h-24 rounded-lg object-cover"
+                          className="w-16 h-16 sm:w-24 sm:h-24 rounded-lg object-cover shrink-0"
                         />
                       ) : (
-                        <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <ImageOff size={24} className="text-gray-400" />
+                        <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                          <ImageOff size={20} className="text-gray-400" />
                         </div>
                       )}
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground mb-2 line-clamp-2">
+                      <div className="flex-1 min-w-0">
+                        {" "}
+                        {/* min-w-0 tránh overflow */}
+                        <h3 className="font-medium text-foreground mb-1 sm:mb-2 line-clamp-2 text-sm sm:text-base">
                           {item.productNameSnapshot}
                         </h3>
-                        <span className="font-bold text-primary">
+                        <span className="font-bold text-primary text-sm sm:text-base">
                           {formatPrice(item.unitPriceSnapshot)}
                         </span>
                       </div>
-                      <div className="flex flex-col items-end justify-between">
+                      <div className="flex flex-col items-end justify-between shrink-0">
                         <button
                           onClick={() => removeItem(item.productId)}
                           className="text-muted-foreground hover:text-destructive transition-colors"
                           disabled={updateCartMutation.isPending}
                         >
-                          <Trash2 size={18} />
+                          <Trash2
+                            size={16}
+                            className="sm:w-[18px] sm:h-[18px]"
+                          />
                         </button>
                         <div className="flex items-center border border-border rounded">
                           <button
-                            className="p-2 hover:bg-muted"
+                            className="p-1.5 sm:p-2 hover:bg-muted"
                             onClick={() =>
                               updateQuantity(item.productId, item.quantity - 1)
                             }
                             disabled={updateCartMutation.isPending}
                           >
-                            <Minus size={14} />
+                            <Minus
+                              size={12}
+                              className="sm:w-[14px] sm:h-[14px]"
+                            />
                           </button>
-                          <span className="w-8 text-center text-sm">
+                          <span className="w-6 sm:w-8 text-center text-xs sm:text-sm">
                             {item.quantity}
                           </span>
                           <button
-                            className="p-2 hover:bg-muted"
+                            className="p-1.5 sm:p-2 hover:bg-muted"
                             onClick={() =>
                               updateQuantity(item.productId, item.quantity + 1)
                             }
                             disabled={updateCartMutation.isPending}
                           >
-                            <Plus size={14} />
+                            <Plus
+                              size={12}
+                              className="sm:w-[14px] sm:h-[14px]"
+                            />
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    {/* Gift items gắn với item này */}
                     {giftsForThisItem.length > 0 && (
-                      <div className="ml-4 space-y-1">
+                      <div className="ml-2 sm:ml-4 space-y-1">
                         {giftsForThisItem.map((gift) => (
                           <GiftItemCard
                             key={`${gift.productId}-${gift.promotionId}`}
@@ -309,18 +350,20 @@ const EndCustomerCartPage = () => {
             </div>
 
             {/* ── Order Summary ─────────────────────────────────── */}
-            <div className="bg-card rounded-lg p-6 shadow-sm h-fit space-y-4">
+            <div className="bg-card rounded-lg p-4 sm:p-6 shadow-sm h-fit space-y-4 lg:sticky lg:top-4">
               <h2 className="font-bold text-lg">Tóm tắt đơn hàng</h2>
 
-              {/* Promotion input */}
+              {/* Promotion section */}
               <div className="space-y-2">
                 <p className="text-sm font-medium flex items-center gap-1.5">
                   <Tag size={14} />
                   Mã khuyến mãi
                 </p>
+
+                {/* Input nhập code thủ công */}
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Nhập mã khuyến mãi"
+                    placeholder="Hoặc nhập mã trực tiếp"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                     onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
@@ -342,7 +385,19 @@ const EndCustomerCartPage = () => {
                   </Button>
                 </div>
 
-                {/* Applied promotions */}
+                {/* Nút xem applicable promotions */}
+                <ApplicablePromotionsSheet
+                  sheetOpen={sheetOpen}
+                  setSheetOpen={setSheetOpen}
+                  isApplicableLoading={isApplicableLoading}
+                  applicableData={applicableData}
+                  applicablePromotions={applicablePromotions}
+                  appliedPromotionIds={appliedPromotionIds}
+                  applyingId={applyingId}
+                  updateCartMutation={updateCartMutation}
+                  handleApplyFromSheet={handleApplyFromSheet}
+                />
+                {/* Applied promotions list */}
                 {cart.appliedPromotions.length > 0 && (
                   <div className="space-y-1.5 mt-2">
                     {cart.appliedPromotions.map((promo) => (

@@ -44,7 +44,11 @@ export function OTPVerificationModal({
     }
 
     try {
-      const data = { email: email, otpCode: otp };
+      const data = {
+        email: email,
+        otpCode: otp,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
       const result = await verifyEmailMutation.mutateAsync(data);
 
       if (result.data.status >= 200 && result.data.status < 300) {
@@ -62,7 +66,9 @@ export function OTPVerificationModal({
         toast.error(result.data.message || "Mã OTP không hợp lệ");
       }
     } catch (error) {
-      toast.error(error?.response?.data?.data || "Có lỗi xảy ra, vui lòng thử lại");
+      toast.error(
+        error?.response?.data?.data || "Có lỗi xảy ra, vui lòng thử lại",
+      );
     }
   };
 
@@ -76,7 +82,9 @@ export function OTPVerificationModal({
         dispatch(handleToggleOTPModal(false));
       }
     } catch (error) {
-      toast.error(error?.response?.data?.data || "Có lỗi xảy ra, vui lòng thử lại");
+      toast.error(
+        error?.response?.data?.data || "Có lỗi xảy ra, vui lòng thử lại",
+      );
     }
   };
 

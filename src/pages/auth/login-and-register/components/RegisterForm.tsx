@@ -38,9 +38,10 @@ export function RegisterForm({
 }: React.ComponentProps<"div">) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { customerNormalRegister, customerGoogleRegister } = useAuth();
+  const { customerNormalRegister, endCustomerGoogleLoginAndRegister } =
+    useAuth();
   const customerNormalRegisterMutation = customerNormalRegister();
-  const customerGoogleRegisterMutation = customerGoogleRegister();
+  const customerGoogleRegisterMutation = endCustomerGoogleLoginAndRegister();
   const { showOTPModal, registerEmail } = useSelector(
     (state: RootState) => state.modal,
   );
@@ -126,6 +127,7 @@ export function RegisterForm({
   };
 
   const handleVerifySuccess = () => {
+    dispatch(handleToggleOTPModal(false));
     navigate("/");
   };
 
@@ -164,7 +166,8 @@ export function RegisterForm({
       const idToken = await result.user.getIdToken();
 
       const response = await customerGoogleRegisterMutation.mutateAsync({
-        IdToken: idToken,
+        idToken: idToken,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
 
       if (response?.data?.status === 200 || response?.data?.status === 201) {

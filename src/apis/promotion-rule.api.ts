@@ -4,6 +4,7 @@ import {
     TPromotionRuleList,
     TCreatePromotionRule,
     TUpdatePromotionRule,
+    TApplicablePromotionRuleList,
 } from "@/schemas/promotion-rule.schema";
 import { BaseResponse, PaginationResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
@@ -16,6 +17,7 @@ export interface GetPromotionRulesParams {
     code?: string;
     name?: string;
     status?: number;
+    timeZone?: string;
 }
 
 const getPromotionRules = async (params?: GetPromotionRulesParams) =>
@@ -24,15 +26,20 @@ const getPromotionRules = async (params?: GetPromotionRulesParams) =>
         { params }
     );
 
-const getPromotionRuleById = async (id: string) =>
+const getPromotionRuleById = async (id: string, timeZone: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TPromotionRuleDetail>>(
-        `${API_SUFFIX.PROMOTION_RULE_API}/${id}`
+        `${API_SUFFIX.PROMOTION_RULE_API}/${id}?timeZone=${timeZone}`
+    );
+
+const getApplicablePromotionRules = async () =>
+    await apiRequest.ecommerceCoffee.get<BaseResponse<TApplicablePromotionRuleList[]>>(
+        `${API_SUFFIX.PROMOTION_RULE_API}/applicable`
     );
 
 const createPromotionRule = async (data: TCreatePromotionRule) =>
     await apiRequest.ecommerceCoffee.post<BaseResponse<string>>(
         `${API_SUFFIX.PROMOTION_RULE_API}`,
-        data  
+        data
     );
 
 const updatePromotionRule = async (id: string, data: TUpdatePromotionRule) =>
@@ -41,11 +48,12 @@ const updatePromotionRule = async (id: string, data: TUpdatePromotionRule) =>
         data
     );
 
-    
+
 
 export const promotionRuleApi = {
     getPromotionRules,
     getPromotionRuleById,
     createPromotionRule,
     updatePromotionRule,
+    getApplicablePromotionRules,
 };
