@@ -4,90 +4,95 @@ import { handleApiError } from "@/lib/error";
 import HeroBanner from "@/pages/guest/home/components/HeroBanner";
 import QuickLinks from "@/pages/guest/home/components/QuickLinks";
 import { TMenuProductCategoryResponse } from "@/schemas/menu-product.schema";
+import { memo, useMemo } from "react";
 import ProductSection from "./components/ProductSection";
-import { useMemo } from "react";
+
+// ---------------------------------------------------------------------------
+// Helpers — defined outside component so they're never recreated
+// ---------------------------------------------------------------------------
+
+function getAllCategoryIds(category: TMenuProductCategoryResponse): string[] {
+  const ids = [category.id];
+  category.children?.forEach((child) => ids.push(...getAllCategoryIds(child)));
+  return ids;
+}
+
+// ---------------------------------------------------------------------------
+// Skeleton — memoized so it's never re-created during data fetch
+// ---------------------------------------------------------------------------
+
+const HomePageSkeleton = memo(() => (
+  <div className="container mx-auto px-4 py-8">
+    <Skeleton className="h-[400px] md:h-[500px] w-full mb-8" />
+    <div className="flex flex-wrap justify-center gap-4 md:gap-8 mb-8">
+      {[1, 2, 3].map((i) => (
+        <Skeleton key={i} className="h-24 w-28 rounded-lg" />
+      ))}
+    </div>
+    {[1, 2].map((section) => (
+      <div key={section} className="mb-8">
+        <Skeleton className="h-12 w-64 mb-4" />
+        <div className="flex gap-4 overflow-hidden">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-80 min-w-[220px] rounded-lg flex-shrink-0" />
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+));
+HomePageSkeleton.displayName = "HomePageSkeleton";
+
+// ---------------------------------------------------------------------------
+// Main page
+// ---------------------------------------------------------------------------
 
 const HomePage = () => {
   const { getHomeMenuData } = useHomeMenu();
   const { data: menuData, isLoading, isError, error } = getHomeMenuData();
 
-  if (isError && error) {
-    handleApiError(error);
-  }
+  if (isError && error) handleApiError(error);
 
-  const rootCategories = menuData.data.data.productCategoriesTree;
+  const rootCategories = menuData?.data?.data?.productCategoriesTree ?? [];
+  const allProducts    = menuData?.data?.data?.products?.items ?? [];
 
-  const allProducts = menuData.data.data.products.items;
-
+  /*
+    PERF: productsByCategory is a Map built once from stable server data.
+    useMemo deps are the actual arrays from the server response — if the
+    server data hasn't changed (same reference from React Query cache),
+    this never re-runs.
+  */
   const productsByCategory = useMemo(() => {
     const map = new Map<string, typeof allProducts>();
     if (!rootCategories.length || !allProducts.length) return map;
 
-    const getAllCategoryIds = (
-      category: TMenuProductCategoryResponse,
-    ): string[] => {
-      const ids = [category.id];
-      category.children?.forEach((child) => {
-        ids.push(...getAllCategoryIds(child));
-      });
-      return ids;
-    };
-
     rootCategories.forEach((rootCategory) => {
       const categoryIds = getAllCategoryIds(rootCategory);
-      const categoryProducts = allProducts.filter((p) =>
-        categoryIds.includes(p.productCategoryId),
-      );
-      map.set(rootCategory.id, categoryProducts.slice(0, 10));
+      const products = allProducts
+        .filter((p) => categoryIds.includes(p.productCategoryId))
+        .slice(0, 10);
+      map.set(rootCategory.id, products);
     });
 
     return map;
   }, [rootCategories, allProducts]);
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        {/* Hero Skeleton */}
-        <Skeleton className="h-96 w-full rounded-lg mb-8" />
-
-        {/* Quick Links Skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-lg" />
-          ))}
-        </div>
-
-        {/* Product Sections Skeleton */}
-        {[1, 2].map((section) => (
-          <div key={section} className="mb-8">
-            <Skeleton className="h-12 w-64 mb-4" />
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-80 w-full rounded-lg" />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  if (isLoading) return <HomePageSkeleton />;
 
   return (
     <>
-      {/* SEO Meta */}
       <title>Uni Coffee Roastery - Cà Phê Việt Nam Chất Lượng Cao</title>
 
-      {/* Hero Banner */}
+      {/*
+        PERF: HeroBanner and QuickLinks are stable — they never depend on
+        product data. Wrapping them in fragments means React reconciles them
+        independently from the dynamic product sections below.
+      */}
       <HeroBanner />
-
-      {/* Quick Links */}
       <QuickLinks />
 
-      {/* Dynamic Product Sections by Root Categories */}
       {rootCategories.map((category) => {
-        const products = productsByCategory.get(category.id) || [];
-
-        // Chỉ hiển thị section nếu có products
+        const products = productsByCategory.get(category.id) ?? [];
         if (products.length === 0) return null;
 
         return (
@@ -96,17 +101,14 @@ const HomePage = () => {
             title={category.name}
             products={products}
             categoryId={category.id}
-            showCarousel={true}
+            showCarousel
           />
         );
       })}
 
-      {/* Empty State */}
       {rootCategories.length === 0 && (
         <div className="container mx-auto px-4 py-16 text-center">
-          <p className="text-muted-foreground">
-            Hiện chưa có sản phẩm nào. Vui lòng quay lại sau.
-          </p>
+          <p className="text-muted-foreground">Hiện chưa có sản phẩm nào. Vui lòng quay lại sau.</p>
         </div>
       )}
     </>

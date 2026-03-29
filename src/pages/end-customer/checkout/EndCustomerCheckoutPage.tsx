@@ -214,6 +214,7 @@ const EndCustomerCheckoutPage = () => {
       shippingAddress: selectedAddress.address,
       shippingContact: selectedAddress.shippingContact,
       customerNote: formData.notes || null,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
 
     try {

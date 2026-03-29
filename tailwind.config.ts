@@ -54,6 +54,12 @@ export default {
           DEFAULT: "hsl(var(--sale-badge))",
           foreground: "hsl(var(--sale-badge-foreground))",
         },
+        coffee: {
+          warm: "hsl(var(--coffee-warm))",
+          dark: "hsl(var(--coffee-dark))",
+          cream: "hsl(var(--coffee-cream))",
+          red: "hsl(var(--coffee-red))",
+        },
         cream: "hsl(var(--cream))",
         "coffee-dark": "hsl(var(--coffee-dark))",
         sidebar: {

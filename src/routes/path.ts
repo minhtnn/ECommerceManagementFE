@@ -1,3 +1,4 @@
+import landingPage from "@/pages/guest/landing-page";
 import { de } from "date-fns/locale";
 
 const path = (root: string, sublink: string) => {
@@ -100,6 +101,14 @@ export const PATH_GUEST = {
     contact: {
         root: path(ROOTS_GUEST, '/contact'),
     },
+    landingPage:{
+        root: ROOTS_GUEST
+    },
+    services:{
+        root: path(ROOTS_GUEST, '/services'),
+        greenCoffee: path(ROOTS_GUEST, '/services/green-coffee'),
+        roastedCoffee: path(ROOTS_GUEST, '/services/roasted-coffee'),
+    }
 }
 
 export const PATH_END_CUSTOMER = {

@@ -405,7 +405,7 @@ const PaymentPage = () => {
                       công
                     </li>
                     <li>
-                      • Nếu gặp vấn đề, vui lòng liên hệ hotline: 1900.123.456
+                      • Nếu gặp vấn đề, vui lòng liên hệ hotline: 0909.429.323
                     </li>
                   </ul>
                 </div>

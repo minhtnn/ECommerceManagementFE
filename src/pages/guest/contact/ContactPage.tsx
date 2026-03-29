@@ -43,19 +43,19 @@ const ContactPage = () => {
     {
       icon: Phone,
       title: "Hotline",
-      content: "1900 123 456",
+      content: "0909.429.323",
       subContent: "Miễn phí cuộc gọi",
     },
     {
       icon: Mail,
       title: "Email",
-      content: "support@unicoffee.vn",
+      content: "unicoffeeroasteryvn@gmail.com",
       subContent: "Phản hồi trong 24h",
     },
     {
       icon: MapPin,
       title: "Địa chỉ",
-      content: "123 Nguyễn Huệ, Quận 1",
+      content: "Tầng 1, Tòa nhà QTSC Building 9, Lô 42, Đường só 3, Công Viên Phần Mềm Quang Trung, P. Tân Chánh Hiệp, Q12",
       subContent: "TP. Hồ Chí Minh",
     },
     {
@@ -100,66 +100,52 @@ const ContactPage = () => {
         <div className="grid md:grid-cols-2 gap-8 md:gap-12">
           {/* Contact Form */}
           <div className="bg-cream rounded-lg p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <MessageCircle className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl font-bold text-foreground">
-                Gửi tin nhắn
-              </h2>
-            </div>
+            <h1 className="font-sans text-lg font-semibold tracking-wide uppercase mb-6">
+              ĐĂNG KÝ TƯ VẤN
+            </h1>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  placeholder="Họ và tên *"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                  className="bg-background"
-                />
-                <Input
-                  type="email"
-                  placeholder="Email *"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  required
-                  className="bg-background"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  placeholder="Số điện thoại"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  className="bg-background"
-                />
-                <Input
-                  placeholder="Chủ đề"
-                  value={formData.subject}
-                  onChange={(e) =>
-                    setFormData({ ...formData, subject: e.target.value })
-                  }
-                  className="bg-background"
-                />
-              </div>
-              <Textarea
-                placeholder="Nội dung tin nhắn *"
-                rows={5}
+              <input
+                type="text"
+                placeholder="Họ và tên"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors"
+              />
+              <input
+                type="tel"
+                placeholder="Số điện thoại"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors"
+              />
+              <textarea
+                placeholder="Nội dung yêu cầu"
+                rows={4}
                 value={formData.message}
                 onChange={(e) =>
                   setFormData({ ...formData, message: e.target.value })
                 }
-                required
-                className="bg-background resize-none"
+                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors resize-none"
               />
-              <Button type="submit" className="w-full">
-                <Send className="w-4 h-4 mr-2" />
-                Gửi tin nhắn
-              </Button>
+              <button
+                type="submit"
+                className="w-full bg-primary text-primary-foreground py-4 text-sm font-semibold tracking-[0.15em] uppercase font-sans hover:opacity-90 transition-opacity"
+              >
+                GỬI YÊU CẦU
+              </button>
             </form>
           </div>
 
@@ -215,11 +201,11 @@ const ContactPage = () => {
             Đội ngũ chăm sóc khách hàng của chúng tôi sẵn sàng hỗ trợ bạn 24/7
           </p>
           <a
-            href="tel:1900123456"
+            href="tel:0909429323"
             className="inline-block bg-accent hover:bg-accent/90 text-accent-foreground font-bold px-8 py-3 rounded-full transition-colors"
           >
             <Phone className="w-5 h-5 inline mr-2" />
-            Gọi ngay: 1900 123 456
+            Gọi ngay: 0909.429.323
           </a>
         </div>
       </div>

@@ -47,22 +47,6 @@ const LoginPage = () => {
   return (
     <EndUserLayout>
       {/* Breadcrumb */}
-      <div className="bg-muted/30 py-3 border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 text-sm">
-            <Link
-              to="/"
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              Trang chủ
-            </Link>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            <span className="text-foreground font-medium">
-              Đăng nhập tài khoản
-            </span>
-          </div>
-        </div>
-      </div>
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">

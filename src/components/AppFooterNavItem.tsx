@@ -1,3 +1,4 @@
+import { PATH_GUEST } from "@/routes/path";
 import {
   Facebook,
   Twitter,
@@ -80,14 +81,6 @@ const AppEndUserFooter = () => {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  to="/search"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  • Tìm kiếm
-                </Link>
-              </li>
-              <li>
-                <Link
                   to="/returns"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
@@ -112,7 +105,7 @@ const AppEndUserFooter = () => {
               </li>
               <li>
                 <Link
-                  to="/guest/contact"
+                  to={PATH_GUEST.contact.root}
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   • Liên hệ

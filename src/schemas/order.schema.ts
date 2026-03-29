@@ -30,6 +30,7 @@ export const CreateOrderRequestSchema = z.object({
   shippingAddress: z.string().min(1).max(500),
   shippingContact: z.string().min(1).max(20),
   customerNote: z.string().max(500).optional().nullable(),
+  timeZone: z.string(), 
 });
 
 export const CreateOrderResponseSchema = z.object({

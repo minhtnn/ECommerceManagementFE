@@ -87,8 +87,8 @@ export const AppRoutes = () =>
       element: <EndUserRoute />,
       children: [
         {
-          element: <Navigate to={PATH_GUEST.home.root} replace />,
           index: true,
+          element: <GuestLandingPage />,
         },
         {
           path: "home",
@@ -117,6 +117,25 @@ export const AppRoutes = () =>
         {
           path: "contact",
           element: <CustomerContactPage />,
+        },
+        {
+          path: "services",
+          children: [
+            {
+              index: true,
+              element: (
+                <Navigate to={PATH_GUEST.services.greenCoffee} replace />
+              ),
+            },
+            {
+              path: "green-coffee",
+              element: <GuestServiceGreenCoffee />,
+            },
+            {
+              path: "roasted-coffee",
+              element: <GuestServiceRoastedCoffee />,
+            },
+          ],
         },
       ],
     },
@@ -241,8 +260,8 @@ export const AppRoutes = () =>
           element: <DashboardAccountPage />,
         },
         {
-          path:"system-configurations",
-          element: <SystemConfigPage/>
+          path: "system-configurations",
+          element: <SystemConfigPage />,
         },
       ],
     },
@@ -363,10 +382,6 @@ export const AppRoutes = () =>
       ],
     },
     {
-      path: "/",
-      element: <Navigate to={PATH_GUEST.home.root} replace />,
-    },
-    {
       path: "*",
       element: <NotFoundPage />,
     },
@@ -424,6 +439,15 @@ const EndCustomerOrdersListPage = Loadable(
 );
 const EndCustomerOrdersDetailPage = Loadable(
   lazy(() => import("@/pages/end-customer/order/detail")),
+);
+const GuestLandingPage = Loadable(
+  lazy(() => import("@/pages/guest/landing-page")),
+);
+const GuestServiceGreenCoffee = Loadable(
+  lazy(() => import("@/pages/guest/service/green-coffee")),
+);
+const GuestServiceRoastedCoffee = Loadable(
+  lazy(() => import("@/pages/guest/service/roasted-coffee")),
 );
 
 const EndCustomerOrderPaymentPage = Loadable(

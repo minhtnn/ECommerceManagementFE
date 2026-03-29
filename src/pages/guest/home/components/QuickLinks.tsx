@@ -174,27 +174,6 @@ const QuickLinks = () => {
                   từ 2,5 triệu trở lên. Chúng tôi không ship COD với đơn hàng
                   giá trị cao.
                 </p>
-
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="font-medium mb-2">Thông tin chuyển khoản:</p>
-                  <p className="text-muted-foreground">
-                    TÊN CHỦ TÀI KHOẢN: CÔNG TY TNHH MTV THÁI KIÊN
-                  </p>
-                  <p className="text-muted-foreground">
-                    Số tài khoản: 119002632865
-                  </p>
-                  <p className="text-muted-foreground">
-                    Tại ngân hàng: Vietinbank - CN7 Tp.HCM - 346 Bùi Hữu Nghĩa,
-                    Phường 2, Quận Bình Thạnh, TP. HCM
-                  </p>
-                  <p className="text-muted-foreground mt-2">
-                    Vui lòng liên hệ:{" "}
-                    <span className="text-primary font-medium">
-                      0937.722.522
-                    </span>{" "}
-                    để báo xác nhận thông tin đơn hàng và xác nhận thanh toán.
-                  </p>
-                </div>
               </section>
 
               {/* Section 4 */}
@@ -277,22 +256,25 @@ const QuickLinks = () => {
                 <div className="space-y-2 text-muted-foreground">
                   <p>
                     <span className="font-medium text-foreground">
-                      Công ty TNHH MTV Thái Kiên
+                      UNICOFFEEROASTERY
                     </span>
                   </p>
                   <p>
-                    Địa chỉ: 127 Nguyễn Cơ Thạch, An Lợi Đông, Quận 2, TP. Hồ
-                    Chí Minh
+                    Địa chỉ: Tầng 1, Tòa nhà QTSC Building 9, Lô 42, Đường só 3,
+                    Công Viên Phần Mềm Quang Trung, P. Tân Chánh Hiệp, Q12, Tp.
+                    HCM
                   </p>
                   <p>
                     Điện thoại:{" "}
                     <span className="text-primary font-medium">
-                      0937 722 522
+                      0909.429.323
                     </span>
                   </p>
                   <p>
                     Email:{" "}
-                    <span className="text-primary">khac.ngo@vtijs.com</span>
+                    <span className="text-primary">
+                      unicoffeeroasteryvn@gmail.com
+                    </span>
                   </p>
                 </div>
               </section>
