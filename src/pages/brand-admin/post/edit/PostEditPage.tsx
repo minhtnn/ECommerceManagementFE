@@ -21,7 +21,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { usePost } from "@/hooks/use-post";
 import { handleApiError } from "@/lib/error";
-import { buildPostFormData, cn, formatDateTimeInShort } from "@/lib/utils";
+import {
+  buildPostFormData,
+  cn,
+  copyToClipboard,
+  formatDateTimeInShort,
+} from "@/lib/utils";
 import { TUpdatePost, UpdatePostSchema } from "@/schemas/post.schema";
 import {
   ALLOWED_TRANSITIONS,
@@ -30,7 +35,7 @@ import {
   POST_STATUS_LABEL,
 } from "@/types/enums/post-status.enum";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Upload, X } from "lucide-react";
+import { AlertCircle, Copy, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
@@ -55,13 +60,19 @@ const PostEditPage = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
 
-  const { getSuspendPostById, updatePost } = usePost();
+  const { getSuspendPostById, updatePost, getPublicPostOgPreviewById } =
+    usePost();
   const {
     data: postData,
     isError,
     error,
     isLoading,
   } = getSuspendPostById(id!, Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+  const { data: ogPreviewData } = getPublicPostOgPreviewById(
+    id!,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
 
   if (isLoading) return <PageLoader />;
   if (isError && error) handleApiError(error);
@@ -308,7 +319,21 @@ const PostEditPage = () => {
           {/* ── Right: Fields ── */}
           <div className="bg-background rounded-lg border p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Thông tin bài đăng</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold">Thông tin bài đăng</h2>
+                {post.status === EPostStatus.Published && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() =>
+                      copyToClipboard(ogPreviewData || "", "Link bài đăng")
+                    }
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
 
               {/* Status selector — disabled + locked khi content dirty */}
               <FormField

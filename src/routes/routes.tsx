@@ -86,9 +86,13 @@ export const AppRoutes = () =>
       path: PATH_GUEST.root,
       element: <EndUserRoute />,
       children: [
+        // {
+        //   index: true,
+        //   element: <GuestLandingPage />,
+        // },
         {
           index: true,
-          element: <GuestLandingPage />,
+          element: <Navigate to={`${PATH_GUEST.home.root}`} replace />,
         },
         {
           path: "home",

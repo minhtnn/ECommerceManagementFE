@@ -1,5 +1,9 @@
 import { customerApi } from "@/apis/customer.api";
-import { TCreateCustomerAddress, TUpdateCustomerAddress } from "@/schemas/customer.schema";
+import {
+  TCreateCustomerAddress,
+  TCreateCustomerConsultant,
+  TUpdateCustomerAddress,
+} from "@/schemas/customer.schema";
 import { ECustomerStatus } from "@/types/enums/customer-status";
 import {
   keepPreviousData,
@@ -63,14 +67,16 @@ export const useCustomer = () => {
   const getCustomerAddressById = (id: string, timeZone: string) => {
     return useSuspenseQuery({
       queryKey: ["customerAddresses", id],
-      queryFn: async () => await customerApi.getCustomerAddressById(id, timeZone),
+      queryFn: async () =>
+        await customerApi.getCustomerAddressById(id, timeZone),
       staleTime: 5 * 1000,
     });
   };
 
   const createCustomerAddress = () =>
     useMutation({
-      mutationFn: (data: TCreateCustomerAddress) => customerApi.createCustomerAddress(data),
+      mutationFn: (data: TCreateCustomerAddress) =>
+        customerApi.createCustomerAddress(data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["customerAddresses"] });
       },
@@ -78,20 +84,34 @@ export const useCustomer = () => {
 
   const updateCustomerAddress = () =>
     useMutation({
-      mutationFn: ({ id, data }: { id: string; data: TUpdateCustomerAddress }) =>
-        customerApi.updateCustomerAddress(id, data),
+      mutationFn: ({
+        id,
+        data,
+      }: {
+        id: string;
+        data: TUpdateCustomerAddress;
+      }) => customerApi.updateCustomerAddress(id, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["customerAddresses"] });
         queryClient.invalidateQueries({ queryKey: ["customerAddress"] });
       },
     });
 
+  const createCustomerConsultant = () =>
+    useMutation({
+      mutationFn: (data: TCreateCustomerConsultant) =>
+        customerApi.createCustomerConsultant(data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["customerConsultant"] });
+      },
+    });
 
   return {
     getCustomers,
     getCustomerAddresses,
     getCustomerAddressById,
     createCustomerAddress,
-    updateCustomerAddress
+    updateCustomerAddress,
+    createCustomerConsultant,
   };
 };

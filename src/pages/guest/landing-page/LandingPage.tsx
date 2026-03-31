@@ -1,20 +1,58 @@
-import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
-import ImagePlaceholder from "../../../components/ImagePlaceholder";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useCustomer } from "@/hooks/use-customer";
+import { handleApiError } from "@/lib/error";
 import { PATH_GUEST } from "@/routes/path";
+import {
+  CreateCustomerConsultantSchema,
+  TCreateCustomerConsultant,
+} from "@/schemas/customer.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import ImagePlaceholder from "../../../components/ImagePlaceholder";
 
 const LandingPage = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
+  const { createCustomerConsultant } = useCustomer();
+  const createCustomerConsultantMutation = createCustomerConsultant();
+
+  const form = useForm<TCreateCustomerConsultant>({
+    resolver: zodResolver(CreateCustomerConsultantSchema),
+    defaultValues: {
+      customerFullName: "",
+      customerEmail: "",
+      customerPhone: "",
+      customerMessage: "",
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
+  const onSubmit = async (data: TCreateCustomerConsultant) => {
+    if (createCustomerConsultantMutation.isPending) return;
+    try {
+      const result = await createCustomerConsultantMutation.mutateAsync(data);
+      if (result?.data?.status >= 200 && result?.data?.status < 300) {
+        toast.success(
+          result?.data?.message || "Gửi thông tin đăng kí tư vấn thành công!",
+        );
+        form.reset();
+      } else {
+        toast.error(
+          result?.data?.message || "Lỗi gửi thông tin đăng kí tư vấn!",
+        );
+      }
+    } catch (err) {
+      handleApiError(err);
+    }
   };
   return (
     <div className="min-h-screen flex flex-col">
@@ -138,54 +176,111 @@ const LandingPage = () => {
           </div>
 
           {/* Right - Form */}
-          <div>
+          <div className="rounded-lg p-6 md:p-8">
             <h1 className="font-sans text-lg font-semibold tracking-wide uppercase mb-6">
               ĐĂNG KÝ TƯ VẤN
             </h1>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Họ và tên"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors"
-              />
-              <input
-                type="tel"
-                placeholder="Số điện thoại"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors"
-              />
-              <textarea
-                placeholder="Nội dung yêu cầu"
-                rows={4}
-                value={formData.message}
-                onChange={(e) =>
-                  setFormData({ ...formData, message: e.target.value })
-                }
-                className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground focus:border-coffee-red transition-colors resize-none"
-              />
-              <button
-                type="submit"
-                className="w-full bg-primary text-primary-foreground py-4 text-sm font-semibold tracking-[0.15em] uppercase font-sans hover:opacity-90 transition-opacity"
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
               >
-                GỬI YÊU CẦU
-              </button>
-            </form>
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="customerFullName"
+                    render={({ field }) => (
+                      <FormItem className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground transition-colors p-0 m-0">
+                        <FormControl className="flex items-center">
+                          <Input
+                            type="text"
+                            placeholder="Họ và tên"
+                            {...field}
+                            className="border-none focus:ring-0 w-full p-0 m-0"
+                            disabled={
+                              createCustomerConsultantMutation.isPending
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="customerEmail"
+                    render={({ field }) => (
+                      <FormItem className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground transition-colors p-0 m-0">
+                        <FormControl className="flex items-center">
+                          <Input
+                            type="email"
+                            placeholder="Email"
+                            {...field}
+                            className="border-none focus:ring-0 w-full p-0 m-0"
+                            disabled={
+                              createCustomerConsultantMutation.isPending
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="customerPhone"
+                    render={({ field }) => (
+                      <FormItem className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground transition-colors p-0 m-0">
+                        <FormControl className="flex items-center">
+                          <Input
+                            type="tel"
+                            placeholder="Số điện thoại"
+                            {...field}
+                            className="border-none focus:ring-0 w-full p-0 m-0"
+                            disabled={
+                              createCustomerConsultantMutation.isPending
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="customerMessage"
+                    render={({ field }) => (
+                      <FormItem className="w-full border-b-2 border-foreground bg-transparent py-3 text-sm font-sans outline-none placeholder:text-muted-foreground transition-colors p-0 m-0">
+                        <FormControl className="flex items-center">
+                          <Textarea
+                            placeholder="Nội dung yêu cầu"
+                            rows={4}
+                            {...field}
+                            className="border-none focus:ring-0 w-full p-0 m-0"
+                            disabled={
+                              createCustomerConsultantMutation.isPending
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground py-4 text-sm font-semibold tracking-[0.15em] uppercase font-sans hover:opacity-90 transition-opacity"
+                >
+                  GỬI YÊU CẦU
+                </Button>
+              </form>
+            </Form>
           </div>
         </div>
       </section>

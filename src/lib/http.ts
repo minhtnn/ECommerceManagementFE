@@ -158,9 +158,11 @@ const request = (apiUrl: string, withAuth: boolean = true): AxiosInstance => {
 };
 
 const ecommerceCoffee = request(envConfig.ECOMERCE_COFFEE_API_URL);
+const ecommerceCoffeeBase = envConfig.ECOMERCE_COFFEE_BASE_API_URL;
 const mapApiUrl = request(envConfig.VITE_ECOMERCE_COFFEE_MAP_API_URL, false);
 
 export const apiRequest = {
+    ecommerceCoffeeBase,
     ecommerceCoffee,
     mapApiUrl
 };

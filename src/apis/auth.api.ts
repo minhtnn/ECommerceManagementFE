@@ -88,6 +88,7 @@ const validateResetToken = async (data: TValidateResetTokenRequest) => {
         {
             email: data.email,
             token: data.token,
+            brandCode: envConfig.BRAND_CODE,
         }
     );
 };
@@ -100,6 +101,7 @@ const resetPassword = async (data: TResetPasswordRequest) => {
             token: data.token,
             newPassword: data.newPassword,
             confirmNewPassword: data.confirmNewPassword,
+            brandCode: envConfig.BRAND_CODE,
         }
     );
 };

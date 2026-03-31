@@ -57,6 +57,7 @@ export const UpdateAppliedPromotionRequest = z.object({
 });
 
 export const UpdateEndCustomerCartSchema = z.object({
+  brandCode: z.string(),
   cartId: z.string().uuid().optional(),
   customerNote: z.string().optional().nullable(),
   items: z.array(UpdateCartItemRequest),

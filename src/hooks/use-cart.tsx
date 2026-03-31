@@ -3,6 +3,7 @@ import {
   TCreateEndCustomerCartRequest,
   TUpdateEndCustomerCartRequest
 } from "@/schemas/cart.schema";
+import envConfig from "@/schemas/config.schema";
 import {
   keepPreviousData,
   useMutation,
@@ -45,7 +46,7 @@ export const useCart = () => {
   const updateEndCustomerCart = () => {
     return useMutation({
       mutationFn: (data: TUpdateEndCustomerCartRequest) =>
-        endCustomerCartApi.updateEndCustomerCart(data),
+        endCustomerCartApi.updateEndCustomerCart(data, envConfig.BRAND_CODE),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["end-customer-cart"] });
       },

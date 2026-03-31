@@ -31,9 +31,9 @@ const getPromotionRuleById = async (id: string, timeZone: string) =>
         `${API_SUFFIX.PROMOTION_RULE_API}/${id}?timeZone=${timeZone}`
     );
 
-const getApplicablePromotionRules = async () =>
+const getApplicablePromotionRules = async (brandCode: string) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<TApplicablePromotionRuleList[]>>(
-        `${API_SUFFIX.PROMOTION_RULE_API}/applicable`
+        `${API_SUFFIX.PROMOTION_RULE_API}/${brandCode}/applicable`
     );
 
 const createPromotionRule = async (data: TCreatePromotionRule) =>

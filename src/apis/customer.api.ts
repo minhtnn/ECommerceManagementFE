@@ -1,7 +1,8 @@
 import { apiRequest } from "@/lib/http";
 import { BaseResponse, PaginationResponse } from "@/types/response.type";
 import { API_SUFFIX } from "./util.api";
-import { TCreateCustomerAddress, TCustomerAddressDetailResponse, TCustomerAddressListResponse, TCustomerListResponse, TUpdateCustomerAddress } from "@/schemas/customer.schema";
+import { TCreateCustomerAddress, TCreateCustomerConsultant, TCustomerAddressDetailResponse, TCustomerAddressListResponse, TCustomerListResponse, TUpdateCustomerAddress } from "@/schemas/customer.schema";
+import envConfig from "@/schemas/config.schema";
 
 const getCustomers = async (params?: any) =>
     await apiRequest.ecommerceCoffee.get<BaseResponse<PaginationResponse<TCustomerListResponse>>>(`${API_SUFFIX.CUSTOMER_API}`, { params: params });
@@ -24,10 +25,17 @@ const updateCustomerAddress = async (id: string, data: TUpdateCustomerAddress) =
         data
     );
 
+const createCustomerConsultant = async (data: TCreateCustomerConsultant) =>
+    await apiRequest.ecommerceCoffee.post<BaseResponse<string>>(
+        `${API_SUFFIX.CUSTOMER_API}/consultant/email`,
+        {...data, brandCode: envConfig.BRAND_CODE}
+    );
+
 export const customerApi = {
     getCustomers,
     getCustomerAddresses,
     getCustomerAddressById,
     createCustomerAddress,
-    updateCustomerAddress
+    updateCustomerAddress,
+    createCustomerConsultant,
 };

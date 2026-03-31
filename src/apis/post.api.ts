@@ -35,6 +35,8 @@ const getPublicPostById = async (brandCode: string, id: string, timeZone: string
         `${API_SUFFIX.POST_API}/public/${brandCode}/${id}?timeZone=${timeZone}`
     );
 
+const getPublicPostOgPreviewById = async (brandCode: string, id: string, timeZone: string) =>
+    `${apiRequest.ecommerceCoffeeBase}${API_SUFFIX.POST_API}/public/${brandCode}/${id}/og?timeZone=${timeZone}`;
 export const postApi = {
     getPosts,
     getPostById,
@@ -42,4 +44,5 @@ export const postApi = {
     updatePost,
     getPublicPosts,
     getPublicPostById,
+    getPublicPostOgPreviewById,
 };

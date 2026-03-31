@@ -53,13 +53,11 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 //#endregion
 
 const ProductCategoryCreatePage = () => {
-  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedType, setSelectedType] = useState<EProductCategoryType>(
     EProductCategoryType.Parent,

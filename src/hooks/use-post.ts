@@ -101,6 +101,13 @@ export const usePost = () => {
             queryFn: () => postApi.getPublicPostById(envConfig.BRAND_CODE, id, timeZone),
             enabled: !!id && !!envConfig.BRAND_CODE,
         });
+
+    const getPublicPostOgPreviewById = (id: string, timeZone: string) =>
+        useQuery({
+            queryKey: ["public-post-og-preview", envConfig.BRAND_CODE, id],
+            queryFn: () => postApi.getPublicPostOgPreviewById(envConfig.BRAND_CODE, id, timeZone),
+            enabled: !!id && !!envConfig.BRAND_CODE,
+        });
     return {
         getPosts,
         getSuspendPosts,
@@ -109,6 +116,7 @@ export const usePost = () => {
         createPost,
         updatePost,
         getInfinitePublicPosts,
-        getPublicPostById
+        getPublicPostById,
+        getPublicPostOgPreviewById,
     };
 };

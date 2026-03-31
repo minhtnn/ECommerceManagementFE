@@ -18,10 +18,10 @@ const createEndCustomerCart = async (data: TCreateEndCustomerCartRequest) =>
     data
   );
 
-const updateEndCustomerCart = async (data: TUpdateEndCustomerCartRequest) =>
+const updateEndCustomerCart = async (data: TUpdateEndCustomerCartRequest, brandCode: string) =>
   await apiRequest.ecommerceCoffee.put<BaseResponse<TGetCustomerCartResponse>>(
     `${API_SUFFIX.END_CUSTOMER_CART_API}`,
-    data
+    { ...data, brandCode }
   );
 
 export const endCustomerCartApi = {

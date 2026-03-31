@@ -2,6 +2,7 @@ import {
   promotionRuleApi,
   GetPromotionRulesParams,
 } from "@/apis/promotion-rule.api";
+import envConfig from "@/schemas/config.schema";
 import {
   TCreatePromotionRule,
   TUpdatePromotionRule,
@@ -63,8 +64,8 @@ export const usePromotionRule = () => {
     isAllowFetch = true,
   }: { isAllowFetch?: boolean } = {}) =>
     useQuery({
-      queryKey: [APPLICABLE_PROMOTION_RULE_QUERY_KEY],
-      queryFn: () => promotionRuleApi.getApplicablePromotionRules(),
+      queryKey: [APPLICABLE_PROMOTION_RULE_QUERY_KEY, envConfig.BRAND_CODE],
+      queryFn: () => promotionRuleApi.getApplicablePromotionRules(envConfig.BRAND_CODE),
       enabled: isAllowFetch,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

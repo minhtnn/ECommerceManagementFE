@@ -27,14 +27,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PATH_AUTH } from "@/routes/path";
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { validateResetToken, resetPassword } = useAuth();
   const validateTokenMutation = validateResetToken();
   const resetPasswordMutation = resetPassword();
@@ -44,8 +44,9 @@ const ResetPasswordPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
+  const hashParams = new URLSearchParams(location.hash.substring(1));
+const token = hashParams.get("token");
+const email = hashParams.get("email");
 
   const form = useForm<TResetPasswordRequest>({
     resolver: zodResolver(ResetPasswordSchema),
