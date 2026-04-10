@@ -38,9 +38,9 @@ const ContactPage = () => {
     },
   });
 
-  const handleFaqClick = (topic: string) => {
-    navigate(`/support-chat?topic=${encodeURIComponent(topic)}`);
-  };
+  // const handleFaqClick = (topic: string) => {
+  //   navigate(`/support-chat?topic=${encodeURIComponent(topic)}`);
+  // };
 
   const onSubmit = async (data: TCreateCustomerConsultant) => {
     if (createCustomerConsultantMutation.isPending) return;
@@ -257,7 +257,7 @@ const ContactPage = () => {
                   key={index}
                   className="bg-muted/30 rounded-lg p-4 animate-fade-in cursor-pointer hover:bg-muted/50 transition-colors group"
                   style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => handleFaqClick(faq.q)}
+                  // onClick={() => handleFaqClick(faq.q)}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -266,7 +266,7 @@ const ContactPage = () => {
                       </h3>
                       <p className="text-sm text-muted-foreground">{faq.a}</p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" />
+                    {/* <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" /> */}
                   </div>
                 </div>
               ))}

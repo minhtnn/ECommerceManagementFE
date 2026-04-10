@@ -1,11 +1,11 @@
-import { Banner1, Banner2, Banner3 } from "@/assets";
+import { Banner1, Banner2 } from "@/assets";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const banners = [
   { id: 1, image: Banner1 },
   { id: 2, image: Banner2 },
-  { id: 3, image: Banner3 },
+  // { id: 3, image: Banner3 },
 ];
 
 const TOTAL = banners.length;

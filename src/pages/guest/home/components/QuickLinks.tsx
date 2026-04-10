@@ -20,7 +20,7 @@ import { Link } from "react-router-dom";
 
 const quickLinks = [
   { icon: "🚚", label: "Giao hàng", href: "/delivery" },
-  { icon: "🏷️", label: "ĐỘC QUYỀN", href: "/exclusive" },
+  { icon: "🏷️", label: "Độc Quyền", href: "/exclusive" },
   { icon: "💬", label: "Liên hệ", href: "/guest/contact" },
 ];
 
@@ -46,7 +46,7 @@ const QuickLinks = () => {
     } else if (label === "Giao hàng") {
       e.preventDefault();
       setDeliveryOpen(true);
-    } else if (label === "ĐỘC QUYỀN") {
+    } else if (label === "Độc Quyền") {
       e.preventDefault();
       setExclusiveOpen(true);
     } else if (label === "Liên hệ") {

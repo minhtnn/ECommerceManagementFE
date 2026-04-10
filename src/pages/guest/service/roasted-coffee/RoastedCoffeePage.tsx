@@ -1,3 +1,4 @@
+import { RoastedCoffeeLanding, RoastedCoffeeProcessingAndPackaging, RoastedCoffeeSupplied } from "@/assets";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { PATH_GUEST } from "@/routes/path";
 import { ArrowRight } from "lucide-react";
@@ -40,7 +41,7 @@ const RoastedCoffeePage = () => {
         </section>
 
         {/* Large hero image */}
-        <ImagePlaceholder className="w-full h-64 md:h-[400px]" />
+        <ImagePlaceholder className="w-full h-64 md:h-[400px]" src={RoastedCoffeeLanding} />
 
         {/* 01. Wholesale Solutions */}
         <section className="content-container py-16">
@@ -80,25 +81,25 @@ const RoastedCoffeePage = () => {
               </p>
             </div>
             <div className="space-y-4">
-              <ImagePlaceholder className="w-full h-64" />
+              <ImagePlaceholder className="w-full h-64" src={RoastedCoffeeSupplied} />
             </div>
           </div>
         </section>
 
         {/* 02. Product Catalog */}
-        <section className="py-16">
+        {/* <section className="py-16">
           <div className="text-center mb-8">
             <p className="section-label mb-2">02. PRODUCT CATALOG</p>
             <h2 className="section-title">DANH MỤC SẢN PHẨM</h2>
           </div>
           <ImagePlaceholder className="w-full h-64 md:h-80" />
-        </section>
+        </section> */}
 
         {/* 03. OEM Roasting */}
         <section className="content-container py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="space-y-4">
-              <ImagePlaceholder className="w-full h-full" />
+              <ImagePlaceholder className="w-full h-full" src={RoastedCoffeeProcessingAndPackaging} />
             </div>
             <div>
               <p className="section-label mb-2">03. OEM ROASTING</p>
@@ -153,7 +154,7 @@ const RoastedCoffeePage = () => {
         <section className="bg-secondary py-16">
           <div className="content-container text-center">
             <p className="section-label mb-2">PARTNER SUPPORT</p>
-            <h2 className="section-title mb-4">
+            <h2 className="flex flex-items justify-center section-title mb-4">
               CHÍNH SÁCH HỖ TRỢ
               <br />
               ĐỐI TÁC KINH DOANH QUÁN

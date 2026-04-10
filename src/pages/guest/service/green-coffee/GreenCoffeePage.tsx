@@ -1,3 +1,4 @@
+import { GreenCoffeeDeepProcessing, GreenCoffeeEcologicalFarming, GreenCoffeeIsolateModel, GreenCoffeeLarge, GreenCoffeeRelatedPartyValue, GreenCoffeeVissionAndMission, GreenCoffeeWoodBlock } from "@/assets";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { PATH_GUEST } from "@/routes/path";
 import { Link } from "react-router-dom";
@@ -15,13 +16,13 @@ const GreenCoffeePage = () => {
           <div className="content-container py-12 md:py-16">
             <p className="section-label mb-2">The Sustainable Crop</p>
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] mb-6">
-              Bui Origin.
+               Uni Coffee Roastery.
               <br />
               Hạt Cà Phê Bền Vững.
             </h1>
             <p className="section-subtitle max-w-xl mb-8">
               Chúng tôi tìm đóng sự phát triển bền vững bắt đầu từ nguồn đất
-              sạch và những người nông dân tâm huyết. Bui Origin không chỉ cung
+              sạch và những người nông dân tâm huyết.  Uni Coffee Roastery không chỉ cung
               cấp cà phê nhân xanh, chúng tôi xây dựng một hệ sinh thái khép kín
               từ farm đến xưởng rang.
             </p>
@@ -47,7 +48,7 @@ const GreenCoffeePage = () => {
         </section>
 
         {/* Large image */}
-        <ImagePlaceholder className="w-full h-64 md:h-96" />
+        <ImagePlaceholder className="w-full h-64 md:h-96" src={GreenCoffeeLarge} alt="Green Coffee" />
 
         {/* Section 01 - Location & USP */}
         <section className="content-container py-16 text-center">
@@ -56,7 +57,7 @@ const GreenCoffeePage = () => {
             Vùng Nguyên Liệu Đất Đỏ Nam Ban
           </h2>
           <p className="section-subtitle max-w-3xl mx-auto mb-12">
-            Nằm ở độ cao 1.080 m tại Lâm Đồng, Bui Origin sở hữu vị thế chiến
+            Nằm ở độ cao 1.080 m tại Lâm Đồng,  Uni Coffee Roastery sở hữu vị thế chiến
             lược trên dải đất đỏ thổ nhưỡng biệt lập. Đây là nơi mỗi nguồn nước,
             mỗi cà phê được kiểm soát cho chế biến.
           </p>
@@ -67,18 +68,21 @@ const GreenCoffeePage = () => {
               {
                 title: "Chuyên Sâu Sơ Chế",
                 desc: "Áp dụng các kỹ thuật sơ chế nâng cao Candy Wash/Honey tùy mùi vị mong muốn. Sản phẩm Natural Là Gì? Phá vỡ ranh giới qua 24h, Phả sấy khô trên giàn phơi sạch đến các loại khác.",
+                src: GreenCoffeeDeepProcessing,
               },
               {
                 title: "Mô Hình Khép Kín",
                 desc: "Dựa từ mô hình ly Planet De Farm - Cà phê được quang ngợc và nhập liệu Bữi trữ lượng không có gì mới là liên kết toàn vùng một duy nhất.",
+                src: GreenCoffeeIsolateModel,
               },
               {
                 title: "Mộc Bản 100%",
                 desc: "Tự hào cung cấp các cà phê không hóc Bui artisan, tuyển chọn những tinh anh của cà Mã, dấu ấn Mật mật rượu nắng Bui truy hồi.",
+                src: GreenCoffeeWoodBlock,
               },
             ].map((item, i) => (
               <div key={i} className="text-left">
-                <ImagePlaceholder className="w-full h-48 mb-4" />
+                <ImagePlaceholder className="w-full h-48 mb-4" src={item.src}  />
                 <h3 className="font-display text-xl font-bold mb-2">
                   {item.title}
                 </h3>
@@ -110,18 +114,22 @@ const GreenCoffeePage = () => {
                 {
                   title: "Nông Nghiệp Sinh Thái",
                   desc: "Nâng cao giá trị cà phê Việt Nam bằng cách sản đậu kiên thâo và kỹ thuật canh tác sinh thái để hiện đại liên đến tăng kết lệ khi vào.",
+                  src: GreenCoffeeEcologicalFarming,
                 },
                 {
                   title: "Tầm Nhìn & Sứ Mệnh",
                   desc: "Sứ mệnh của chúng tôi là tạo ra sản chất biến nâng cấp cho quốc gia, phê quê và cung cấp nguồn Đ minh xanh kiến thần hơn đôi có tuyển đời.",
+                  src: GreenCoffeeVissionAndMission,
+                
                 },
                 {
                   title: "Giá Trị Liên Kết",
                   desc: "Bản bảo nguồn nông Ort bản cho nông trại. Thu mua quyết chế 1325 vể giá cao nước đóng thê thương Bề để cộng mua, phát triển thêm quá.",
+                  src: GreenCoffeeRelatedPartyValue,
                 },
               ].map((item, i) => (
                 <div key={i} className="text-left">
-                  <ImagePlaceholder className="w-full h-48 mb-4" />
+                  <ImagePlaceholder className="w-full h-48 mb-4" src={item.src} />
                   <h3 className="font-display text-xl font-bold mb-2">
                     {item.title}
                   </h3>

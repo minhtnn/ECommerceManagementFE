@@ -39,8 +39,8 @@ export const CategoryTreeItem = ({
           {!hasChildren && <div className="w-5 flex-shrink-0" />} */}
 
           {/* Category Image */}
-          {category.imageUrl ? (
-            <div className="w-10 h-10 overflow-hidden flex-shrink-0 border border-[hsl(var(--tree-border-image))] rounded-full">
+          {/* {category.imageUrl ? (
+            <div className="w-10 h-10 overflow-hidden flex-shrink-0 rounded-full">
               <img
                 src={category.imageUrl}
                 alt={category.name}
@@ -51,7 +51,7 @@ export const CategoryTreeItem = ({
             <div className="flex justify-center items-center w-10 h-10 overflow-hidden flex-shrink-0 border border-[hsl(var(--tree-border-image))] rounded-full">
               <ImageOff className="w-5 h-5 text-[hsl(var(--tree-icon-empty))]" />
             </div>
-          )}
+          )} */}
 
           <div className="flex flex-col items-start flex-1 min-w-0 overflow-hidden">
             <span
