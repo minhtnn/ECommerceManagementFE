@@ -1,6 +1,6 @@
 export enum EActionTargetRole {
     DiscountTarget,
-    // BuyProduct,
+    BuyProduct,
     GetProduct,
     GiftProduct,
 }

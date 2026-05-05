@@ -859,7 +859,28 @@ const PromotionRuleCreatePage = () => {
       const result = await createMutation.mutateAsync(data);
       if (result?.data?.status >= 200 && result?.data?.status < 300) {
         toast.success("Tạo khuyến mãi thành công");
-        navigate(PATH_BRAND_DASHBOARD.promotionRule.root);
+        form.reset({
+          code: "",
+          name: "",
+          shortDescription: "",
+          description: "",
+          promotionType: EPromotionType.OrderDiscount,
+          globalDiscountCap: undefined,
+          priority: undefined,
+          startDate: "",
+          endDate: "",
+          ruleConditions: [
+            {
+              ...PROMOTION_CONFIG[EPromotionType.OrderDiscount].defaultDieuKien,
+            },
+          ],
+          ruleActions: [
+            {
+              ...PROMOTION_CONFIG[EPromotionType.OrderDiscount].defaultHanhDong,
+            },
+          ],
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
       }
     } catch (err) {
       handleApiError(err);
